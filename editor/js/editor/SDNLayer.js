@@ -8,7 +8,8 @@ import SvgArea from './SDNSvgArea';
 
 /**
  * Layer Constructor
- * @param opt 設定用オブジェクト。 {type: [required], name: [optional], properties: [optional], x: [optional], y: [optional]}
+ * @param opt 設定用オブジェクト。 {type: [required], name: [optional], properties: [optional],
+  *                             x: [optional], y: [optional]}
  * @param backgroud SvgArea オブジェクト。レイヤーを構成する SVG 部品の追加先を管理する。
  */
 const Layer = function (opt, background) {
@@ -19,6 +20,8 @@ const Layer = function (opt, background) {
     const layerName = Layer.calcDefaultUniqueName(opt.name || null, type, theOthers);
     const x = opt.x || 0;
     const y = opt.y || 0;
+
+    const doAutoLink = opt.isNew || false;
 
     const _properties = component.property;
     const allProperties = () => {
@@ -390,6 +393,10 @@ const Layer = function (opt, background) {
     this.setPosition({x: x, y: y});
 
     Graph.insertLayer(this);
+
+    if (doAutoLink){
+        this.autoLink();
+    }
 };
 
 /**

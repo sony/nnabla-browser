@@ -8,7 +8,6 @@
                 @selected-component="name => $emit('selected-component', name)"
                 @trigger-job="value => $emit('trigger-job', value)"
                 @fetch-results="(callback, offset) => $emit('fetch-results', callback, offset)"
-                @show-right-content="visible => visibleRightContent = visible"
                 @history="command => $emit('history', command)"
         />
         <center-content
@@ -17,11 +16,11 @@
                 :selected-component="selectedComponent"
                 :history-info="historyInfo"
                 :zoom-info="zoomInfo"
-                @show-right-content="visible => visibleRightContent = visible"
                 @history="command => $emit('history', command)"
                 @zoom="operation => $emit('zoom', operation)"
         />
         <right-content
+                ref="rightContent"
                 :jobs-in-queue="jobsInQueue"
                 :posting-job="postingJob"
                 :statistics="statistics"
@@ -35,7 +34,7 @@
 <script>
     import ConfigLeft from './Config/ConfigLeft';
     import ConfigCenter from './Config/ConfigCenter';
-    import JobsAreaVue from './Jobs/JobsArea.vue';
+    import MonitoringLeftContent from './Monitoring/LeftContent.vue';
     import TrainingResultDetailContentVue from './Results/TrainingResultDetailContent.vue';
     import EditNetworkOperationContentVue from './Network/EditNetworkOperationContent.vue';
     import EditLeftContentVue from './Network/EditLeftContent.vue';
@@ -43,6 +42,7 @@
     export default {
         props: {
             activeTabName: String,
+            visibleRightContent: Boolean,
             selection: Object,
             selectedComponent: String,
             jobsInQueue: Boolean,
@@ -64,20 +64,18 @@
                 @renamed="changes => $emit('renamed', changes)"
                 @trigger-job="value => $emit('trigger-job', value)"
                 @fetch-results="(callback, offset) => $emit('fetch-results', callback, offset)"
-                @show-right-content="visible => $emit('show-right-content', visible)"
                 @history="command => $emit('history', command)"
                 />
             </div>
         `,
                 components: {
-                    'edit-list': EditLeftContentVue,
-                    'config-list': ConfigLeft,
-                    'job-list': JobsAreaVue,
+                    'edit-left': EditLeftContentVue,
+                    'config-left': ConfigLeft,
+                    'monitoring-left': MonitoringLeftContent,
                 },
                 computed: {
                     listForEachTabRespectively: function () {
-                        const tabName = this.activeTabName;
-                        return ['training', 'evaluation'].includes(tabName) ? 'job-list' : (tabName + '-list');
+                        return `${this.activeTabName}-left`;
                     },
                 },
             },
@@ -143,8 +141,7 @@
                     const on = (name) => (x) => Object({name: name, percentage: x});
                     return {
                         handleLearningCurveZooming: handleAs('zoom', on('Learning Curve')),
-                        handleTradeOffGraphZooming: handleAs('zoom', on('Trade-off Graph')),
-                        handleShowRightContent: handleAs('show-right-content'),
+                        handleTradeOffGraphZooming: handleAs('zoom', on('Trade-off Graph'))
                     };
                 })(),
             },
@@ -183,12 +180,6 @@
                 },
             },
         },
-        data: function () {
-            return {
-                visibleRightContent: true,
-                currentActiveTabName: '',
-            };
-        },
         mounted: function () {
             $('.left-content').resizable({
                 handles: 'e',
@@ -200,12 +191,11 @@
                 alsoResizeReverse: '.right-content',
             });
         },
-        beforeUpdate: function () {
-            if (this.currentActiveTabName !== this.activeTabName) {
-                this.currentActiveTabName = this.activeTabName;
-                this.visibleRightContent = true;
+        methods: {
+            showRightContent: function (visible) {
+                this.visibleRightContent = visible;
             }
-        },
+        }
     };
 </script>
 

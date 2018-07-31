@@ -5,6 +5,7 @@
   "scripts": {
     "bundler": "parcel watch editor/js/index.js",
     "build": "parcel build editor/js/index.js -d editor/dist",
+    "build-nnploader": "parcel build editor/js/io/loadNNtxt.js -d editor/dist",
     "start": "node main.js -p 8888 -d /home/akiohayakawa/workspace/my_nnabla_test/nnp/logdir"
   },
   "keywords": [

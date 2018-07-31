@@ -148,7 +148,6 @@ export default (function () {
                         results.push(value);
                     }
                 }
-
                 return results;
             };
         },

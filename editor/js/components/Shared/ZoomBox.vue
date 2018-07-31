@@ -35,8 +35,6 @@ export default {
 <style>
 .zoom-box {
     position: absolute;
-    top: 40px;
-    right: 94px;
     height: 40px;
     margin: 0;
     padding: 0;

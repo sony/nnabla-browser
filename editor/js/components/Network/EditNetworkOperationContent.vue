@@ -52,7 +52,7 @@ import Vue from 'vue/dist/vue.esm.js';
 window.Network;
 
 // Global data to manage Vue comonent.
-const data = {graphs: [{name: 'Main', nodes: [], links: []}], target: 'Main'};
+const data = {graphs: [{parentDirName: "", name: 'Main', nodes: [], links: [], monitors:[]}], target: 'Main'};
 
 // get all graph names
 const names = () => data.graphs.map((g) => g.name);
@@ -61,7 +61,8 @@ const indexOf = (name) => names().indexOf(name);
 // insert new graph
 const _append = (name) => {
     const graphs = data.graphs;
-    graphs.splice(graphs.length, 0, {name: name, nodes: [], links: []});
+    graphs.splice(graphs.length, 0,
+        {parentDirName: "", name: name, nodes: [], links: [], monitors: []});
 };
 // delete graph; returns next tab name and deleted graph data.
 const _delete = (name) => {
@@ -84,6 +85,7 @@ const _select = (name) => {
     Graph.clear();
     data.target = name; // refresh active.
     _deserialize(name);
+    window.svgArea.requestAdjustSize();
 };
 // calculate new graph name
 const _newName = () => 'Network_' + names()
@@ -96,7 +98,7 @@ const _newName = () => 'Network_' + names()
 // reload all graphs from serialized data.
 const _resetGraphs = (networks) => {
     if (!Array.isArray(networks) || networks.length === 0) { // fall back
-        networks = [{name: 'Main', nodes: [], links: []}];
+        networks = [{parentDirName: "", name: 'Main', nodes: [], links: [], monitors: []}];
     }
 
     data.graphs = networks;
@@ -239,6 +241,7 @@ export default {
                     <graph-tab v-for="graph in graphs"
                         v-bind:graph="graph"
                         :key="graph.name"
+                        :id="'tab-' + graph.name "
                         :class="{'active': graph.name===target}"
                         @history="command => $emit('history', command)"
                     />
@@ -398,7 +401,7 @@ export default {
                     <tool-button image-name="Paste" :disabled="false"                     @pressed="paste" />
                     <div class="pull-right">
                         <nnc-zoom-box :percentages="zoomPercantages" :percentage="zoomCurrentPercentage" @zoom-value="value => $emit('zoom', {name: 'Editor', percentage: value})" />
-                        <button @click="dropDownMenu" class="btn network-action-button" data-toggle="dropdown">
+                        <button @click="dropDownMenu" class="btn network-action-button" data-toggle="dropdown" style="float: right">
                             Action&nbsp;
                             <span class="caret" />
                         </button>

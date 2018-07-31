@@ -67,7 +67,7 @@ const SvgArea = function () {
      * @param type
      * @return {{x: number, y: number}}
      */
-    let calcNewLayerPosition = (type) => {
+    this.calcNewLayerPosition = (type) => {
         let component = EditorUtils.getComponent(type);
         let x = GRID;
         let y = GRID;
@@ -288,7 +288,7 @@ const SvgArea = function () {
                     if (serialized) {
                         layer = Layer.deserialize(serialized);
                     } else {
-                        const pos = calcNewLayerPosition(type);
+                        const pos = this.calcNewLayerPosition(type);
                         layer = new Layer({type: type, x: pos.x, y: pos.y}, this);
                         serialized = layer.serialize();
                     }
