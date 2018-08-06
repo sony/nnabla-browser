@@ -189,7 +189,7 @@ Connector.prototype._makeEventAttacher = function(dragDelegate, linksLayer) {
             },
         };
     };
-    return d3.behavior.drag().on('dragstart', () => dragDelegate.set(_createDragContext())); // drag と dragend の処理は delegate に移譲
+    return d3.drag().on('start', () => dragDelegate.set(_createDragContext())); // drag と dragend の処理は delegate に移譲
 };
 /**
  * イベント追加

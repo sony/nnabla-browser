@@ -1,5 +1,3 @@
-import Layer from './../editor/SDNLayer';
-import Graph from './../currentGraph';
 import Definition from "./../misc/Definitions"
 
 const Path = require("path");
@@ -54,7 +52,17 @@ const getGraphInfoFromNNtxt = event => {
 };
 
 const getMonitorInfo = event => {
-    return event.data.split("\n");
+    const splited = event.data.split("\n");
+
+    let times = [], values = [];
+
+    for (let elm of splited) {
+        let [t, v] = elm.split(" ");
+        times.push(Number(t));
+        values.push(Number(v));
+    }
+
+    return {t: times, v: values}
 };
 
 eventSrc.onmessage = event => {
@@ -79,36 +87,52 @@ eventSrc.onmessage = event => {
 
     graphInfo = window.Graphs.data()[graphIndex] || graphInfo;
 
-    if (ext === "nntxt") {
-        // for debug
-        window.nntxtFromServer = JSON.parse(event.data);
+    let monitorName = Path.basename(id);
+    const monitorIndex = graphInfo.monitors.indexOf(graphInfo.monitors.find(x => {
+        return x.name === monitorName;
+    }));
 
-        let [nodes, links] = getGraphInfoFromNNtxt(event);
-        graphInfo["nodes"] = nodes;
-        graphInfo["links"] = links;
-    } else if (ext === "txt" && secondaryExt === "series") {
-        let monitorData = getMonitorInfo(event);
 
-        let monitorName = Path.basename(id);
-
-        // check if the same name already exits
-        const monitorIndex = graphInfo.monitors.indexOf(graphInfo.monitors.find(x => {
-            return x.name === monitorName;
-        }));
-
-        if (monitorIndex > -1) {
-            graphInfo.monitors[monitorIndex].data = monitorData;
-        } else {
-            graphInfo.monitors.push({
-                name: monitorName, data: monitorData
+    if (event.data === "delete") {
+        if (ext === "nntxt" && graphIndex > -1) {
+            window.Graphs.data()[graphIndex].nodes = [];
+            window.Graphs.data()[graphIndex].links = [];
+            window.tabNames.some(function (v, i) {
+                if (v === parentDir) window.tabNames.splice(i, 1);
             });
+
+            // graph.hide is only for delete
+            window.Graphs.data()[graphIndex].hide = true;
+        } else if (ext === "txt" && secondaryExt === "series" && monitorIndex > -1) {
+            window.Graphs.data()[graphIndex].monitors.splice(monitorIndex, 1);
+        }
+    } else {
+        if (ext === "nntxt") {
+            let [nodes, links] = getGraphInfoFromNNtxt(event);
+            graphInfo.nodes = nodes;
+            graphInfo.links = links;
+        } else if (ext === "txt" && secondaryExt === "series") {
+            let monitorData = getMonitorInfo(event);
+
+            // check if the same name already exits
+            if (monitorIndex > -1) {
+                graphInfo.monitors[monitorIndex].data = monitorData;
+            } else {
+                graphInfo.monitors.push({
+                    name: monitorName, data: monitorData
+                });
+            }
+        }
+
+        if (graphIndex > -1) {
+            window.Graphs.data()[graphIndex] = graphInfo;
+        } else {
+            window.Graphs.data().push(graphInfo);
+            window.tabNames.push(parentDir);
         }
     }
 
-    if (graphIndex > -1) {
-        window.Graphs.data()[graphIndex] = graphInfo;
-    } else {
-        window.Graphs.data().push(graphInfo);
-        window.tabNames.push(parentDir);
-    }
 };
+
+// for rendering monitor results
+window.monitorInfo = [];

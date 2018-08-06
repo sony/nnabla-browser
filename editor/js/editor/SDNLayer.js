@@ -61,6 +61,15 @@ const Layer = function (opt, background) {
     let _linkFromFocusedIf = (predicate) => undefined;
     const _nullConnector = {canConnect: () => false};
 
+    let _layerGroupNode = background.layerGroup().node();
+    let _dragEventHandlerAppender = d3.drag()
+        .on('start', function () {
+            let mouse = d3.mouse(_layerGroupNode);
+            let dragContext = _createDragContext({x: mouse[0], y: mouse[1]});
+            console.log(dragContext);
+            background.setDragContext(dragContext);
+        }); // drag と dragend の処理は svgArea に移譲
+
     const _createDragContext = (posDragStart) => {
         // mousedown に先行して dragstart が呼ばれることを利用して、
         // 選択レイヤーが変わる前に現時点での主・副選択状態を記憶する
@@ -203,13 +212,7 @@ const Layer = function (opt, background) {
         };
     };
 
-    let _layerGroupNode = background.layerGroup().node();
-    let _dragEventHandlerAppender = d3.behavior.drag()
-        .on('dragstart', function () {
-            let mouse = d3.mouse(_layerGroupNode);
-            let dragContext = _createDragContext({x: mouse[0], y: mouse[1]});
-            background.setDragContext(dragContext);
-        }); // drag と dragend の処理は svgArea に移譲
+
 
     let dlayer = Definitions.EDIT.LAYER;
     this._selectFrame = background.focusGroup().append('rect')

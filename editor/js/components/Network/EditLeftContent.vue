@@ -168,8 +168,8 @@
             };
 
             d3.selectAll('.component').call(
-                d3.behavior.drag()
-                    .on('dragstart', function () {
+                d3.drag()
+                    .on('start', function () {
                         let type = $(this).text();
                         $(this)[0].focus();
                         emitChangeSelectedComponent(type);
@@ -188,7 +188,7 @@
                         let mouse = d3.mouse(d3.select(Definitions.EDIT.SVG_ID).node());
                         _dragContext.move({x: mouse[0], y: mouse[1]});
                     })
-                    .on('dragend', function () {
+                    .on('end', function () {
                         _dragContext.destroy();
                         _dragContext = undefined;
 

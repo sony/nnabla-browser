@@ -392,6 +392,7 @@ const SvgArea = function () {
 
     let _dragContext;
     this.setDragContext = (dragContext) => {
+        console.log(dragContext, _dragContext);
         if (_dragContext) {
             // XXX Unexpected situation!!
             throw 'Error: previous context not cleared correctly.';
@@ -411,19 +412,20 @@ const SvgArea = function () {
     this.subscribeMouseEnter = (callback) => _eventCallbacksMouseEnter.insert(callback);
     /** SvgArea への MouseEnter イベントを受信したときに呼び返されるコールバックを削除する */
     this.unsubscribeMouseEnter = (callback) => _eventCallbacksMouseEnter.remove(callback);
+
     _svgTopLevel.on('mouseenter', function () {
         let mouse = d3.mouse(this);
         _eventCallbacksMouseEnter.apply((callback) => callback({x: mouse[0], y: mouse[1]}));
     }).on('click', () => {
         _svgDom.focus();
-    }).call(d3.behavior.drag()
-        .on('dragstart', function () {
+    }).call(d3.drag()
+        .on('start', function () {
             _dragContext = _dragContext || _createLassoSelectionContext(_mouseToWorldCoordinate(this));
         })
         .on('drag', function () {
             _dragContext.move(_mouseToWorldCoordinate(this));
         })
-        .on('dragend', function () {
+        .on('end', function () {
             _dragContext.destroy();
             _dragContext = undefined;
         })
@@ -436,7 +438,9 @@ const SvgArea = function () {
  * @memberOf SvgArea
  */
 SvgArea.hideAndRemove = (obj) => {
-    if (obj) obj.transition().style('opacity', 0).each('end', () => obj.remove());
+    if (obj) obj.transition().style('opacity', 0).on('end', () => {
+        obj.remove();
+    });
 };
 
 export default SvgArea;

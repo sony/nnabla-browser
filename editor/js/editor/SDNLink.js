@@ -158,8 +158,8 @@ let Link;
             };
         };
 
-        const _eventHandlerAppender = d3.behavior.drag()
-            .on('dragstart', function() {
+        const _eventHandlerAppender = d3.drag()
+            .on('start', function() {
                 // 左クリックの場合のみ
                 if (d3.event.sourceEvent.buttons === 1) {
                     const pos = d3.mouse(this); // mousedownされた位置座標の取得

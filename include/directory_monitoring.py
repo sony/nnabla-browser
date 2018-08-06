@@ -21,7 +21,9 @@ class Monitor(FileSystemEventHandler):
         super().__init__()
         self.logdir = logdir
         self.dataInfo = shared_dict
-        self.sendManager = send_flags # {flag: boolean, targets: list of connections, each element stands for each connection}
+
+        # {flag: boolean, targets: list of connections, each element stands for each connection}
+        self.sendManager = send_flags
 
         self.initialize_dict()
 
@@ -31,21 +33,29 @@ class Monitor(FileSystemEventHandler):
 
         return rel_path, full_path
 
-    def initialize_dict(self):
-        for root, dirs, files in os.walk(self.logdir):
-            for file in fnmatch.filter(files, "*.nntxt"):
-                rel_path, full_path = self._create_rel_and_full_path(root, file)
-                msg = nnabla_proto_to_json(full_path)
+    def add_new_nntxt_info(self, path):
+        rel_path = os.path.relpath(path, self.logdir)
+        msg = nnabla_proto_to_json(path)
 
-                self.dataInfo[rel_path] = {"file_name": file, "path": full_path, "data": msg}
+        self.dataInfo[rel_path] = {"file_name": os.path.basename(path),
+                                   "path": path,
+                                   "data": msg}
 
-            for file in fnmatch.filter(files, "*.series.txt"):
-                rel_path, full_path = self._create_rel_and_full_path(root, file)
+    def add_new_monitor_info(self, path):
+        rel_path = os.path.relpath(path, self.logdir)
 
-                with open(full_path, "r") as f:
-                    msg = f.read()
+        with open(path, "r") as f:
+            msg = f.read()
 
-                self.dataInfo[rel_path] = {"file_name": file, "path": full_path, "data": msg}
+        self.dataInfo[rel_path] = {"file_name": os.path.basename(path),
+                                   "path": path,
+                                   "data": msg}
+
+    def add_new_info(self, path):
+        if fnmatch.fnmatch(path, "*.nntxt"):
+            self.add_new_nntxt_info(path)
+        elif fnmatch.fnmatch(path, "*.series.txt"):
+            self.add_new_monitor_info(path)
 
     def set_send_info(self, target):
         with Lock():
@@ -53,26 +63,39 @@ class Monitor(FileSystemEventHandler):
             for i in range(length):
                 self.sendManager[i] = {"flag": True, "targets": self.sendManager[i]["targets"] + [target]}
 
+    def initialize_dict(self):
+        for root, dirs, files in os.walk(self.logdir):
+            for file in files:
+                full_path = os.path.join(root, file)
+                self.add_new_info(full_path)
+
     def on_created(self, event):
-        if event.is_directory:
-            pass
+        created = event.src_path
+
+        self.add_new_info(created)
 
     def on_modified(self, event):
         modified = event.src_path
+        index = os.path.relpath(modified, self.logdir)
 
         if fnmatch.fnmatch(modified, "*.nntxt"):
-            index = os.path.relpath(modified, self.logdir)
             msg = nnabla_proto_to_json(modified)
 
-            self.dataInfo[index] = {"name": os.path.basename(modified), "path": modified, "data": msg}
-
-            self.set_send_info(index)
         elif fnmatch.fnmatch(modified, "*.series.text"):
-            pass
+            with open(modified, "r") as f:
+                msg = f.read()
 
-        if event.is_directory:
-            pass
+        else:
+            return
+
+        self.dataInfo[index] = {"name": os.path.basename(modified), "path": modified, "data": msg}
+
+        self.set_send_info(index)
 
     def on_deleted(self, event):
-        if event.is_directory:
-            pass
+        deleted = event.src_path
+        index = os.path.relpath(deleted, self.logdir)
+
+        if index in self.dataInfo.keys():
+            self.dataInfo[index] = {"name": os.path.basename(deleted), "path": deleted, "data": "delete"}
+            self.set_send_info(index)

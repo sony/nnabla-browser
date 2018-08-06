@@ -31,7 +31,9 @@
   "dependencies": {
     "ajv": "^6.5.2",
     "argv": "0.0.2",
+    "c3": "^0.6.6",
     "css-loader": "^1.0.0",
+    "d3": "^5.5.0",
     "eslint-plugin-vue": "^4.2.2",
     "express": "^4.16.3",
     "json-storage": "^2.1.1",
@@ -39,6 +41,7 @@
     "protobufjs": "^6.8.6",
     "python-shell": "^0.5.0",
     "vue": "^2.5.13",
+    "vue-c3": "^1.2.8",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
   },

@@ -34,7 +34,8 @@
 <script>
     import ConfigLeft from './Config/ConfigLeft';
     import ConfigCenter from './Config/ConfigCenter';
-    import MonitoringLeftContent from './Monitoring/LeftContent.vue';
+    import MonitoringLeftContent from './Monitoring/LeftContent';
+    import MonitoringCenterContent from './Monitoring/CenterContent';
     import TrainingResultDetailContentVue from './Results/TrainingResultDetailContent.vue';
     import EditNetworkOperationContentVue from './Network/EditNetworkOperationContent.vue';
     import EditLeftContentVue from './Network/EditLeftContent.vue';
@@ -98,6 +99,7 @@
                         @history="command => $emit('history', command)"
                         @zoom="operation => $emit('zoom', operation)"
                     />
+                    <monitoring-result v-else-if="selectedMonitoringTab">
                     <edit-hyper-params v-if="selectedConfigTab" />
                     <view-training-result v-if="selectedLearningCurve"
                         :zoom-info="zoomInfo.learningCurve"
@@ -116,6 +118,7 @@
                 components: {
                     'edit-network-graph': EditNetworkOperationContentVue,
                     'edit-hyper-params': ConfigCenter,
+                    'monitoring-result': MonitoringCenterContent,
                     'view-training-result': TrainingResultDetailContentVue,
                 },
                 computed: {
@@ -124,6 +127,9 @@
                     },
                     selectedConfigTab: function () {
                         return this.activeTabName === 'config';
+                    },
+                    selectedMonitoringTab: function() {
+                        return this.activeTabName === "monitoring";
                     },
                     selectedLearningCurve: function () {
                         return this.activeTabName === 'training' &&

@@ -239,7 +239,7 @@ export default {
             template: `
                 <div class="network-tabs">
                     <graph-tab v-for="graph in graphs"
-                        v-bind:graph="graph"
+                        :graph="graph"
                         :key="graph.name"
                         :id="'tab-' + graph.name "
                         :class="{'active': graph.name===target}"
