@@ -1,5 +1,6 @@
 import os
 import fnmatch
+import glob
 
 from watchdog.events import FileSystemEventHandler
 from google.protobuf import text_format, json_format
@@ -25,6 +26,8 @@ class Monitor(FileSystemEventHandler):
         # {flag: boolean, targets: list of connections, each element stands for each connection}
         self.sendManager = send_flags
 
+        self.path_maps = self.get_path_recursive(self.logdir)
+
         self.initialize_dict()
 
     def _create_rel_and_full_path(self, root, filename):
@@ -41,6 +44,8 @@ class Monitor(FileSystemEventHandler):
                                    "path": path,
                                    "data": msg}
 
+        self.set_send_info(rel_path)
+
     def add_new_monitor_info(self, path):
         rel_path = os.path.relpath(path, self.logdir)
 
@@ -50,6 +55,8 @@ class Monitor(FileSystemEventHandler):
         self.dataInfo[rel_path] = {"file_name": os.path.basename(path),
                                    "path": path,
                                    "data": msg}
+
+        self.set_send_info(rel_path)
 
     def add_new_info(self, path):
         if fnmatch.fnmatch(path, "*.nntxt"):
@@ -62,6 +69,28 @@ class Monitor(FileSystemEventHandler):
             length = len(self.sendManager)
             for i in range(length):
                 self.sendManager[i] = {"flag": True, "targets": self.sendManager[i]["targets"] + [target]}
+
+    def get_path_recursive(self, path):
+        res = dict()
+
+        res["name"] = os.path.basename(path)
+        res["children"] = []
+        res["monitorFiles"] = []
+        res["nntxtFiles"] = []
+
+        files = glob.glob(os.path.join(path, "*"))
+
+        for file in files:
+            if os.path.isdir(file):
+                res["children"].append(self.get_path_recursive(file))
+            else:
+                filename = os.path.basename(file)
+                if fnmatch.fnmatch(file, "*.nntxt"):
+                    res["nntxtFiles"].append({"name": filename, "data": None})
+                elif fnmatch.fnmatch(file, "*.series.txt"):
+                    res["monitorFiles"].append({"name": filename, "data": None})
+
+        return res
 
     def initialize_dict(self):
         for root, dirs, files in os.walk(self.logdir):

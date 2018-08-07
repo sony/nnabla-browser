@@ -1,6 +1,7 @@
 import time
 import argparse
 import subprocess
+import json
 
 import gevent
 from gevent.wsgi import WSGIServer
@@ -14,7 +15,7 @@ from include.server_sent_event import ServerSentEvent
 
 # build
 subprocess.call("npm run build".split(" "))
-subprocess.call("npm run build-nnploader".split(" "))
+# subprocess.call("npm run build-nnploader".split(" "))
 
 app = Flask(__name__, template_folder="./editor", static_folder="./editor")
 
@@ -27,10 +28,12 @@ args = parser.parse_args()
 manager = Manager()
 send_flags = manager.list()
 D = manager.dict()
+path_maps = manager.dict()
 
 
-def supervise(shared_dict, send_flags):
+def supervise(shared_dict, send_flags, path_maps):
     monitor = Monitor(logdir=args.logdir, shared_dict=shared_dict, send_flags=send_flags)
+    path_maps.update(monitor.path_maps)
 
     observer = Observer()
     observer.schedule(monitor, monitor.logdir, recursive=True)
@@ -46,7 +49,7 @@ def supervise(shared_dict, send_flags):
 
 
 p = Pool(1)
-p.Process(target=supervise, args=[D, send_flags]).start()
+p.Process(target=supervise, args=[D, send_flags, path_maps]).start()
 
 
 @app.route("/")
@@ -57,6 +60,10 @@ def index():
 @app.route("/subscribe")
 def subscribe():
     def send():
+        # send dir tree information
+        ev = ServerSentEvent(json.dumps(dict(path_maps)), _id="pathMap")
+        yield ev.msg_encode()
+
         initial_send_info = {"flag": len(D.keys()) > 0, "targets": list(D.keys())}
         with Lock():
             info_index = len(send_flags)

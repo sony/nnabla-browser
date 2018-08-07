@@ -4,7 +4,6 @@
             <button-home/>
             <appbar-tab tab-name="EDIT"/>
             <appbar-tab tab-name="MONITORING"/>
-            <!--<appbar-tab tabName="EVALUATION" />-->
         </div>
         <div class="editor-navbar-center"></div>
         <div class="pull-right">

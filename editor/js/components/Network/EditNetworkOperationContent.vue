@@ -1,8 +1,5 @@
 <template>
     <div>
-        <network-tabs
-            @history="command => $emit('history', command)"
-        />
         <network-action
             :selection="selection"
             :history-info="historyInfo"
@@ -10,6 +7,9 @@
             :zoom-current-percentage="networkGraph.percentage"
             @history="command => $emit('history', command)"
             @zoom="operation => $emit('zoom', operation)"
+        />
+        <network-tabs
+                @history="command => $emit('history', command)"
         />
         <div class="tab-content network-editor-scroller">
             <svg id="network-editor" tabindex="0"
@@ -627,6 +627,7 @@ export default {
     width: 100%;
     height: 40px;
     border-bottom: solid 1px var(--color-gray2);
+    overflow: auto;
 }
 
 .graphs-tab {

@@ -4,6 +4,8 @@
                 :active-tab-name="activeTabName"
                 :selection="selection"
                 :selected-component="selectedComponent"
+                :directory-info="directoryInfo"
+                :chart-info="chartInfo"
                 @renamed="changes => $emit('renamed', changes)"
                 @selected-component="name => $emit('selected-component', name)"
                 @trigger-job="value => $emit('trigger-job', value)"
@@ -16,12 +18,13 @@
                 :selected-component="selectedComponent"
                 :history-info="historyInfo"
                 :zoom-info="zoomInfo"
+                :directory-info="directoryInfo"
+                :chart-info="chartInfo"
                 @history="command => $emit('history', command)"
                 @zoom="operation => $emit('zoom', operation)"
         />
         <right-content
                 ref="rightContent"
-                :jobs-in-queue="jobsInQueue"
                 :posting-job="postingJob"
                 :statistics="statistics"
                 :visible-right-content="visibleRightContent"
@@ -34,11 +37,9 @@
 <script>
     import ConfigLeft from './Config/ConfigLeft';
     import ConfigCenter from './Config/ConfigCenter';
-    import MonitoringLeftContent from './Monitoring/LeftContent';
+    import LeftContent from './LeftComponent/LeftContent';
     import MonitoringCenterContent from './Monitoring/CenterContent';
-    import TrainingResultDetailContentVue from './Results/TrainingResultDetailContent.vue';
-    import EditNetworkOperationContentVue from './Network/EditNetworkOperationContent.vue';
-    import EditLeftContentVue from './Network/EditLeftContent.vue';
+    import NetworkOperationContent from './Network/EditNetworkOperationContent.vue';
 
     export default {
         props: {
@@ -50,17 +51,26 @@
             postingJob: Boolean,
             statistics: Object,
             historyInfo: Object,
-            zoomInfo: Object
+            zoomInfo: Object,
+            directoryInfo: Object
+        },
+        data: function () {
+          return {
+              chartInfo: []
+          }
         },
         components: {
             'left-content': {
-                props: ['activeTabName', 'selection', 'selectedComponent'],
+                props: ['activeTabName', 'selection', 'selectedComponent', "directoryInfo", "chartInfo"],
                 template: `
-            <div class="left-content">
+            <div class="left-content" id="leftContent">
                 <component
                 :is="listForEachTabRespectively"
                 :selection="selection"
                 :selected-component="selectedComponent"
+                :activeTabName="activeTabName"
+                :directory-info="directoryInfo"
+                :chart-info="chartInfo"
                 @selected-component="name => $emit('selected-component', name)"
                 @renamed="changes => $emit('renamed', changes)"
                 @trigger-job="value => $emit('trigger-job', value)"
@@ -70,13 +80,16 @@
             </div>
         `,
                 components: {
-                    'edit-left': EditLeftContentVue,
+                    'default-left-content': LeftContent,
                     'config-left': ConfigLeft,
-                    'monitoring-left': MonitoringLeftContent,
                 },
                 computed: {
                     listForEachTabRespectively: function () {
-                        return `${this.activeTabName}-left`;
+                        if (this.activeTabName === "config") {
+                            return "config-left";
+                        } else {
+                            return "default-left-content"
+                        }
                     },
                 },
             },
@@ -87,6 +100,8 @@
                     selection: Object,
                     historyInfo: Object,
                     zoomInfo: Object,
+                    directoryInfo: Object,
+                    chartInfo: Array
                 },
                 template: `
             <div class="center-content">
@@ -96,30 +111,19 @@
                         :selection="selection"
                         :history-info="historyInfo"
                         :network-graph="zoomInfo.networkGraph"
+                        :directory-info="directoryInfo"
                         @history="command => $emit('history', command)"
                         @zoom="operation => $emit('zoom', operation)"
                     />
-                    <monitoring-result v-else-if="selectedMonitoringTab">
+                    <monitoring-result v-else-if="selectedMonitoringTab" :chart-info="chartInfo" />
                     <edit-hyper-params v-if="selectedConfigTab" />
-                    <view-training-result v-if="selectedLearningCurve"
-                        :zoom-info="zoomInfo.learningCurve"
-                        @zoom-value="handleLearningCurveZooming"
-                    />
-                    <view-training-result v-if="selectedTradeOffGraph"
-                        :zoom-info="zoomInfo.tradeOffGraph"
-                        @zoom-value="handleTradeOffGraphZooming"
-                    />
                 </keep-alive>
             </div>
         `,
-                data: function () {
-                    return results;
-                },
                 components: {
-                    'edit-network-graph': EditNetworkOperationContentVue,
+                    'edit-network-graph': NetworkOperationContent,
                     'edit-hyper-params': ConfigCenter,
                     'monitoring-result': MonitoringCenterContent,
-                    'view-training-result': TrainingResultDetailContentVue,
                 },
                 computed: {
                     selectedEditTab: function () {
@@ -128,16 +132,8 @@
                     selectedConfigTab: function () {
                         return this.activeTabName === 'config';
                     },
-                    selectedMonitoringTab: function() {
+                    selectedMonitoringTab: function () {
                         return this.activeTabName === "monitoring";
-                    },
-                    selectedLearningCurve: function () {
-                        return this.activeTabName === 'training' &&
-                            this.graph.type === 'Learning Curve';
-                    },
-                    selectedTradeOffGraph: function () {
-                        return this.activeTabName === 'training' &&
-                            this.graph.type === 'Trade-off Graph';
                     },
                 },
                 methods: (() => {
@@ -187,11 +183,13 @@
             },
         },
         mounted: function () {
+
             $('.left-content').resizable({
                 handles: 'e',
                 alsoResizeReverse: '.center-content',
                 minWidth: 280,
             });
+
             $('.center-content').resizable({
                 handles: 'e',
                 alsoResizeReverse: '.right-content',
@@ -207,6 +205,7 @@
 
 <style>
     .left-content {
+        position: relative;
         width: 280px;
         height: 100%;
         background-color: var(--color-gray1);

@@ -4,7 +4,7 @@
             <chart-block
                     :chart="chart"
                     :key="chart.name"
-                    v-for="chart in charts"/>
+                    v-for="chart in chartInfo"/>
         </div>
     </div>
 </template>
@@ -14,13 +14,16 @@
     import VueC3 from 'vue-c3/dist/vue-c3.esm';
 
     export default {
+        props: {
+            chartInfo: Array
+        },
         components: {
             'chart-block': {
                 // chart : {name: chart title, data: [{legend: ..., values: ...}, {}...]}
                 props: {chart: Object},
                 template: `
-                <div class="chart-block" :id="chart.name">
-                    <vue-c3 :handler="handler"></vue-c3>
+                <div class="chart-block" :id="chart.name" :key="chart.name">
+                    <vue-c3 :handler="handler" :key="chart.name"></vue-c3>
                 </div>
                 `,
                 data: function () {
@@ -32,7 +35,18 @@
                 watch: {
                     chartData: function (newData, oldData) {
                         let options = this.createChartOptions();
+                        let nextLoaded = Object.keys(options.data.xs);
+
                         this.handler.$emit("dispatch", (chart) => {
+                            let nextUnload = [];
+                            for (let x of chart.data()) {
+                                if (!nextLoaded.includes(x.id)) {
+                                    nextUnload.push(x.id);
+                                }
+                            }
+
+                            options.data.unload = nextUnload;
+
                             chart.load(options.data);
                         });
                     }
@@ -56,7 +70,6 @@
                             columns.push(tmp_values);
                         }
 
-
                         return {
                             title: {
                                 text: this.chart.name
@@ -64,6 +77,9 @@
                             data: {
                                 xs: xs,
                                 columns: columns
+                            },
+                            size: {
+                                width: (window.innerWidth - document.getElementById("leftContent").clientWidth) * 0.9 // dirty hack...
                             },
                             axis: {
                                 x: {
@@ -89,9 +105,6 @@
                     this.handler.$emit("init", options);
                 },
             },
-        },
-        data: function () {
-            return {charts: window.monitorInfo}
         },
     }
 

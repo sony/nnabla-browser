@@ -1,16 +1,16 @@
 <template>
-    <div class="app-row" style="top: 0; bottom: 0;">
-        <component-palette class="app-row" style="top: 0; bottom: 310px; border-bottom: 1px solid var(--color-gray2);"
-                           :selected-component="selectedComponent"
-                           @selected-component="name => $emit('selected-component', name)"
+        <div>
+            <component-palette class="app-row" style="top: 0; bottom: 310px; border-bottom: 1px solid var(--color-gray2);"
+                               :selected-component="selectedComponent"
+                               @selected-component="name => $emit('selected-component', name)"
+                               @history="command => $emit('history', command)"
+            />
+            <property-area class="app-row" style="height: 310px; bottom: 0;"
+                           :selection="selection"
+                           @renamed="onrenamed"
                            @history="command => $emit('history', command)"
-        />
-        <property-area class="app-row" style="height: 310px; bottom: 0;"
-                       :selection="selection"
-                       @renamed="onrenamed"
-                       @history="command => $emit('history', command)"
-        />
-    </div>
+            />
+        </div>
 </template>
 
 <script>
@@ -197,6 +197,7 @@
             );
         },
     };
+
     const propertyArea = {
         props: ['selection'],
         template: `
@@ -486,6 +487,7 @@
             },
         },
     };
+
     export default {
         props: ['selection', 'selectedComponent'],
         components: {

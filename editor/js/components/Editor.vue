@@ -7,11 +7,11 @@
                       :visible-right-content="editor.activeTabName === 'EDIT'"
                       :selected-component="selectedComponent"
                       :selection="selection"
-                      :jobs-in-queue="jobsInQueue"
                       :posting-job="postingJob"
                       :statistics="statistics"
                       :history-info="historyInfo"
                       :zoom-info="zoomInfo"
+                      :directory-info="directoryInfo"
                       @renamed="onRenamed"
                       @selected-component="name => selectedComponent = name"
                       @trigger-job="onTriggeredJob"
@@ -37,6 +37,7 @@
     import sduApp from './../editor/SDUApp';
     import tooltip from './../editor/tooltip';
     import jqueryUiCustom from './../misc/jquery-ui-custom';
+    import SSEhelper from "../io/ServerSentEventHelper";
 
     window.nnc = Object.assign(window.nnc, {
         editor: {
@@ -63,7 +64,6 @@
                 postingJob: false,
                 selectedComponent: '', // selected component on the palette
                 modal: {}, // modal dialog
-                results: results,
                 history: {
                     commands: [],
                     index: 0,
@@ -107,17 +107,13 @@
                         };
                     };
                     return {
-                        networkGraph: new Zoomer('Editor'),
-                        learningCurve: new Zoomer('Learning Curve'),
-                        tradeOffGraph: new Zoomer('Trade-off Graph'),
+                        networkGraph: new Zoomer('Editor')
                     };
                 })(),
+                directoryInfo: {}
             };
         },
         computed: {
-            jobsInQueue: function () {
-                return this.results.data.some(EditorUtils.is_active);
-            },
             historyInfo: function () {
                 const historyIndex = this.history.index;
                 const commands = this.history.commands;
@@ -281,7 +277,6 @@
              * @param layers specify all layers on the editing graph.
              */
             initPropMap: function (layers) {
-                layers
                 // ideally object which will be no longer referenced in the map should be cleared here...
                 layers.forEach(function (layer) {
                     this.onAddedLayer(layer);
@@ -494,6 +489,53 @@
                     }[operation.name]
                     ].zoom(operation.percentage);
             },
+            setupSSE: function(){
+
+                const eventSrc = new EventSource("/subscribe");
+
+                eventSrc.onmessage = event => {
+                    const id = event.lastEventId;
+
+                    if (id === "pathMap") {
+                        this.directoryInfo = Object.assign({}, this.directoryInfo, JSON.parse(event.data));
+
+                    } else {
+                        const splited = id.split(".");
+                        const ext = splited[splited.length - 1];
+                        const secondaryExt = splited[splited.length - 2];
+
+                        let graphInfo = {
+                            name: id,
+                            nodes: [],
+                            links: []
+                        };
+
+
+                        if (event.data === "delete") {
+                            if (ext === "nntxt") {
+                                SSEhelper.deleteDirectoryInfo(id, "nntxtFiles", this.directoryInfo);
+                            } else if (ext === "txt" && secondaryExt === "series") {
+                                SSEhelper.deleteDirectoryInfo(id, "monitorFiles", this.directoryInfo);
+                            }
+                        } else {
+                            if (ext === "nntxt") {
+                                let [nodes, links] = SSEhelper.getGraphInfoFromNNtxt(event);
+                                graphInfo.nodes = nodes;
+                                graphInfo.links = links;
+
+                                // update directoryInfo
+                                SSEhelper.addDirectoryInfo(id, "nntxtFiles", graphInfo, this.directoryInfo);
+
+                            } else if (ext === "txt" && secondaryExt === "series") {
+                                let monitorData = SSEhelper.getMonitorInfo(event);
+
+                                // update directoryInfo
+                                SSEhelper.addDirectoryInfo(id, "monitorFiles", monitorData, this.directoryInfo);
+                            }
+                        }
+                    }
+                };
+            }
         },
         mounted: function () {
             window.nnc.components = {Editor: this};
@@ -526,6 +568,8 @@
             jqueryUiCustom();
             sduApp();
             tooltip();
+
+            this.setupSSE();
         },
 
     };

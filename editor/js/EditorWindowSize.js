@@ -1,4 +1,3 @@
-import {learningCurveGraph, tradeOffGraph} from './TrainingGraphs';
 import EditorUtils from './EditorUtils';
 
 const EditorWindowSize = {
@@ -55,32 +54,6 @@ const EditorWindowSize = {
                 const graphHeight = contentHeight - graphsTabHeight - networkActionHeight;
                 $('.network-editor-scroller').height(graphHeight);
                 if (window.svgArea) window.svgArea.requestAdjustSize();
-            }
-
-            if (window.nnc.editor.activeTabName === 'TRAINING' || window.nnc.editor.activeTabName === 'EVALUATION') {
-                const logAreaHeight = boundingHeightOf('.log-area');
-                const jobMainAreaHeight = contentHeight - 40 - 40 - logAreaHeight;
-                $('.job-main-area').outerHeight(jobMainAreaHeight);
-
-                if (window.nnc.editor.activeTabName === 'TRAINING') {
-                    const svgWidth = contentWidth - 32;
-                    const svgHeight = jobMainAreaHeight - 34 - $('.legend').outerHeight(true);
-                    if (results.data.length && results.active > -1) {
-                        learningCurveGraph.width = tradeOffGraph.width = svgWidth - learningCurveGraph.margin.LEFT - learningCurveGraph.margin.RIGHT;
-                        learningCurveGraph.svgWidth = tradeOffGraph.svgWidth = svgWidth;
-                        learningCurveGraph.chartSVGWidth = tradeOffGraph.chartSVGWidth = svgWidth;
-                        learningCurveGraph.height = tradeOffGraph.height = svgHeight - learningCurveGraph.margin.TOP - learningCurveGraph.margin.BOTTOM;
-                        learningCurveGraph.svgHeight = tradeOffGraph.svgHeight = svgHeight;
-                        learningCurveGraph.chartSVGHeight = tradeOffGraph.chartSVGHeight = svgHeight - 80;
-                        learningCurveGraph.learningCurve(ResultsUtils.getActiveResult().job_id);
-                        tradeOffGraph.tradeOff();
-                    }
-                }
-
-                if (window.nnc.editor.activeTabName === 'EVALUATION') {
-                    $('.pager-content').outerHeight(jobMainAreaHeight); // output_result
-                    $('.confusion-matrix-content').outerHeight(jobMainAreaHeight); // confusion_matrix
-                }
             }
         };
     })(),
