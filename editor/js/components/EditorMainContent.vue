@@ -52,12 +52,8 @@
             statistics: Object,
             historyInfo: Object,
             zoomInfo: Object,
-            directoryInfo: Object
-        },
-        data: function () {
-          return {
-              chartInfo: []
-          }
+            directoryInfo: Object,
+            chartInfo: Array
         },
         components: {
             'left-content': {

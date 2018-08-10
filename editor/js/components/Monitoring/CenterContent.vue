@@ -1,12 +1,10 @@
 <template>
-    <div>
         <div class="monitoring-content-scroller">
             <chart-block
                     :chart="chart"
                     :key="chart.name"
                     v-for="chart in chartInfo"/>
         </div>
-    </div>
 </template>
 
 <script>
@@ -28,28 +26,30 @@
                 `,
                 data: function () {
                     return {
-                        handler: new Vue(),
-                        chartData: this.chart.data
+                        handler: new Vue()
                     };
                 },
                 watch: {
-                    chartData: function (newData, oldData) {
-                        let options = this.createChartOptions();
-                        let nextLoaded = Object.keys(options.data.xs);
+                    "chart.data": {
+                        handler: function (newData, oldData) {
+                            let options = this.createChartOptions();
+                            let nextLoaded = Object.keys(options.data.xs);
 
-                        this.handler.$emit("dispatch", (chart) => {
-                            let nextUnload = [];
-                            for (let x of chart.data()) {
-                                if (!nextLoaded.includes(x.id)) {
-                                    nextUnload.push(x.id);
+                            this.handler.$emit("dispatch", (chart) => {
+                                let nextUnload = [];
+                                for (let x of chart.data()) {
+                                    if (!nextLoaded.includes(x.id)) {
+                                        nextUnload.push(x.id);
+                                    }
                                 }
-                            }
 
-                            options.data.unload = nextUnload;
+                                options.data.unload = nextUnload;
 
-                            chart.load(options.data);
-                        });
-                    }
+                                chart.load(options.data);
+                            });
+                        },
+                        deep: true
+                    },
                 },
                 components: {
                     VueC3
@@ -113,6 +113,7 @@
 <style>
     .monitoring-content-scroller {
         width: 100%;
+        height: 100%;
         overflow: scroll;
     }
 

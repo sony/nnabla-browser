@@ -110,10 +110,9 @@ class Monitor(FileSystemEventHandler):
         if fnmatch.fnmatch(modified, "*.nntxt"):
             msg = nnabla_proto_to_json(modified)
 
-        elif fnmatch.fnmatch(modified, "*.series.text"):
+        elif fnmatch.fnmatch(modified, "*.series.txt"):
             with open(modified, "r") as f:
                 msg = f.read()
-
         else:
             return
 

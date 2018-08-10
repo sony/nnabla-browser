@@ -46,7 +46,9 @@
     const monitorsComponent = {
         props: ["monitor", "id", "chartInfo"],
         data: function () {
-            return {checked: this.monitor.isView || false};
+            return {
+                checked: this.monitor.isView || false
+            };
         },
         methods: {
             getDataIndex: function (infoIndex) {
@@ -106,12 +108,35 @@
                 }
             }
         },
+        watch: {
+            "monitor.data": function(_n, _o) {
+                if (this.checked){
+                    const graphTitle = this.monitor.name.split(".")[0];
+                    const targetInfoIndex = this.chartInfo.findIndex(x => {
+                        return x.name === graphTitle;
+                    });
+
+                    const targetDataIndex = this.getDataIndex(targetInfoIndex);
+
+                    const insertData = {
+                        legend: this.id,
+                        values: this.monitor.data
+                    };
+
+                    this.chartInfo[targetInfoIndex].data.splice(targetDataIndex, 1,
+                        Object.assign(
+                            {},
+                            this.chartInfo[targetInfoIndex].data[targetDataIndex],
+                            insertData));
+                }
+            }
+        },
         template: `
-        <div style="margin-left: 20px;">
-            <input type="checkbox" :id="id + '/' + monitor.name" v-model="checked" @change="changeEvent">
-            <label :for="id + '/' + monitor.name">{{ monitor.name }}</label>
-        </div>
-        `
+            <div style="margin-left: 20px;">
+                <input type="checkbox" :id="id + '/' + monitor.name" v-model="checked" @change="changeEvent">
+                <label :for="id + '/' + monitor.name">{{ monitor.name }}</label>
+            </div>
+            `
     };
 
     const directoryComponent = {
@@ -208,7 +233,7 @@
 </script>
 
 <style>
-    .nntxt.active{
+    .nntxt.active {
         color: var(--color-brand);
         cursor: pointer;
     }

@@ -19,6 +19,7 @@ const SSEhelper = function() {
 
     const searchTargetFromDirectoryInfo = (id, propertyName, target) => {
         let filename;
+        let parent;
 
         const checkExt = (path) => {
             const ext = Path.extname(path);
@@ -75,11 +76,11 @@ const SSEhelper = function() {
     };
 
     this.getMonitorInfo = event => {
-        const splited = event.data.split("\n");
+        const split = event.data.split("\n");
 
         let times = [], values = [];
 
-        for (let elm of splited) {
+        for (let elm of split) {
             let [t, v] = elm.split(" ");
             times.push(Number(t));
             values.push(Number(v));
@@ -92,7 +93,7 @@ const SSEhelper = function() {
         let [target, index, filename] = searchTargetFromDirectoryInfo(id, propertyName, directoryInfo);
 
         if (index > -1) {
-            target[propertyName][index].data = info;
+            target[propertyName][index].data = Object.assign({}, target[propertyName][index].data, info);
         } else {
             target[propertyName].push({
                 name: filename,
@@ -106,8 +107,28 @@ const SSEhelper = function() {
 
         if (index > -1) {
             target[propertyName].splice(index, 1);
+            return true;
         }
+
+        return false;
     };
+
+    this.deleteChartInfo = (rootDir, id, chartInfo) => {
+        let chartTitle = Path.basename(id).split(".")[0];
+        let legend = Path.join(rootDir, Path.dirname(id));
+
+        let chartIndex = chartInfo.findIndex(x => x.name === chartTitle);
+
+        if (chartIndex > -1) {
+            let dataIndex = chartInfo[chartIndex].data.findIndex(x => x.legend === legend);
+            if (dataIndex > -1) {
+                chartInfo[chartIndex].data.splice(dataIndex, 1);
+                if (chartInfo[chartIndex].data.length < 1){
+                    chartInfo.splice(chartIndex, 1);
+                }
+            }
+        }
+    }
 
 };
 

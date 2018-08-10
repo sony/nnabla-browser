@@ -1,15 +1,11 @@
 <template>
     <div class="editor-navbar">
-        <div> <!-- this DIV element for symmetry of 'pull-right' -->
-            <button-home/>
+        <div style="margin-left: 30px;">
             <appbar-tab tab-name="EDIT"/>
             <appbar-tab tab-name="MONITORING"/>
         </div>
         <div class="editor-navbar-center"></div>
-        <div class="pull-right">
-            <appbar-tab tab-name="CONFIG"/>
-            <button-save v-bind:loaded="loaded" @click="$emit('save')"/>
-            <button-save-as v-bind:loaded="loaded" @click="$emit('save-as')"/>
+        <div style="height: 100%; float: right;">
             <button-expand/>
         </div>
     </div>
@@ -47,30 +43,6 @@
                         });
                     },
                 },
-            },
-            'button-home': {
-                template: `
-            <div class="nnc-invoker navbar-el">
-                <router-link to="/" title="Home">
-                    <img src="./editor/image/HomeWhite.svg" class="navbar-img nnc-enabled"/>
-                </router-link>
-            </div>`,
-            },
-            'button-save': {
-                props: ['loaded'],
-                template: `
-            <div class="nnc-invoker navbar-el">
-            <img v-if="loaded" src="./editor/image/SaveWhite.svg" class="navbar-img nnc-enabled" title="Save (Ctrl+S)" @click="$emit('click')" />
-            <img v-else        src="./editor/image/SaveWhite.svg" class="navbar-img nnc-disabled" />
-            </div>`,
-            },
-            'button-save-as': {
-                props: ['loaded'],
-                template: `
-            <div class="nnc-invoker navbar-el">
-            <img v-if="loaded" src="./editor/image/SaveAsWhite.svg" class="navbar-img nnc-enabled" title="Save as" @click="$emit('click')" />
-            <img v-else        src="./editor/image/SaveAsWhite.svg" class="navbar-img nnc-disabled" />
-            </div>`,
             },
             'button-expand': {
                 template: `
@@ -114,15 +86,5 @@
         height: 40px;
         text-align: center;
         line-height: 40px;
-    }
-
-    .project-name {
-        font-family: "SSTUI-Medium";
-        font-size: 13px;
-        color: var(--color-gray0);
-        width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 </style>

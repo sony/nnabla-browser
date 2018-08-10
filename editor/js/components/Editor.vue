@@ -12,6 +12,7 @@
                       :history-info="historyInfo"
                       :zoom-info="zoomInfo"
                       :directory-info="directoryInfo"
+                      :chart-info="chartInfo"
                       @renamed="onRenamed"
                       @selected-component="name => selectedComponent = name"
                       @trigger-job="onTriggeredJob"
@@ -110,7 +111,8 @@
                         networkGraph: new Zoomer('Editor')
                     };
                 })(),
-                directoryInfo: {}
+                directoryInfo: {},
+                chartInfo: []
             };
         },
         computed: {
@@ -516,6 +518,7 @@
                                 SSEhelper.deleteDirectoryInfo(id, "nntxtFiles", this.directoryInfo);
                             } else if (ext === "txt" && secondaryExt === "series") {
                                 SSEhelper.deleteDirectoryInfo(id, "monitorFiles", this.directoryInfo);
+                                SSEhelper.deleteChartInfo(this.directoryInfo.name, id, this.chartInfo);
                             }
                         } else {
                             if (ext === "nntxt") {
@@ -654,7 +657,6 @@
 
     .pull-right {
         float: right;
-        width: 220px;
         height: 100%;
     }
 

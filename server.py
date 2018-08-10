@@ -5,6 +5,7 @@ import json
 
 import gevent
 from gevent.wsgi import WSGIServer
+from werkzeug.contrib.fixers import ProxyFix
 from flask import Flask, render_template, Response
 
 from multiprocessing import Pool, Manager, Lock
@@ -99,7 +100,8 @@ def subscribe():
 
 
 print("open server : {}".format(args.port))
-server = WSGIServer(("", args.port), app)
+app.wsgi_app = ProxyFix(app.wsgi_app)
+server = WSGIServer(("0.0.0.0", args.port), app)
 server.serve_forever()
 
 p.close()
