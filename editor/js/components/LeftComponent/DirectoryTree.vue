@@ -1,9 +1,10 @@
 <template>
     <div>
-        <monitoring-list
+        <monitoring-list style="top: 0; bottom: 310px; border-bottom: 1px solid var(--color-gray2);"
                 class="app-row"
                 :directory-info="directoryInfo"
                 :chart-info="chartInfo"
+                :graph-info="graphInfo"
                 :active-tab-name="activeTabName"
         />
     </div>
@@ -11,14 +12,14 @@
 
 <script>
 
+    import Vue from 'vue/dist/vue.esm.js';
+
     const nntxtsComponent = {
-        props: ["nntxt", "activeTabName"],
+        props: ["nntxt", "dirName", "graphInfo", "activeTabName"],
         template: `
-        <div class="nntxt"
-        style="margin-left: 20px;"
-        :class="classObject"
-        @click="clickEvent"> {{nntxt.name}} </div>
-        `,
+            <div class="nntxt"
+            :class="classObject"
+            @click="clickEvent"> {{nntxt.name}} </div>`,
         computed: {
             classObject: function () {
                 return {active: this.activeTabName === "edit"}
@@ -26,25 +27,19 @@
         },
         methods: {
             clickEvent: function () {
-                console.log("clicked");
-                window.Graph.clear();
+                const nntxtPath = this.dirName + "/" + this.nntxt.name;
 
-                let length = window.Graphs.data().length;
-                window.Graphs.data().splice(0, length);
-                window.Graphs.data().push(this.nntxt.data);
-
-                console.log("tab-" + this.nntxt.data.name);
-
-                this.$nextTick().then(() => {
-                    document.getElementById("tab-" + this.nntxt.data.name).click();
-                });
-
+                if (nntxtPath !== this.graphInfo.nntxtPath) {
+                    Vue.set(this.graphInfo, "graphs", this.nntxt.data);
+                    Vue.set(this.graphInfo, "activeGraphIndex", 0);
+                    Vue.set(this.graphInfo, "nntxtPath", nntxtPath);
+                }
             }
         }
     };
 
     const monitorsComponent = {
-        props: ["monitor", "id", "chartInfo"],
+        props: ["monitor", "dirName", "chartInfo"],
         data: function () {
             return {
                 checked: this.monitor.isView || false
@@ -54,7 +49,7 @@
             getDataIndex: function (infoIndex) {
                 if (infoIndex > -1) {
                     return this.chartInfo[infoIndex].data.findIndex(x => {
-                        return x.legend === this.id;
+                        return x.legend === this.dirName;
                     });
                 } else {
                     return -1;
@@ -71,7 +66,7 @@
                 const targetDataIndex = this.getDataIndex(targetInfoIndex);
 
                 const insertData = {
-                    legend: this.id,
+                    legend: this.dirName,
                     values: this.monitor.data
                 };
 
@@ -119,7 +114,7 @@
                     const targetDataIndex = this.getDataIndex(targetInfoIndex);
 
                     const insertData = {
-                        legend: this.id,
+                        legend: this.dirName,
                         values: this.monitor.data
                     };
 
@@ -132,42 +127,52 @@
             }
         },
         template: `
-            <div style="margin-left: 20px;">
-                <input type="checkbox" :id="id + '/' + monitor.name" v-model="checked" @change="changeEvent">
-                <label :for="id + '/' + monitor.name">{{ monitor.name }}</label>
-            </div>
-            `
+            <div>
+                <input type="checkbox" :id="dirName + '/' + monitor.name" v-model="checked" @change="changeEvent">
+                <label :for="dirName + '/' + monitor.name">{{ monitor.name }}</label>
+            </div>`
     };
 
     const directoryComponent = {
         name: "directory-component",
-        props: ["info", "dirName", "chartInfo", "activeTabName"],
+        props: [
+            "info",
+            "dirName",
+            "chartInfo",
+            "graphInfo",
+            "activeTabName"
+        ],
         template: `
-        <div class="directory" v-if="checkDisplay">
-            <div class="nnc-invoker title" @click="onClickExpand">
-                <img class="icon-small" :src="expandArrow" />{{ info.name }}
+        <div class="branch" v-if="checkDisplay">
+            <div class="branch-name" @click="expand = !expand;">
+                <img class="icon-small" :src="expandArrow" >
+                {{ info.name }}
             </div>
 
             <div class="components" :style="{display: expand ? 'block' : 'none'}">
                 <directory-component
                      :info="childInfo"
-                     :style="{padding: '5px 0px 5px 20px'}"
                      :dirName="dirName + '/' + childInfo.name"
-                     :chartInfo="chartInfo"
+                     :chart-info="chartInfo"
+                     :graph-info="graphInfo"
                      :active-tab-name="activeTabName"
                      v-for="childInfo in info.children"
                     />
 
                 <nntxts-component
+                    style="margin-left: 10px"
                     v-for="nntxt in info.nntxtFiles"
                     :nntxt="nntxt"
+                    :dirName="dirName"
+                    :graph-info="graphInfo"
                     :active-tab-name="activeTabName"
                      />
 
                 <monitors-component
+                    style="margin-left: 10px"
                     :monitor="monitor"
-                    :id="dirName"
-                    :chartInfo="chartInfo"
+                    :dirName="dirName"
+                    :chart-info="chartInfo"
                     v-for="monitor in info.monitorFiles"
                     />
             </div>
@@ -186,13 +191,7 @@
             }
         },
         data: function () {
-            return {expand: this.info.expand || false};
-        },
-        methods: {
-            onClickExpand: function () {
-                this.expand = !this.expand;
-                this.info.expand = this.expand;
-            }
+            return {expand: false};
         },
     };
 
@@ -200,6 +199,7 @@
         props: {
             directoryInfo: Object,
             chartInfo: Array,
+            graphInfo: Object,
             activeTabName: String
         },
         components: {
@@ -207,17 +207,19 @@
                 props: {
                     directoryInfo: Object,
                     chartInfo: Array,
+                    graphInfo: Object,
                     activeTabName: String
                 },
                 template: `
-                <div style="height: 100%">
-                    <div class="title">Monitoring List</div>
+                <div>
+                    <div class="title">Directory Tree</div>
                     <div class="app-row app-scroll-x app-scroll-y" style="top: 40px; bottom: 0; padding: 0 16px;">
                         <directory-component
                             v-if="typeof directoryInfo.name !== 'undefined'"
                             :info="directoryInfo"
                             :dir-name="directoryInfo.name"
                             :chart-info="chartInfo"
+                            :graph-info="graphInfo"
                             :active-tab-name="activeTabName"
                              />
                     </div>
@@ -236,12 +238,5 @@
     .nntxt.active {
         color: var(--color-brand);
         cursor: pointer;
-    }
-
-    .directory .title {
-        padding: 3px 0;
-        height: 24px;
-        margin-top: 0;
-        margin-left: 0;
     }
 </style>

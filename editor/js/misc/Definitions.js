@@ -13,15 +13,12 @@ const color = {
     gray5: rgbColor('#262626'),
 };
 
+const API_DOC_URL = 'https://nnabla.readthedocs.io/en/latest/python/api/';
+
 export default {
-    CORE_API: {
-        VERSION: 'v1',
-        baseUrl: function() {
-            return CoreDomain + this.VERSION;
-        },
-        usersUrl: function() {
-            return this.baseUrl() + '/users/' + localStorage.getItem('u');
-        },
+    NNABLA_CORE_API: {
+        PF_DOC_URL: API_DOC_URL + "parametric_function.html",
+        F_DOC_URL: API_DOC_URL + "function.html"
     },
     KEY_CODE: {
         ENTER: 13,
@@ -109,6 +106,7 @@ export default {
             const HEIGHT = GRID * 2;
 
             return {
+                GRID: GRID,
                 RECT_WIDTH: WIDTH,
                 RECT_HEIGHT: HEIGHT,
                 RECT_BORDER_WIDTH: 1,
@@ -134,7 +132,7 @@ export default {
                     OFFSET_X: 0,
                     OFFSET_Y: 12,
                     FONTCOLOR: 'white',
-                    FONTSIZE: '12px',
+                    FONTSIZE: '14px',
                 },
 
                 PROPERTY_LABEL: {

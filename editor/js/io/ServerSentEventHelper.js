@@ -19,7 +19,6 @@ const SSEhelper = function() {
 
     const searchTargetFromDirectoryInfo = (id, propertyName, target) => {
         let filename;
-        let parent;
 
         const checkExt = (path) => {
             const ext = Path.extname(path);
@@ -53,26 +52,28 @@ const SSEhelper = function() {
     this.getGraphInfoFromNNtxt = event => {
         const json = JSON.parse(event.data);
 
-        const targets = json.network[0].function || [];
-
-        let nodes = [], links = [];
-
-        for (let x of targets) {
-            const pos = calcLayerPosition(nodes);
-
-            let layerInfo = {
-                name: "",
-                type: x.type,
-                x: pos.x,
-                y: pos.y,
-                // properties: {},
-                isNew: true
+        const graphInfoArray = [];
+        for (let network of json.network || {}) {
+            let graphInfo = {
+                name: network.name,
+                nodes: [],
+                links: []
             };
 
-            nodes.push(layerInfo)
+            // currently layer property is ignored.
+            for (let layer of network.function || []) {
+                const pos = calcLayerPosition(graphInfo.nodes);
+
+                let layerInfo = Object.assign({}, layer, {x: pos.x, y: pos.y});
+
+                graphInfo.nodes.push(layerInfo);
+            }
+
+            graphInfoArray.push(graphInfo);
+
         }
 
-        return [nodes, links];
+        return graphInfoArray;
     };
 
     this.getMonitorInfo = event => {

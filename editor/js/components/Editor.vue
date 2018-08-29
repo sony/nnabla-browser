@@ -1,28 +1,18 @@
 <template>
     <div>
-        <editor-application-bar v-bind:loaded="isLoadEnd"
-                                @show-right-content="showRightContent"
-        />
+        <editor-application-bar v-bind:loaded="isLoadEnd" />
         <main-content :active-tab-name="editor.activeTabName.toLowerCase()"
                       :visible-right-content="editor.activeTabName === 'EDIT'"
-                      :selected-component="selectedComponent"
-                      :selection="selection"
-                      :posting-job="postingJob"
-                      :statistics="statistics"
+                      :selected-layer="selectedLayer"
                       :history-info="historyInfo"
                       :zoom-info="zoomInfo"
                       :directory-info="directoryInfo"
                       :chart-info="chartInfo"
+                      :graph-info="graphInfo"
                       @renamed="onRenamed"
-                      @selected-component="name => selectedComponent = name"
-                      @trigger-job="onTriggeredJob"
-                      @fetch-results="fetchResults"
-                      @statistics="changeActiveStatistics"
                       @history="command => history.execute(command)"
                       @zoom="operateZooming"
         />
-        <nnc-modal-loading v-if="!isLoadEnd"/>
-        <nnc-dialog v-if="modal.show" :data="modal"/>
     </div>
 </template>
 
@@ -30,8 +20,6 @@
     import EditorApplicationBar from './EditorApplicationBar';
     import MainContent from './EditorMainContent';
     import EditorWindowSize from './../EditorWindowSize';
-    import Definitions from './../misc/Definitions';
-    import Graph from './../currentGraph';
     import EditorUtils from './../EditorUtils';
     import ZOOM_INFO from './../misc/ZoomInfo';
     import Vue from 'vue/dist/vue.esm.js';
@@ -40,7 +28,7 @@
     import jqueryUiCustom from './../misc/jquery-ui-custom';
     import SSEhelper from "../io/ServerSentEventHelper";
 
-    window.nnc = Object.assign(window.nnc, {
+    window.nnc = Object.assign(window.nnc || {}, {
         editor: {
             activeTabName: 'EDIT',
         },
@@ -53,17 +41,9 @@
         },
         data: function () {
             return {
-                project: {name: ''},
                 isLoadEnd: false,
                 editor: window.nnc.editor,
-                selection: {main: '', all: [], props: null},
-                propMap: {}, // all layer's properties mapping.
-                statistics: {
-                    active: null, // active statistics object in this.values
-                    values: [], // statistics calculated by nnablambda
-                },
-                postingJob: false,
-                selectedComponent: '', // selected component on the palette
+                selectedLayer: {},
                 modal: {}, // modal dialog
                 history: {
                     commands: [],
@@ -112,7 +92,8 @@
                     };
                 })(),
                 directoryInfo: {},
-                chartInfo: []
+                chartInfo: [],
+                graphInfo: {activeGraphIndex: -1, nntxtPath:"", graphs: [], }
             };
         },
         computed: {
@@ -133,158 +114,9 @@
             },
         },
         methods: {
-            showRightContent: function (visible){
-                this.$refs.mainContent.showRightContent(visible);
-            },
-            makeConfiguration: function (type) {
-                switch (type) {
-                    case 'train':
-                    case 'scheduleTrain':
-                    case 'evaluate':
-                        return EditorUtils.serialize_configuration();
-                    case 'retrainNotInPlace':
-                        return EditorUtils.serialize_configuration(JSON.parse(ResultsUtils.getActiveResult().configuration).networks);
-                    default:
-                        throw type;
-                }
-            },
-            onTriggeredJob: function (type) {
-                this.postingJob = true;
-                this.isLoadEnd = false; // show loading spinner.
-                const unsetPostingJob = () => {
-                    this.postingJob = false;
-                    this.isLoadEnd = true; // hide loading spinner.
-                };
-                const _pushNewJob = (result, type, name) => {
-                    nnc.editor.activeTabName = 'TRAINING';
-                    results.data.unshift(Object.assign(
-                        {
-                            type: type,
-                            status: 'queued',
-                            active: false,
-                            logfile: '',
-                            job_name: name,
-                            evaluation_logfile: '',
-                            evaluate_status: '',
-                            confusionMatrix: {
-                                selectedModal: '',
-                                matrices: '',
-                            },
-                            current_epoch: undefined,
-                        }, result));
-                    ResultsUtils.changeActive(result.job_id);
-                    ResultsUtils.showResultContent(result.job_id);
-                };
-                switch (type) {
-                    case 'train':
-                    case 'scheduleTrain':
-                    case 'retrainNotInPlace': {
-                        const configuration = this.makeConfiguration(type);
-                        EditorUtils.checkErrors(configuration, (errors) => {
-                            if (errors) {
-                                this.popup('Errors in graph', errors, [{name: 'OK'}]);
-                                unsetPostingJob();
-                            } else {
-                                const jobName = EditorUtils.getNewJobName();
-                                const jobType = 'train';
-                                // post new job
-                                EditorUtils.callApi({
-                                    url: Definitions.CORE_API.usersUrl() + '/projects/' + nnc.editor.projectId + '/jobs',
-                                    type: 'post',
-                                    data: JSON.stringify({
-                                        configuration: JSON.stringify(configuration),
-                                        this_will_be_deprecated_in_day2: exportProject(configuration, true),
-                                        type: jobType,
-                                        job_name: jobName,
-                                    }),
-                                    contentType: 'application/json',
-                                    dataType: 'json',
-                                }, (result) => {
-                                    _pushNewJob(result, jobType, jobName);
-                                }, EditorUtils.showPopupIfJobExceedsTimeLimitOrHandleAsDefaultFailureFor(jobType), unsetPostingJob);
-                            }
-                        });
-                        break;
-                    }
-                    case 'stopTrain':
-                        $.when(...ResultsUtils.getJobsInProgress().map((job) => {
-                            const finished = $.Deferred();
-                            EditorUtils.callApi({
-                                url: Definitions.CORE_API.usersUrl() + '/projects/' + nnc.editor.projectId + '/jobs/' + job.job_id + '/suspend',
-                                type: 'POST',
-                                dataType: 'json',
-                            }, undefined, EditorUtils.handleXhrFailure, () => finished.resolve());
-                            return finished;
-                        })).always(unsetPostingJob);
-                        break;
-                    case 'evaluate': {
-                        const jobType = 'evaluate';
-                        const jobId = ResultsUtils.getActiveResult().job_id;
-                        const executor = configs.data.filter((config) => config.type === 'Executor')[0];
-                        const firstExecutorsDatasetName = (executor || {}).dataset;
-                        const referencedDataset = datasets.data.find((dataset) => dataset.name === firstExecutorsDatasetName);
-                        const datasetId = (referencedDataset || {}).id;
-                        if (!datasetId) {
-                            let message;
-                            if (!executor) {
-                                message = 'No "Executor" defined.';
-                            } else if (!referencedDataset) {
-                                message = 'Dataset "' + firstExecutorsDatasetName + '" is not found, specified in "' + executor.name + '".';
-                            } else {
-                                message = 'Dataset "' + firstExecutorsDatasetName + '" has not been linked.';
-                            }
-                            this.popup('Error in CONFIG', message, [{name: 'OK'}]);
-                            unsetPostingJob();
-                        } else {
-                            EditorUtils.callApi({
-                                url: Definitions.CORE_API.usersUrl() + '/projects/' + nnc.editor.projectId + '/jobs/' + jobId + '/resume',
-                                type: 'POST',
-                                data: JSON.stringify({type: jobType, evaluation_dataset_id: datasetId}),
-                                contentType: 'application/json',
-                                dataType: 'json',
-                            }, (result) => {
-                                this.fetchResults(() => {
-                                    let job = results.data.find((job) => job.job_id === jobId);
-                                    Object.assign(job, result);
-                                    ResultsUtils.setPollingForEvaluateResult(job);
-                                    ResultsUtils.changeActive(job.job_id);
-                                    nnc.editor.activeTabName = 'EVALUATION';
-                                });
-                            }, EditorUtils.showPopupIfJobExceedsTimeLimitOrHandleAsDefaultFailureFor(jobType), unsetPostingJob);
-                        }
-                        break;
-                    }
-                    case 'profile': {
-                        const jobName = EditorUtils.getNewJobName();
-                        let jobType = 'profile';
-                        EditorUtils.callApi({
-                            url: Definitions.CORE_API.usersUrl() + '/projects/' + nnc.editor.projectId + '/jobs',
-                            type: 'post',
-                            data: JSON.stringify({
-                                configuration: JSON.stringify(EditorUtils.serialize_configuration()),
-                                this_will_be_deprecated_in_day2: exportProject(EditorUtils.serialize_configuration(), true),
-                                type: jobType,
-                                job_name: jobName,
-                            }),
-                            contentType: 'application/json',
-                            dataType: 'json',
-                        }, (result) => {
-                            _pushNewJob(result, jobType, jobName);
-                        }, EditorUtils.showPopupIfJobExceedsTimeLimitOrHandleAsDefaultFailureFor(jobType), unsetPostingJob);
-                        break;
-                    }
-                }
-            },
             /**
              * @param layers specify all layers on the editing graph.
              */
-            initPropMap: function (layers) {
-                // ideally object which will be no longer referenced in the map should be cleared here...
-                layers.forEach(function (layer) {
-                    this.onAddedLayer(layer);
-                }, this);
-                this._updateSelectedLayer();
-            },
             onAddedLayer: (function () {
                 let mapType = (prop) => {
                     if (!prop.editable) {
@@ -414,17 +246,6 @@
                 let layer = this.propMap[this.selection.main];
                 Vue.set(this.selection, 'props', layer ? Object.assign({}, layer) : null);
             },
-            updateStatistics: function (statistics) {
-                const object = this.statistics;
-                object.values = statistics;
-                this.changeActiveStatistics(statistics[0] || object.active);
-            },
-            changeActiveStatistics: function (stat) {
-                if (stat) {
-                    this.statistics.active = stat;
-                    Graph.layers().forEach((layer) => layer.updateStatistics(stat));
-                }
-            },
             /**
              * Show popup dialog.
              * @param title dialog title
@@ -467,21 +288,6 @@
                     show: true, // show dialog
                 });
             },
-            fetchResults: function (callback, offset) {
-                EditorUtils.callApi({
-                    url: Definitions.CORE_API.usersUrl() + '/projects/' + EditorUtils.getProjectId() + '/jobs' + '?offset=' + (offset || 0) + '&limit=10',
-                    type: 'get',
-                    dataType: 'json',
-                }, (result) => {
-                    results.merge(result.jobs);
-                    results.metadata.total = result.metadata.total;
-                    (callback || (() => undefined))();
-                }, EditorUtils.handleXhrFailure);
-            },
-            setPollingForFetchResults: function () {
-                const _fetchResults = () => this.fetchResults(() => setTimeout(_fetchResults, 10000));
-                _fetchResults();
-            },
             operateZooming: function (operation) {
                 this.zoomInfo[
                     {
@@ -506,13 +312,6 @@
                         const ext = splited[splited.length - 1];
                         const secondaryExt = splited[splited.length - 2];
 
-                        let graphInfo = {
-                            name: id,
-                            nodes: [],
-                            links: []
-                        };
-
-
                         if (event.data === "delete") {
                             if (ext === "nntxt") {
                                 SSEhelper.deleteDirectoryInfo(id, "nntxtFiles", this.directoryInfo);
@@ -522,12 +321,10 @@
                             }
                         } else {
                             if (ext === "nntxt") {
-                                let [nodes, links] = SSEhelper.getGraphInfoFromNNtxt(event);
-                                graphInfo.nodes = nodes;
-                                graphInfo.links = links;
+                                let graphInfoArray = SSEhelper.getGraphInfoFromNNtxt(event);
 
                                 // update directoryInfo
-                                SSEhelper.addDirectoryInfo(id, "nntxtFiles", graphInfo, this.directoryInfo);
+                                SSEhelper.addDirectoryInfo(id, "nntxtFiles", graphInfoArray, this.directoryInfo);
 
                             } else if (ext === "txt" && secondaryExt === "series") {
                                 let monitorData = SSEhelper.getMonitorInfo(event);
@@ -550,9 +347,6 @@
                     case 'training':
                         window.nnc.editor.activeTabName = 'TRAINING';
                         break;
-                    case 'evaluation':
-                        window.nnc.editor.activeTabName = 'EVALUATION';
-                        break;
                 }
             };
             EditorWindowSize.init();
@@ -561,8 +355,6 @@
                 headers: {'X-Requested-With': 'XMLHttpRequest'},
                 xhrFields: {withCredentials: true},
             });
-
-            nnc.editor.projectId = EditorUtils.getProjectId();
 
             nnc.params = EditorUtils.getParams();
 

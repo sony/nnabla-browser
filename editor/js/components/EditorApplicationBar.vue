@@ -13,11 +13,10 @@
 
 <script>
     import EditorWindowSize from './../EditorWindowSize';
-    import contextMenu from './../editor/editorContextMenu';
     import Vue from 'vue/dist/vue.esm.js';
 
     export default {
-        props: ['loaded', 'projectName'],
+        props: ['loaded'],
         components: {
             'appbar-tab': {
                 props: ['tabName'],
@@ -36,7 +35,6 @@
                 },
                 methods: {
                     changeActiveTab: function (tabName) {
-                        contextMenu.close();
                         window.nnc.editor.activeTabName = tabName;
                         Vue.nextTick(function () {
                             EditorWindowSize.init();

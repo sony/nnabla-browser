@@ -1,39 +1,22 @@
-import clipboard from './clipboard';
 import EditorUtils from './../EditorUtils';
-import Graph from './../currentGraph';
-import SvgArea from './SDNSvgArea';
 import Definitions from './../misc/Definitions';
 import Vue from 'vue/dist/vue.esm.js';
 
 export default () => {
     const uop = EditorUtils.allowedUserOperation;
     const eta = EditorUtils.editTabIsActive;
-    const dl = () => window.svgArea.draggingLayer(); // window.svgArea have not been exist yet. (just constructed here after...)
     // Clipboard
     // クリップボードへコピー（マウス操作、キーボード操作）
-    document.addEventListener('copy', function(e) {
-        if (uop() && eta() && !dl() && 0 < Graph.selection.layer.members().length) {
-            clipboard._copy(e);
-        }
-    });
+    document.addEventListener('copy', function(e) {});
 
     // NetworkEditorにペーストする（キーボード操作）
-    document.addEventListener('paste', (e) => {
-        if (uop() && eta() && !dl()) {
-            clipboard.paste(e.clipboardData.getData('text'));
-        }
-    });
+    document.addEventListener('paste', (e) => {});
 
     // クリップボードへコピーして削除する（マウス操作、キーボード操作）
-    document.addEventListener('cut', function(e) {
-        if (uop() && eta() && !dl() && 0 < Graph.selection.layer.members().length) {
-            clipboard._copy(e);
-            Graph.deleteSelection('Cut');
-        }
-    });
+    document.addEventListener('cut', function(e) {});
 
     document.addEventListener('keydown', function(e) {
-        if (uop() && !dl() && e.ctrlKey) {
+        if (uop() && e.ctrlKey) {
             switch (e.keyCode) {
             case Definitions.KEY_CODE.S:
                 e.preventDefault();
@@ -56,7 +39,6 @@ export default () => {
         'a': Definitions.KEY_CODE.A,
     });
 
-    new SvgArea();
     $(document).on({
         contextmenu: () => false,
     });

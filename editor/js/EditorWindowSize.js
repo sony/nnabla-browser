@@ -53,7 +53,6 @@ const EditorWindowSize = {
                 const networkActionHeight = boundingHeightOf('.network-action');
                 const graphHeight = contentHeight - graphsTabHeight - networkActionHeight;
                 $('.network-editor-scroller').height(graphHeight);
-                if (window.svgArea) window.svgArea.requestAdjustSize();
             }
         };
     })(),

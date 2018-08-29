@@ -1,14 +1,7 @@
-import Graph from './currentGraph';
 import store from './store/index';
 
 const EditorUtils = (() => {
-    let _nnablamdaCalls = {};
     let _timeoutIds = {};
-
-    const _generateNetworksCurrentEditingOnly = () => {
-        const current = window.Graphs.flush(); // reflect current edit into data.
-        return [current];
-    };
 
     const _generateNetworks = () => {
         window.Graphs.flush(); // reflect current edit into data.

@@ -1,0 +1,136 @@
+<template>
+    <div>
+        <component-palette class="app-row" style="top: 0; bottom: 310px; border-bottom: 1px solid var(--color-gray2);"
+                           :selected-layer="selectedLayer"
+                           @history="command => $emit('history', command)"
+        />
+    </div>
+</template>
+
+<script>
+
+    const functionComponent = {
+        props: ["layer"],
+        template: `
+                <div class="function">
+                {{layer.snake_name}}
+                </div>`
+    };
+
+    const baseFunctionComponent = {
+        props: ["layers", "base_category"],
+        template: `
+                <div class="branch">
+                    <div class="branch-name" @click="expand = !expand;">
+                        <img class="icon-small" :src="expandArrow" >
+                        {{ base_category }}
+                    </div>
+
+                     <div class="components" :style="{display: expand ? 'block' : 'none'}">
+                        <function-component v-for="(layer, name) in layers" :key="name" :layer="layer"/>
+                    </div>
+                </div>`,
+        data: function () {
+            return {expand: false}
+        },
+        components: {
+            "function-component": functionComponent
+        },
+        computed: {
+            expandArrow: function () {
+                return './editor/image/Arrow' + (this.expand ? 'Down' : '') + '.svg';
+            }
+
+        },
+    };
+
+    const componentPalette = {
+        props: {selectedComponent: String},
+        template: `
+    <div>
+        <div class="title">NNabla Functions</div>
+        <div class="app-row app-scroll-x app-scroll-y" style="top: 40px; bottom: 0; padding: 0 16px 0 16px;">
+            <component-category
+                v-for="(contents, category) in nnablaFunctions"
+                :key="category"
+                :category="category"
+                :contents="contents"
+                :selected-component="selectedComponent"
+                @update:selected="onUpdateSelected"
+                />
+        </div>
+    </div>`,
+        data: () => {
+            return {nnablaFunctions: nnablaCore};
+        },
+        components: {
+            'component-category': {
+                props: ['category', 'contents', 'selectedComponent'],
+                template: `
+        <div class="branch">
+            <div class="branch-name" @click="expand = !expand;">
+                <img class="icon-small" :src="expandArrow" >
+                {{ category }}
+            </div>
+
+            <div class="components" :style="{display: expand ? 'block' : 'none'}">
+                <div v-if="isBaseFunctions">
+                    <base-function-component
+                        v-for="(layers, base_category) in contents"
+                        :key="base_category"
+                        :layers="layers"
+                        :base_category="base_category" />
+                </div>
+
+                <div v-else>
+                     <function-component v-for="(layer, name) in contents" :key="name" :layer="layer"/>
+                </div>
+            </div>
+        </div>
+        `,
+                data: () => {
+                    return {expand: false};
+                },
+                computed: {
+                    isBaseFunctions: function () {
+                        return this.category === 'base_functions';
+                    },
+                    expandArrow: function () {
+                        return './editor/image/Arrow' + (this.expand ? 'Down' : '') + '.svg';
+                    }
+
+                },
+                components: {
+                    "base-function-component": baseFunctionComponent,
+                    "function-component": functionComponent
+                },
+            }
+        },
+        methods: {
+            onUpdateSelected(name) {
+                this.$emit('selected-component', name);
+            },
+        },
+        mounted: function () {
+        },
+    };
+
+
+    export default {
+        props: ['selectedLayer'],
+        components: {
+            'component-palette': componentPalette,
+        },
+    };
+</script>
+
+<style>
+    .components .function {
+        margin-left: 10px;
+        cursor: pointer;
+    }
+
+    .components .function:hover {
+        color: var(--color-brand);
+    }
+</style>

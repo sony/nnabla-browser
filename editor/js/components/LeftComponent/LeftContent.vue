@@ -15,35 +15,47 @@
 
         </div>
 
-        <div class="app-row" style="top: 40px; bottom: 0;">
-                <edit-left-content
-                        v-if="activeLeftTab === 'edit'"
-                        :selection="selection"
-                        :selected-component="selectedComponent"
-                        @selected-component="name => $emit('selected-component', name)"
-                        @renamed="changes => $emit('renamed', changes)"
-                        @trigger-job="value => $emit('trigger-job', value)"
-                        @fetch-results="(callback, offset) => $emit('fetch-results', callback, offset)"
-                        @history="command => $emit('history', command)"/>
+        <div class="left-component">
 
-                <directory-tree
-                        :directory-info="directoryInfo"
-                        :chart-info="chartInfo"
-                        :active-tab-name="activeTabName"
-                        v-if="activeLeftTab === 'tree'"/>
+            <div class="app-row" style="top: 40px; bottom: 0;">
+                <keep-alive>
+                    <function-tree
+                            v-if="activeLeftTab === 'edit'"
+                            :selected-layer="selectedLayer"
+                            @history="command => $emit('history', command)"/>
+
+                    <directory-tree
+                            v-if="activeLeftTab === 'tree'"
+                            :directory-info="directoryInfo"
+                            :chart-info="chartInfo"
+                            :graph-info="graphInfo"
+                            :active-tab-name="activeTabName" />
+                </keep-alive>
+
+                <property-area :selected-layer="selectedLayer" />
+            </div>
+
         </div>
 
     </div>
 </template>
 
 <script>
-    import EditNetwork from "./EditNetwork";
+    import FunctionTree from "./FunctionTree";
     import DirectoryTree from "./DirectoryTree";
+    import PropertyArea from "./PropertyArea";
 
     export default {
-        props: ['selection', 'selectedComponent', 'activeTabName', "directoryInfo", "chartInfo"],
+        props: [
+            'selectedLayer',
+            'activeTabName',
+            "directoryInfo",
+            "chartInfo",
+            "graphInfo"],
+
         components: {
-            "edit-left-content": EditNetwork,
+            "property-area": PropertyArea,
+            "function-tree": FunctionTree,
             "directory-tree": DirectoryTree
         },
 
@@ -86,6 +98,27 @@
     .left-component-tab .tab.active {
         box-sizing: border-box;
         border-bottom: solid 2px var(--color-brand);
+    }
+
+    .left-component .icon-small {
+        width: 16px;
+        height: 16px;
+    }
+
+    .left-component .branch {
+        font-size: 14px;
+    }
+
+    .left-component .branch-name {
+        padding-top: 3px;
+        height: 24px;
+        margin-top: 0;
+        margin-left: 0;
+        white-space: nowrap;
+    }
+    
+    .left-component .components {
+        margin-left: 20px;
     }
 
 </style>

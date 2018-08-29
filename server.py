@@ -2,6 +2,7 @@ import time
 import argparse
 import subprocess
 import json
+import os
 
 import gevent
 from gevent.wsgi import WSGIServer
@@ -13,6 +14,11 @@ from watchdog.observers import Observer
 
 from include.directory_monitoring import Monitor
 from include.server_sent_event import ServerSentEvent
+from include.parse_nnabla_function import create_nnabla_core_js
+
+# create nnablaCore.js
+output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/js/nnablaCore.js")
+create_nnabla_core_js(output_path)
 
 # build
 subprocess.call("npm run build".split(" "))
@@ -26,6 +32,11 @@ parser.add_argument("--logdir", "-d", default="./logdir", type=str)
 
 args = parser.parse_args()
 
+# check if logdir exists
+logdir = os.path.abspath(args.logdir)
+if not os.path.exists(logdir):
+    os.makedirs(logdir)
+
 manager = Manager()
 send_flags = manager.list()
 D = manager.dict()
@@ -33,7 +44,7 @@ path_maps = manager.dict()
 
 
 def supervise(shared_dict, send_flags, path_maps):
-    monitor = Monitor(logdir=args.logdir, shared_dict=shared_dict, send_flags=send_flags)
+    monitor = Monitor(logdir=logdir, shared_dict=shared_dict, send_flags=send_flags)
     path_maps.update(monitor.path_maps)
 
     observer = Observer()

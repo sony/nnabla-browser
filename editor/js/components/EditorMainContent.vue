@@ -2,72 +2,60 @@
     <div class="main-content">
         <left-content
                 :active-tab-name="activeTabName"
-                :selection="selection"
-                :selected-component="selectedComponent"
+                :selected-layer="selectedLayer"
                 :directory-info="directoryInfo"
                 :chart-info="chartInfo"
+                :graph-info="graphInfo"
                 @renamed="changes => $emit('renamed', changes)"
-                @selected-component="name => $emit('selected-component', name)"
+                @selected-layer="name => $emit('selected-layer', name)"
                 @trigger-job="value => $emit('trigger-job', value)"
                 @fetch-results="(callback, offset) => $emit('fetch-results', callback, offset)"
                 @history="command => $emit('history', command)"
         />
         <center-content
                 :active-tab-name="activeTabName"
-                :selection="selection"
-                :selected-component="selectedComponent"
+                :selected-layer="selectedLayer"
                 :history-info="historyInfo"
                 :zoom-info="zoomInfo"
                 :directory-info="directoryInfo"
                 :chart-info="chartInfo"
+                :graph-info="graphInfo"
                 @history="command => $emit('history', command)"
                 @zoom="operation => $emit('zoom', operation)"
-        />
-        <right-content
-                ref="rightContent"
-                :posting-job="postingJob"
-                :statistics="statistics"
-                :visible-right-content="visibleRightContent"
-                @trigger-job="value => $emit('trigger-job', value)"
-                @statistics="value => $emit('statistics', value)"
         />
     </div>
 </template>
 
 <script>
-    import ConfigLeft from './Config/ConfigLeft';
-    import ConfigCenter from './Config/ConfigCenter';
     import LeftContent from './LeftComponent/LeftContent';
     import MonitoringCenterContent from './Monitoring/CenterContent';
-    import NetworkOperationContent from './Network/EditNetworkOperationContent.vue';
+    import NetworkCenterContent from './Network/NetworkEditor.vue';
 
     export default {
         props: {
             activeTabName: String,
-            visibleRightContent: Boolean,
-            selection: Object,
-            selectedComponent: String,
-            jobsInQueue: Boolean,
-            postingJob: Boolean,
-            statistics: Object,
+            selectedLayer: Object,
             historyInfo: Object,
             zoomInfo: Object,
             directoryInfo: Object,
-            chartInfo: Array
+            chartInfo: Array,
+            graphInfo: Object
         },
         components: {
             'left-content': {
-                props: ['activeTabName', 'selection', 'selectedComponent', "directoryInfo", "chartInfo"],
+                props: [
+                    'activeTabName', 'selectedLayer',
+                    "directoryInfo", "chartInfo", "graphInfo"
+                ],
                 template: `
             <div class="left-content" id="leftContent">
                 <component
-                :is="listForEachTabRespectively"
-                :selection="selection"
-                :selected-component="selectedComponent"
+                :selected-layer="selectedLayer"
                 :activeTabName="activeTabName"
                 :directory-info="directoryInfo"
                 :chart-info="chartInfo"
-                @selected-component="name => $emit('selected-component', name)"
+                :graph-info="graphInfo"
+                @selected-layer="name => $emit('selected-layer', name)"
                 @renamed="changes => $emit('renamed', changes)"
                 @trigger-job="value => $emit('trigger-job', value)"
                 @fetch-results="(callback, offset) => $emit('fetch-results', callback, offset)"
@@ -76,57 +64,42 @@
             </div>
         `,
                 components: {
-                    'default-left-content': LeftContent,
-                    'config-left': ConfigLeft,
-                },
-                computed: {
-                    listForEachTabRespectively: function () {
-                        if (this.activeTabName === "config") {
-                            return "config-left";
-                        } else {
-                            return "default-left-content"
-                        }
-                    },
+                    'component': LeftContent,
                 },
             },
             'center-content': {
                 props: {
                     activeTabName: String,
-                    selectedComponent: String,
-                    selection: Object,
+                    selectedLayer: Object,
                     historyInfo: Object,
                     zoomInfo: Object,
                     directoryInfo: Object,
-                    chartInfo: Array
+                    chartInfo: Array,
+                    graphInfo: Object
                 },
                 template: `
-            <div class="center-content">
+            <div class="center-content" id="centerContent">
                 <keep-alive>
                     <edit-network-graph v-if="selectedEditTab"
-                        :selected-component="selectedComponent"
-                        :selection="selection"
+                        :selected-layer="selectedLayer"
                         :history-info="historyInfo"
                         :network-graph="zoomInfo.networkGraph"
                         :directory-info="directoryInfo"
+                        :graph-info="graphInfo"
                         @history="command => $emit('history', command)"
                         @zoom="operation => $emit('zoom', operation)"
                     />
                     <monitoring-result v-else-if="selectedMonitoringTab" :chart-info="chartInfo" />
-                    <edit-hyper-params v-if="selectedConfigTab" />
                 </keep-alive>
             </div>
         `,
                 components: {
-                    'edit-network-graph': NetworkOperationContent,
-                    'edit-hyper-params': ConfigCenter,
+                    'edit-network-graph': NetworkCenterContent,
                     'monitoring-result': MonitoringCenterContent,
                 },
                 computed: {
                     selectedEditTab: function () {
                         return this.activeTabName === 'edit';
-                    },
-                    selectedConfigTab: function () {
-                        return this.activeTabName === 'config';
                     },
                     selectedMonitoringTab: function () {
                         return this.activeTabName === "monitoring";
@@ -143,40 +116,6 @@
                     };
                 })(),
             },
-            'right-content': {
-                props: {jobsInQueue: Boolean, postingJob: Boolean, statistics: Object, visibleRightContent: Boolean},
-                template: `
-        <div class="right-content" v-if="visibleRightContent">
-            <div class="job-action-control">
-            </div>
-            <div>
-                <div class="title">Network Statistics</div>
-                <div class="network-statistics-scroller nnc-invoker">
-                    <div v-for="state in statistics.values"
-                    :key="state.name"
-                    :class="'stat-line' + (statistics.active === state ? ' active' : '')"
-                    @click.prevent="$emit('statistics', state)"
-                    ><div class="content"><div class="name">{{ state.name }}</div>{{ Number(state.sum).toLocaleString() }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        `,
-                components: {
-                    'flat-button': {
-                        props: {image: String, caption: String, disabled: Boolean},
-                        template: `
-                <div class="job-action-control-content">
-                    <span v-if="disabled" class="nnc-disabled"><img :src="image" />{{ caption }}</span>
-                    <span v-else class="nnc-enabled" @click.stop.prevent="$emit('pressed')"><img :src="image" />{{ caption }}</span>
-                </div>
-                `,
-                    },
-                },
-                methods: {
-                    evaluatable: () => results.evaluatable(),
-                },
-            },
         },
         mounted: function () {
 
@@ -191,11 +130,6 @@
                 alsoResizeReverse: '.right-content',
             });
         },
-        methods: {
-            showRightContent: function (visible) {
-                this.visibleRightContent = visible;
-            }
-        }
     };
 </script>
 
@@ -216,42 +150,4 @@
         background-color: var(--color-gray0);
     }
 
-    .right-content {
-        min-width: 280px;
-        height: 100%;
-        float: left;
-        background-color: var(--color-gray0);
-    }
-
-    .job-action-control {
-        width: 100%;
-        height: 80px;
-        border-bottom: solid 1px var(--color-gray2);
-        overflow: hidden;
-        padding: 0px 10px 0px 10px;
-    }
-
-    .job-action-control-content {
-        float: left;
-        width: 50%;
-    }
-
-    .job-action-control-text {
-        font-family: "SSTUI-Medium";
-        line-height: 40px;
-        position: relative;
-        z-index: 2;
-        margin-left: -3px;
-    }
-
-    .job-action-control-content > span.nnc-enabled:hover {
-        opacity: 0.5;
-    }
-
-    .job-action-control-content > span > img {
-        width: 24px;
-        height: 24px;
-        margin: 6px 0px 10px 4px;
-        vertical-align: middle;
-    }
 </style>
