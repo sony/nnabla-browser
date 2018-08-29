@@ -1,6 +1,6 @@
 <template>
     <div>
-        <monitoring-list style="top: 0; bottom: 310px; border-bottom: 1px solid var(--color-gray2);"
+        <monitoring-list style="top: 0; bottom: 370px; border-bottom: 1px solid var(--color-gray2);"
                 class="app-row"
                 :directory-info="directoryInfo"
                 :chart-info="chartInfo"

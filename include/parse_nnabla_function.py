@@ -143,9 +143,6 @@ def parse_yaml(yaml_path):
 
     recursive(yaml_obj, ret["base_functions"], depth=0, category=None)
 
-    with open("check.txt", "w") as f:
-        f.write(dumps(ret, indent=2))
-
     for function_api in function_apis:
         ret[function_api["api_type"]][function_api["layer_name"]] = function_api
 

@@ -114,12 +114,20 @@
                     <tool-button image-name="Copy"  :disabled="false"     @pressed="copy" />
                     <tool-button image-name="Paste" :disabled="false"                     @pressed="paste" />
                     <div class="pull-right" style="width: 200px;">
-                        <nnc-zoom-box :percentages="zoomPercantages" :percentage="zoomCurrentPercentage" @zoom-value="value => $emit('zoom', {name: 'Editor', percentage: value})" />
-                        <button @click="dropDownMenu" class="btn network-action-button" data-toggle="dropdown" style="float: right">
-                            Action&nbsp;
+                        <button
+                        @click="dropDownMenu"
+                         class="btn network-action-button"
+                         data-toggle="dropdown"
+                         style="float: right">
+                            Action
                             <span class="caret" />
                         </button>
                         <div class="action-menu-item dropdown-menu" />
+                        <nnc-zoom-box
+                        style="float: right"
+                        :percentages="zoomPercantages"
+                        :percentage="zoomCurrentPercentage"
+                        @zoom-value="value => $emit('zoom', {name: 'Editor', percentage: value})" />
                     </div>
                 </div>
             `,
@@ -176,9 +184,6 @@
                 if (percentage) this.$emit('zoom', {name: 'Editor', percentage: percentage});
             },
         },
-        mounted: function(){
-            // window.svgArea = new svgArea(this.selected);
-        }
     };
 </script>
 

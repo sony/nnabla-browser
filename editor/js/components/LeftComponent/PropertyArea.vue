@@ -1,6 +1,6 @@
 <template>
     <div>
-        <property-area class="app-row" style="height: 310px; bottom: 0;"
+        <property-area class="app-row" style="height: 370px; bottom: 0;"
                        :selected-layer="selectedLayer"
                        @history="command => $emit('history', command)"
         />

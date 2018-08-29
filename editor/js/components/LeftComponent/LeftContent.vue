@@ -32,7 +32,7 @@
                             :active-tab-name="activeTabName" />
                 </keep-alive>
 
-                <property-area :selected-layer="selectedLayer" />
+                <property-area :selected-layer="selectedLayer" v-show="isPropertyAreaShow"/>
             </div>
 
         </div>
@@ -66,6 +66,11 @@
         },
         data: () => {
             return {activeLeftTab: "tree"}
+        },
+        computed: {
+            isPropertyAreaShow: function () {
+                return String(this.activeTabName) === "edit";
+            }
         },
         watch: {
             activeTabName: function(_new, _old) {

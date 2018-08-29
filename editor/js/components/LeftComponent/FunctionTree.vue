@@ -1,6 +1,6 @@
 <template>
     <div>
-        <component-palette class="app-row" style="top: 0; bottom: 310px; border-bottom: 1px solid var(--color-gray2);"
+        <component-palette class="app-row" style="top: 0; bottom: 370px; border-bottom: 1px solid var(--color-gray2);"
                            :selected-layer="selectedLayer"
                            @history="command => $emit('history', command)"
         />
