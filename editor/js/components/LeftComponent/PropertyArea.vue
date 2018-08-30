@@ -1,7 +1,6 @@
 <template>
     <div>
         <property-area class="app-row" style="height: 370px; bottom: 0;"
-                       :selected-layer="selectedLayer"
                        @history="command => $emit('history', command)"
         />
     </div>
@@ -11,7 +10,6 @@
     import Definitions from './../../misc/Definitions';
 
     const propertyArea = {
-        props: ["selectedLayer"],
         template: `
             <div class="property-area">
                 <div class="title">Layer Property</div>
@@ -19,22 +17,18 @@
                     <layer-type :defaultProps="defaultProps" />
                     <layer-properties class="app-row app-scroll-x app-scroll-y" style="top: 88px; bottom: 0;"
                         :defaultProps="defaultProps"
-                        :selected-layer="selectedLayer"
                         @history="command => $emit('history', command)"
                     />
             </div>`,
-        data: function () {
-            return {isLayerSelected: false, defaultProps: {}}
-        },
-        watch: {
-            "selectedLayer": {
-                handler: function () {
-                    this.isLayerSelected = Object.keys(this.selectedLayer).length > 0;
-                    if (this.isLayerSelected) {
-                        this.defaultProps = window.nnablaCoreAllFunctions.find(x => x.layer_name === this.selectedLayer.type);
-                    }
-                },
-                deep: true
+        computed: {
+            selectedLayer: function () {
+                return this.$store.state.graphInfo.selectedLayer;
+            },
+            isLayerSelected: function () {
+                return Object.keys(this.selectedLayer).length > 0;
+            },
+            defaultProps: function () {
+                return window.nnablaCoreAllFunctions.find(x => x.layer_name === this.selectedLayer.type);
             }
         },
         components: {
@@ -63,7 +57,7 @@
                 }
             },
             'layer-properties': {
-                props: ['selectedLayer', "defaultProps"],
+                props: ["defaultProps"],
                 template: `
                     <div>
                         <div class="property" v-for="property, name in defaultProps.arguments">
@@ -73,7 +67,6 @@
                                 :is="selectComponent(property)"
                                 :property="property"
                                 :name="name"
-                                :selected-layer="selectedLayer"
                                 :class="'value' + (property.error ? ' warning' : '')"
                                 :title="property.error"
                                 />
@@ -82,7 +75,7 @@
                     </div>`,
                 components: {
                     'prop-text': {
-                        props: ['property', "name", "selectedLayer"],
+                        props: ['property', "name"],
                         template: `
                             <div>
                                 <input type="text" :value="getValue()" />
@@ -144,7 +137,6 @@
     };
 
     export default {
-        props: ['selectedLayer'],
         components: {
             'property-area': propertyArea,
         },

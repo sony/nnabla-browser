@@ -1,18 +1,11 @@
 <template>
     <div>
-        <editor-application-bar v-bind:loaded="isLoadEnd" />
-        <main-content :active-tab-name="editor.activeTabName.toLowerCase()"
-                      :visible-right-content="editor.activeTabName === 'EDIT'"
-                      :selected-layer="selectedLayer"
-                      :history-info="historyInfo"
-                      :zoom-info="zoomInfo"
-                      :directory-info="directoryInfo"
-                      :chart-info="chartInfo"
-                      :graph-info="graphInfo"
-                      @renamed="onRenamed"
-                      @history="command => history.execute(command)"
-                      @zoom="operateZooming"
-        />
+        <editor-application-bar />
+        <main-content
+                  :history-info="historyInfo"
+                  :zoom-info="zoomInfo"
+                  @history="command => history.execute(command)"
+                  @zoom="operateZooming" />
     </div>
 </template>
 
@@ -20,19 +13,12 @@
     import EditorApplicationBar from './EditorApplicationBar';
     import MainContent from './EditorMainContent';
     import EditorWindowSize from './../EditorWindowSize';
-    import EditorUtils from './../EditorUtils';
     import ZOOM_INFO from './../misc/ZoomInfo';
     import Vue from 'vue/dist/vue.esm.js';
     import sduApp from './../editor/SDUApp';
     import tooltip from './../editor/tooltip';
     import jqueryUiCustom from './../misc/jquery-ui-custom';
     import SSEhelper from "../io/ServerSentEventHelper";
-
-    window.nnc = Object.assign(window.nnc || {}, {
-        editor: {
-            activeTabName: 'EDIT',
-        },
-    });
 
     export default {
         components: {
@@ -41,9 +27,6 @@
         },
         data: function () {
             return {
-                isLoadEnd: false,
-                editor: window.nnc.editor,
-                selectedLayer: {},
                 modal: {}, // modal dialog
                 history: {
                     commands: [],
@@ -90,10 +73,7 @@
                     return {
                         networkGraph: new Zoomer('Editor')
                     };
-                })(),
-                directoryInfo: {},
-                chartInfo: [],
-                graphInfo: {activeGraphIndex: -1, nntxtPath:"", graphs: [], }
+                })()
             };
         },
         computed: {
@@ -114,138 +94,6 @@
             },
         },
         methods: {
-            /**
-             * @param layers specify all layers on the editing graph.
-             */
-            onAddedLayer: (function () {
-                let mapType = (prop) => {
-                    if (!prop.editable) {
-                        return 'immutable';
-                    } else {
-                        if (prop.name === 'Name') {
-                            return 'name';
-                        } else {
-                            switch (prop.type) {
-                                default:
-                                    return 'text';
-                                case 'Boolean':
-                                    return 'bool';
-                                case 'Option':
-                                    return 'select';
-                            }
-                        }
-                    }
-                };
-                let makePropFor = (layer) => (prop) => {
-                    return {
-                        name: prop.name,
-                        type: mapType(prop),
-                        choice: prop.option,
-                        computed: prop.name === 'Name' ? layer.name() : layer.getUserInputProperty(prop.name),
-                        value: layer.getUserInputProperty(prop.name),
-                        error: (layer.errors().find((error) => error.property === prop.name) || {}).message,
-                    };
-                };
-                return function (layer) { // onAddedLayer function body.
-                    this.propMap[layer.name()] = {
-                        type: layer.type(),
-                        color: '#' + layer.component().color.substring(2),
-                        props: layer.typedProperties().map(makePropFor(layer)),
-                    };
-                };
-            })(),
-            onDeletedLayer: function (name) {
-                delete this.propMap[name];
-            },
-            onRenamed: function (changes) {
-                let propMap = this.propMap;
-                // assign new mapping
-                let backup = changes.map((change) => {
-                    return {name: change.to, prop: propMap[change.from]};
-                });
-                backup.forEach((item) => {
-                    propMap[item.name] = item.prop;
-
-                    // update 'Name' value in the mapping
-                    let nameProp = item.prop.props.find((prop) => prop.name === 'Name');
-                    nameProp.value = item.name;
-                    nameProp.computed = item.name;
-                });
-                // drop old mapping
-                let oldNames = changes.map((change) => change.from);
-                let newNames = changes.map((change) => change.to);
-                oldNames.filter((name) => !newNames.includes(name)).forEach((name) => delete propMap[name]);
-
-                let changed = changes.find((change) => change.from === this.selection.main);
-                if (changed) {
-                    this.selection.main = changed.to;
-                }
-                this._updateSelectedLayer();
-            },
-            /**
-             * @param nodes represent the array which holds all completed properties from nnablambda.
-             */
-            onComputedProperties: function (nodes) {
-                let map = this.propMap;
-                nodes.forEach((node) => {
-                    let props = (map[node.name] || {}).props || []; // this Vue object's mapping (or discard)
-                    let _propObj = (name) => props.find((prop) => prop.name === name) || {}; // find matching property
-                    let computedMap = node.properties;
-                    for (let key in computedMap) { // update each property by computed value
-                        if (Object.prototype.hasOwnProperty.call(computedMap, key)) {
-                            _propObj(key).computed = computedMap[key];
-                        }
-                    }
-                });
-
-                this._updateSelectedLayer();
-            },
-            /**
-             * update user input value in this propMap.
-             */
-            onChangedProperty: function (layer, propName, propValue) {
-                this.propMap[layer].props.find((prop) => prop.name === propName).value = propValue;
-                //todo: compute statistics
-                this.propMap[layer].props.find((prop) => prop.name === propName).computed = propValue;
-
-                this.selection.props = this.propMap[this.selection.main];
-            },
-            /**
-             * @param errors are array in which member has the type {layer: 'name', property: 'name', message: 'error'}.
-             */
-            onComputedErrors: function (errors) {
-                let map = this.propMap;
-                // delete all errors forged in the mapped item
-                for (let key in map) {
-                    if (Object.prototype.hasOwnProperty.call(map, key)) {
-                        map[key].props.forEach((prop) => delete prop.error);
-                    }
-                }
-
-                // set errors
-                errors.forEach((error) => {
-                    let props = (map[error.layer] || {}).props || []; // this Vue object's mapping (or discard)
-                    let _propObj = (name) => props.find((prop) => prop.name === name) || {}; // find matching property
-                    _propObj(error.property).error = error.message; // set error message
-                });
-
-                this._updateSelectedLayer();
-            },
-            /**
-             * @param {Set} layers represent layer selection.
-             */
-            onChangedSelection: function (layers) {
-                this.selection = {
-                    main: (layers.focused() || {name: () => ''}).name(),
-                    all: layers.apply((layer) => layer.name()),
-                };
-
-                this._updateSelectedLayer();
-            },
-            _updateSelectedLayer: function () {
-                let layer = this.propMap[this.selection.main];
-                Vue.set(this.selection, 'props', layer ? Object.assign({}, layer) : null);
-            },
             /**
              * Show popup dialog.
              * @param title dialog title
@@ -305,60 +153,34 @@
                     const id = event.lastEventId;
 
                     if (id === "pathMap") {
-                        this.directoryInfo = Object.assign({}, this.directoryInfo, JSON.parse(event.data));
-
+                        this.$store.commit("initDirectoryInfo", JSON.parse(event.data));
                     } else {
-                        const splited = id.split(".");
-                        const ext = splited[splited.length - 1];
-                        const secondaryExt = splited[splited.length - 2];
+                        const operation = (event.data === "delete" ? "delete" : "add") + "DirectoryInfo";
 
-                        if (event.data === "delete") {
-                            if (ext === "nntxt") {
-                                SSEhelper.deleteDirectoryInfo(id, "nntxtFiles", this.directoryInfo);
-                            } else if (ext === "txt" && secondaryExt === "series") {
-                                SSEhelper.deleteDirectoryInfo(id, "monitorFiles", this.directoryInfo);
-                                SSEhelper.deleteChartInfo(this.directoryInfo.name, id, this.chartInfo);
+                        let fileType, data;
+                        if (fileType = SSEhelper.getFileType(id)) {
+                            if (fileType === "nntxtFiles") {
+                                data = SSEhelper.getGraphInfoFromNNtxt(event);
+                            } else if (fileType === "monitorFiles") {
+                                data = SSEhelper.getMonitorInfo(event);
                             }
-                        } else {
-                            if (ext === "nntxt") {
-                                let graphInfoArray = SSEhelper.getGraphInfoFromNNtxt(event);
 
-                                // update directoryInfo
-                                SSEhelper.addDirectoryInfo(id, "nntxtFiles", graphInfoArray, this.directoryInfo);
-
-                            } else if (ext === "txt" && secondaryExt === "series") {
-                                let monitorData = SSEhelper.getMonitorInfo(event);
-
-                                // update directoryInfo
-                                SSEhelper.addDirectoryInfo(id, "monitorFiles", monitorData, this.directoryInfo);
-                            }
+                            this.$store.commit(operation, {path: id, fileType, data});
                         }
                     }
                 };
             }
         },
         mounted: function () {
-            window.nnc.components = {Editor: this};
-            let _changeActiveTabAccordingToQueryParam = (params) => {
-                switch ((params || {}).tab) {
-                    default:
-                        window.nnc.editor.activeTabName = 'EDIT';
-                        break;
-                    case 'training':
-                        window.nnc.editor.activeTabName = 'TRAINING';
-                        break;
-                }
-            };
+
+            window.activeTab = this.$store.state.editor.activeTabName;
+
             EditorWindowSize.init();
             EditorWindowSize.bind();
             $.ajaxSetup({
                 headers: {'X-Requested-With': 'XMLHttpRequest'},
                 xhrFields: {withCredentials: true},
             });
-
-            nnc.params = EditorUtils.getParams();
-
-            this.isLoadEnd = true;
 
             jqueryUiCustom();
             sduApp();

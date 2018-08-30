@@ -3,7 +3,6 @@ import Definitions from './../misc/Definitions';
 import Vue from 'vue/dist/vue.esm.js';
 
 export default () => {
-    const uop = EditorUtils.allowedUserOperation;
     const eta = EditorUtils.editTabIsActive;
     // Clipboard
     // クリップボードへコピー（マウス操作、キーボード操作）
@@ -16,11 +15,10 @@ export default () => {
     document.addEventListener('cut', function(e) {});
 
     document.addEventListener('keydown', function(e) {
-        if (uop() && e.ctrlKey) {
+        if (e.ctrlKey) {
             switch (e.keyCode) {
             case Definitions.KEY_CODE.S:
                 e.preventDefault();
-                EditorUtils.save_configuration();
                 break;
             case Definitions.KEY_CODE.Y:
                 if (eta()) window.nnc.components.Editor.history.execute({type: 'redo'});

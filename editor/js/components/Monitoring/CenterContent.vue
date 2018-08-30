@@ -3,7 +3,7 @@
             <chart-block
                     :chart="chart"
                     :key="chart.name"
-                    v-for="chart in chartInfo"/>
+                    v-for="chart in $store.state.chartInfo.charts"/>
         </div>
 </template>
 
@@ -12,12 +12,9 @@
     import VueC3 from 'vue-c3/dist/vue-c3.esm';
 
     export default {
-        props: {
-            chartInfo: Array
-        },
         components: {
             'chart-block': {
-                // chart : {name: chart title, data: [{legend: ..., values: ...}, {}...]}
+                // chart : {name: "", data: [{name: "", values: {t: [], v: []}}, ...]}
                 props: {chart: Object},
                 template: `
                 <div class="chart-block" :id="chart.name" :key="chart.name">
@@ -59,14 +56,14 @@
                         let columns = [];
                         let xs = {};
                         for (let index in this.chart.data) {
-                            xs[this.chart.data[index].legend] = `x${index}`;
+                            xs[this.chart.data[index].name] = `x${index}`;
 
                             let tmp_times = this.chart.data[index].values.t.slice(0, this.chart.data[index].values.t.length);
                             tmp_times.unshift(`x${index}`);
                             columns.push(tmp_times);
 
                             let tmp_values = this.chart.data[index].values.v.slice(0, this.chart.data[index].values.t.length);
-                            tmp_values.unshift(this.chart.data[index].legend);
+                            tmp_values.unshift(this.chart.data[index].name);
                             columns.push(tmp_values);
                         }
 

@@ -1,25 +1,13 @@
 <template>
     <div class="main-content">
         <left-content
-                :active-tab-name="activeTabName"
-                :selected-layer="selectedLayer"
-                :directory-info="directoryInfo"
-                :chart-info="chartInfo"
-                :graph-info="graphInfo"
-                @renamed="changes => $emit('renamed', changes)"
                 @selected-layer="name => $emit('selected-layer', name)"
                 @trigger-job="value => $emit('trigger-job', value)"
-                @fetch-results="(callback, offset) => $emit('fetch-results', callback, offset)"
                 @history="command => $emit('history', command)"
         />
         <center-content
-                :active-tab-name="activeTabName"
-                :selected-layer="selectedLayer"
                 :history-info="historyInfo"
                 :zoom-info="zoomInfo"
-                :directory-info="directoryInfo"
-                :chart-info="chartInfo"
-                :graph-info="graphInfo"
                 @history="command => $emit('history', command)"
                 @zoom="operation => $emit('zoom', operation)"
         />
@@ -33,88 +21,52 @@
 
     export default {
         props: {
-            activeTabName: String,
-            selectedLayer: Object,
             historyInfo: Object,
-            zoomInfo: Object,
-            directoryInfo: Object,
-            chartInfo: Array,
-            graphInfo: Object
+            zoomInfo: Object
         },
         components: {
             'left-content': {
-                props: [
-                    'activeTabName', 'selectedLayer',
-                    "directoryInfo", "chartInfo", "graphInfo"
-                ],
                 template: `
-            <div class="left-content" id="leftContent">
-                <component
-                :selected-layer="selectedLayer"
-                :activeTabName="activeTabName"
-                :directory-info="directoryInfo"
-                :chart-info="chartInfo"
-                :graph-info="graphInfo"
-                @selected-layer="name => $emit('selected-layer', name)"
-                @renamed="changes => $emit('renamed', changes)"
-                @trigger-job="value => $emit('trigger-job', value)"
-                @fetch-results="(callback, offset) => $emit('fetch-results', callback, offset)"
-                @history="command => $emit('history', command)"
-                />
-            </div>
-        `,
+                    <div class="left-content" id="leftContent">
+                        <component
+                        @selected-layer="name => $emit('selected-layer', name)"
+                        @trigger-job="value => $emit('trigger-job', value)"
+                        @history="command => $emit('history', command)"
+                        />
+                    </div>`,
                 components: {
                     'component': LeftContent,
                 },
             },
             'center-content': {
                 props: {
-                    activeTabName: String,
-                    selectedLayer: Object,
                     historyInfo: Object,
-                    zoomInfo: Object,
-                    directoryInfo: Object,
-                    chartInfo: Array,
-                    graphInfo: Object
+                    zoomInfo: Object
                 },
                 template: `
-            <div class="center-content" id="centerContent">
-                <keep-alive>
-                    <edit-network-graph v-if="selectedEditTab"
-                        :selected-layer="selectedLayer"
-                        :history-info="historyInfo"
-                        :network-graph="zoomInfo.networkGraph"
-                        :directory-info="directoryInfo"
-                        :graph-info="graphInfo"
-                        @history="command => $emit('history', command)"
-                        @zoom="operation => $emit('zoom', operation)"
-                    />
-                    <monitoring-result v-else-if="selectedMonitoringTab" :chart-info="chartInfo" />
-                </keep-alive>
-            </div>
-        `,
+                    <div class="center-content" id="centerContent">
+                        <keep-alive>
+                            <edit-network-graph v-if="selectedEditTab"
+                                :history-info="historyInfo"
+                                :network-graph="zoomInfo.networkGraph"
+                                @history="command => $emit('history', command)"
+                                @zoom="operation => $emit('zoom', operation)"
+                            />
+                            <monitoring-result v-else-if="selectedMonitoringTab" />
+                        </keep-alive>
+                    </div>`,
                 components: {
                     'edit-network-graph': NetworkCenterContent,
                     'monitoring-result': MonitoringCenterContent,
                 },
                 computed: {
                     selectedEditTab: function () {
-                        return this.activeTabName === 'edit';
+                        return this.$store.state.editor.activeTabName === 'graph';
                     },
                     selectedMonitoringTab: function () {
-                        return this.activeTabName === "monitoring";
+                        return this.$store.state.editor.activeTabName === "monitoring";
                     },
                 },
-                methods: (() => {
-                    const handleAs = (event, preprocess) => function (value) {
-                        this.$emit(event, (preprocess || ((x) => x))(value));
-                    };
-                    const on = (name) => (x) => Object({name: name, percentage: x});
-                    return {
-                        handleLearningCurveZooming: handleAs('zoom', on('Learning Curve')),
-                        handleTradeOffGraphZooming: handleAs('zoom', on('Trade-off Graph'))
-                    };
-                })(),
             },
         },
         mounted: function () {

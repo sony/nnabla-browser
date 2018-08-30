@@ -4,13 +4,13 @@
 
             <div class="tab" style="left: 0; border-right: solid 1px var(--color-gray2);"
                  :class="{'active': activeLeftTab === 'tree'}"
-                 @click="changeActiveTab('tree')"> tree
+                 @click="changeActiveLeftTab('tree')"> tree
             </div>
 
             <div class="tab" style="left: 50%;"
                  :class="{'active': activeLeftTab === 'edit'}"
-                 @click="changeActiveTab('edit')"
-                 v-if="activeTabName === 'edit'"> edit
+                 @click="changeActiveLeftTab('edit')"
+                 v-if="activeTabName === 'graph'"> edit
             </div>
 
         </div>
@@ -21,18 +21,13 @@
                 <keep-alive>
                     <function-tree
                             v-if="activeLeftTab === 'edit'"
-                            :selected-layer="selectedLayer"
                             @history="command => $emit('history', command)"/>
 
                     <directory-tree
-                            v-if="activeLeftTab === 'tree'"
-                            :directory-info="directoryInfo"
-                            :chart-info="chartInfo"
-                            :graph-info="graphInfo"
-                            :active-tab-name="activeTabName" />
+                            v-if="activeLeftTab === 'tree'" />
                 </keep-alive>
 
-                <property-area :selected-layer="selectedLayer" v-show="isPropertyAreaShow"/>
+                <property-area v-show="isPropertyAreaShow"/>
             </div>
 
         </div>
@@ -46,13 +41,6 @@
     import PropertyArea from "./PropertyArea";
 
     export default {
-        props: [
-            'selectedLayer',
-            'activeTabName',
-            "directoryInfo",
-            "chartInfo",
-            "graphInfo"],
-
         components: {
             "property-area": PropertyArea,
             "function-tree": FunctionTree,
@@ -60,7 +48,7 @@
         },
 
         methods: {
-            changeActiveTab: function (name) {
+            changeActiveLeftTab: function (name) {
                 this.activeLeftTab = name;
             }
         },
@@ -68,15 +56,17 @@
             return {activeLeftTab: "tree"}
         },
         computed: {
+            activeTabName: function () {
+                return this.$store.state.editor.activeTabName.toLowerCase();
+            },
+
             isPropertyAreaShow: function () {
-                return String(this.activeTabName) === "edit";
+                return this.activeTabName === "graph";
             }
         },
         watch: {
-            activeTabName: function(_new, _old) {
-                if (_new === "monitoring") {
-                    this.activeLeftTab = "tree";
-                }
+            activeTabName: function() {
+                this.activeLeftTab = "tree";
             }
         }
     }

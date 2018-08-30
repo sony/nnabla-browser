@@ -8,13 +8,10 @@
                 @zoom="operation => $emit('zoom', operation)"
         />
         <network-tabs
-                :graph-info="graphInfo"
                 @history="command => $emit('history', command)"
         />
         <div class="tab-content network-editor-scroller">
-            <svg-area
-                    :graph-info="graphInfo"
-                    :selected-layer="selectedLayer"/>
+            <svg-area />
         </div>
     </div>
 </template>
@@ -28,10 +25,8 @@
 
     export default {
         props: {
-            selectedLayer: Object,
             historyInfo: Object,
             networkGraph: Object,
-            graphInfo: Object
         },
         data: function () {
             return {
@@ -42,15 +37,13 @@
         },
         components: {
             'network-tabs': {
-                props: ["graphInfo"],
                 template: `
                 <div class="network-tabs">
-                    <graph-tab v-for="(graph, index) in graphInfo.graphs"
+                    <graph-tab v-for="(graph, index) in $store.state.graphInfo.graphs"
                         :graph="graph"
-                        :key="graphInfo.nntxtPath + '-' + index"
+                        :key="$store.state.graphInfo.nntxtPath + '-' + index"
                         :index="index"
-                        :class="{'active': index===graphInfo.activeGraphIndex}"
-                        @tab-clicked="updateActiveGraph"
+                        :class="{'active': index===$store.state.graphInfo.activeGraphIndex}"
                         @history="command => $emit('history', command)"
                     />
                     <graph-tab-append
@@ -58,11 +51,6 @@
                     />
                 </div>
             `,
-                methods: {
-                    updateActiveGraph: function (index) {
-                        this.$set(this.graphInfo, "activeGraphIndex", index);
-                    }
-                },
                 components: {
                     'graph-tab': {
                         props: ['graph', "index"],
@@ -78,7 +66,7 @@
                     `,
                         methods: {
                             clicked: function () {
-                                this.$emit("tab-clicked", this.index);
+                                this.$store.commit("setActiveGraphIndex", index);
                             },
                             clickedDelete: function () {
                                 // set True to the argument of graphInfo named something like "isShow"

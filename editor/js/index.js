@@ -1,5 +1,4 @@
 import Vue from 'vue/dist/vue.esm.js';
-import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import Editor from './components/Editor';
 import CheckBoxVue from './components/Shared/CheckBox.vue';
@@ -9,10 +8,11 @@ import LoadingVue from './components/Shared/Loading.vue';
 import ModalLoadingVue from './components/Shared/ModalLoading.vue';
 import ZoomBoxVue from './components/Shared/ZoomBox.vue';
 import ContextMenuVue from './components/Shared/ContextMenu.vue';
-//
-Vue.use(Vuex);
+
+import store from "./store/index";
+
 Vue.use(VueRouter);
-//
+
 // Register global components.
 Vue.component('nnc-checkbox', CheckBoxVue);
 Vue.component('nnc-radio', RadioButtonVue);
@@ -35,5 +35,6 @@ const router = new VueRouter({
 
 new Vue({
     router,
-    el: '#app'
+    store,
+    el: '#app',
 });

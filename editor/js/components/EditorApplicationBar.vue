@@ -1,8 +1,8 @@
 <template>
     <div class="editor-navbar">
         <div style="margin-left: 30px;">
-            <appbar-tab tab-name="EDIT"/>
-            <appbar-tab tab-name="MONITORING"/>
+            <appbar-tab tab-name="graph"/>
+            <appbar-tab tab-name="monitoring"/>
         </div>
         <div class="editor-navbar-center"></div>
         <div style="height: 100%; float: right;">
@@ -16,26 +16,18 @@
     import Vue from 'vue/dist/vue.esm.js';
 
     export default {
-        props: ['loaded'],
         components: {
             'appbar-tab': {
                 props: ['tabName'],
                 template: `
-                <div class="nnc-invoker" :class="['navbar-el', editor.activeTabName === tabName ? 'active' : '']" @click="changeActiveTab(tabName)">
+                <div class="nnc-invoker" :class="['navbar-el', $store.state.editor.activeTabName === tabName ? 'active' : '']" @click="changeActiveTab(tabName)">
                     <span class="navbar-tab">
-                        <img v-if='tabName === "CONFIG"' src="./editor/image/SettingsWhite.svg" class="navbar-img nnc-enabled">
-                        {{ tabName }}
+                        {{ tabName.toUpperCase() }}
                     </span>
-                </div>
-            `,
-                data: function () {
-                    return {
-                        editor: window.nnc.editor,
-                    };
-                },
+                </div>`,
                 methods: {
                     changeActiveTab: function (tabName) {
-                        window.nnc.editor.activeTabName = tabName;
+                        this.$store.commit("changeActiveTab", tabName);
                         Vue.nextTick(function () {
                             EditorWindowSize.init();
                         });

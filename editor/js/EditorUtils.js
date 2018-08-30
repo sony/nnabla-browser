@@ -1,4 +1,3 @@
-import store from './store/index';
 
 const EditorUtils = (() => {
     let _timeoutIds = {};
@@ -20,7 +19,7 @@ const EditorUtils = (() => {
      * @returns {component}
      */
     const _component = function (type) {
-        return nNablaCore.layers.components.find((component) => component.name == type);
+        return nNablaCore.layers.components.find((component) => component.name === type);
     };
 
     const _callApi = (request, doneCallback, failedCallback, alwaysCallback) => {
@@ -90,20 +89,7 @@ const EditorUtils = (() => {
             }
         },
         serialize_configuration: _generateConfiguration,
-        save_configuration: function (atLast) {
-            store.dispatch('saveConfiguration', {
-                project: window.nnc.components.Editor.project,
-                configuration: _generateConfiguration(),
-            });
-        },
 
-        set_auto_save: function () {
-            const autoSave = function () {
-                setTimeout(autoSave, 10000);
-                EditorUtils.save_configuration();
-            };
-            autoSave();
-        },
         getComponent: _component,
         toUniqueName: function (name, list) {
             let index = 1;
@@ -121,8 +107,6 @@ const EditorUtils = (() => {
         },
         getNewJobName: () => (new Date()).toISOString().replace('T', '_').replace(/[-:]/g, '').substring(0, 15),
         callApi: _callApi,
-        allowedUserOperation: () => window.nnc.components.Editor.$data.isLoadEnd,
-        editTabIsActive: () => window.nnc.editor.activeTabName === 'EDIT',
         is_active: (job) => ['queued', 'preprocessing', 'processing'].includes(job.status),
         indexOperator: (array, value) => new IndexOperator(array, value),
     };

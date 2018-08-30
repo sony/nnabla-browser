@@ -4,7 +4,7 @@
         <g class="layers" id="svg-layers">
             <g class="layer"
                v-for="(node, index) in activeGraph.nodes"
-               :key="graphInfo.nntxtPath + '-' + index"
+               :key="$store.state.graphInfo.nntxtPath + '-' + index"
                :transform="createTransform(node)"
                @click="clickLayer(node)">
                 <rect v-bind="getNodeAttr()" :style="getNodeStyle(node)" v-bind="getNodeAttr()"></rect>
@@ -19,7 +19,6 @@
 
 <script>
     import Definitions from './../../misc/Definitions';
-    import Vue from 'vue/dist/vue.esm.js';
 
     const allFunctions = [];
 
@@ -131,14 +130,14 @@
     const svgAreaOperator = new svgAreaOperatorCtor();
 
     export default {
-        props: ["graphInfo", "selectedLayer"],
         data: function () {
             return {activeGraph: {links: [], nodes: [], name: ""}};
         },
         watch: {
-            "graphInfo": {
+            "$store.state.graphInfo": {
                 handler: function () {
-                    this.activeGraph = Object.assign({}, this.activeGraph, this.graphInfo.graphs[this.graphInfo.activeGraphIndex]);
+                    this.activeGraph = Object.assign({}, this.activeGraph,
+                        this.$store.state.graphInfo.graphs[this.$store.state.graphInfo.activeIndex]);
                 },
                 deep: true
             },
@@ -148,16 +147,7 @@
         },
         methods: {
             clickLayer: function (node) {
-                const keys = Object.keys(this.selectedLayer);
-                // clear
-                for (let key of keys){
-                    Vue.delete(this.selectedLayer, key);
-                }
-
-                // update
-                for (let x in node) {
-                    this.$set(this.selectedLayer, x, node[x]);
-                }
+                this.$store.commit("setSelectedLayer", node);
             },
             createTransform: (node) => `translate(${node.x}, ${node.y})`,
             getNodeAttr: () => StyleHelper.createNodeAttr(),

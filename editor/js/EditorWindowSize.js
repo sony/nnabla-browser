@@ -1,4 +1,5 @@
 import EditorUtils from './EditorUtils';
+import store from "./store";
 
 const EditorWindowSize = {
     /**
@@ -48,7 +49,7 @@ const EditorWindowSize = {
             const contentHeight = windowHeight - navbarHeight;
             $('.main-content').outerHeight(contentHeight);
 
-            if (EditorUtils.editTabIsActive()) {
+            if (store.state.editor.activeTabName === "graph") {
                 const graphsTabHeight = boundingHeightOf('.network-tabs');
                 const networkActionHeight = boundingHeightOf('.network-action');
                 const graphHeight = contentHeight - graphsTabHeight - networkActionHeight;

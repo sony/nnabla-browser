@@ -1,7 +1,7 @@
 <template>
     <div>
-        <component-palette class="app-row" style="top: 0; bottom: 370px; border-bottom: 1px solid var(--color-gray2);"
-                           :selected-layer="selectedLayer"
+        <component-palette class="app-row"
+                           style="top: 0; bottom: 370px; border-bottom: 1px solid var(--color-gray2);"
                            @history="command => $emit('history', command)"
         />
     </div>
@@ -45,49 +45,45 @@
     };
 
     const componentPalette = {
-        props: {selectedComponent: String},
         template: `
-    <div>
-        <div class="title">NNabla Functions</div>
-        <div class="app-row app-scroll-x app-scroll-y" style="top: 40px; bottom: 0; padding: 0 16px 0 16px;">
-            <component-category
-                v-for="(contents, category) in nnablaFunctions"
-                :key="category"
-                :category="category"
-                :contents="contents"
-                :selected-component="selectedComponent"
-                @update:selected="onUpdateSelected"
-                />
-        </div>
-    </div>`,
+            <div>
+                <div class="title">NNabla Functions</div>
+                <div class="app-row app-scroll-x app-scroll-y" style="top: 40px; bottom: 0; padding: 0 16px 0 16px;">
+                    <component-category
+                        v-for="(contents, category) in nnablaFunctions"
+                        :key="category"
+                        :category="category"
+                        :contents="contents"
+                        />
+                </div>
+            </div>`,
         data: () => {
             return {nnablaFunctions: nnablaCore};
         },
         components: {
             'component-category': {
-                props: ['category', 'contents', 'selectedComponent'],
+                props: ['category', 'contents'],
                 template: `
-        <div class="branch">
-            <div class="branch-name" @click="expand = !expand;">
-                <img class="icon-small" :src="expandArrow" >
-                {{ category }}
-            </div>
+                    <div class="branch">
+                        <div class="branch-name" @click="expand = !expand;">
+                            <img class="icon-small" :src="expandArrow" >
+                            {{ category }}
+                        </div>
 
-            <div class="components" :style="{display: expand ? 'block' : 'none'}">
-                <div v-if="isBaseFunctions">
-                    <base-function-component
-                        v-for="(layers, base_category) in contents"
-                        :key="base_category"
-                        :layers="layers"
-                        :base_category="base_category" />
-                </div>
+                        <div class="components" :style="{display: expand ? 'block' : 'none'}">
+                            <div v-if="isBaseFunctions">
+                                <base-function-component
+                                    v-for="(layers, base_category) in contents"
+                                    :key="base_category"
+                                    :layers="layers"
+                                    :base_category="base_category" />
+                            </div>
 
-                <div v-else>
-                     <function-component v-for="(layer, name) in contents" :key="name" :layer="layer"/>
-                </div>
-            </div>
-        </div>
-        `,
+                            <div v-else>
+                                 <function-component v-for="(layer, name) in contents" :key="name" :layer="layer"/>
+                            </div>
+                        </div>
+                    </div>`,
                 data: () => {
                     return {expand: false};
                 },
@@ -106,18 +102,10 @@
                 },
             }
         },
-        methods: {
-            onUpdateSelected(name) {
-                this.$emit('selected-component', name);
-            },
-        },
-        mounted: function () {
-        },
     };
 
 
     export default {
-        props: ['selectedLayer'],
         components: {
             'component-palette': componentPalette,
         },
