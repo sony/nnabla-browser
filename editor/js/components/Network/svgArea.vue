@@ -21,7 +21,7 @@
                 <rect class="layer-rect" v-bind="getNodeAttr()" :style="getNodeStyle(node)"></rect>
                 <text :style="getCapitalStyle()" v-bind="getCapitalAttr()">{{ node.type.substring(0, 1) }}</text>
                 <g class="text-component" v-bind="getTextComponentStyle()">
-                    <text :style="getTextStyle()" v-bind="getTextAttr()">{{node.type}}</text>
+                    <text :style="getTextStyle()" v-bind="getTextAttr()">{{node.name}}</text>
                 </g>
             </g>
         </g>

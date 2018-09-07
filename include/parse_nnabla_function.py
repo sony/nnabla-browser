@@ -118,7 +118,7 @@ def parse_yaml(yaml_path):
     with open(yaml_path, "r") as f:
         yaml_obj = yaml.load(f)
 
-    ret = {"base_functions": {}, "functions_api": {}, "parametric_functions_api": {}}
+    ret = {"base_functions": {}, "functions_api": {}, "parametric_functions_api": {}, "variables": {}}
 
     def recursive(obj, result, depth, category):
         for key, value in obj.items():
@@ -145,6 +145,21 @@ def parse_yaml(yaml_path):
 
     for function_api in function_apis:
         ret[function_api["api_type"]][function_api["layer_name"]] = function_api
+
+    # input and output
+    ret["variables"]["input"] = {
+                    "layer_name": "InputVariable",
+                    "snake_name": "input",
+                    "color": "#000000",
+                    "arguments": []
+                }
+
+    ret["variables"]["output"] = {
+        "layer_name": "OutputVariable",
+        "snake_name": "output",
+        "color": "#000000",
+        "arguments": []
+    }
 
     return ret
 

@@ -169,6 +169,8 @@
                         }
                     }
                 };
+
+                eventSrc.onerror = () => eventSrc.close();
             }
         },
         mounted: function () {

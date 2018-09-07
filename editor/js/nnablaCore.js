@@ -4124,5 +4124,19 @@ const nnablaCore = {
         }
       }
     }
+  },
+  "variables": {
+    "input": {
+      "layer_name": "InputVariable",
+      "snake_name": "input",
+      "color": "#000000",
+      "arguments": []
+    },
+    "output": {
+      "layer_name": "OutputVariable",
+      "snake_name": "output",
+      "color": "#000000",
+      "arguments": []
+    }
   }
 }

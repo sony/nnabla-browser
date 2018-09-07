@@ -2,19 +2,111 @@ import Definition from "./../misc/Definitions"
 
 const Path = require("path");
 
-const SSEhelper = function() {
+const SSEhelper = function () {
 
-    const calcLayerPosition = array => {
-        const GRID = Definition.EDIT.GRID.SIZE;
-        const BOXHEIGHT = Definition.EDIT.LAYER.BOUNDING_BOX.HEIGHT;
+    const GRID = Definition.EDIT.GRID.SIZE;
 
-        const pos = {"x": GRID, "y": GRID};
+    const indexRegisterCtor = function () {
+        this.initialize = () => {
+            this.layerIndex = 0;
+            this.depthWiseIndex = {};
+        };
 
-        if (array.length > 0) {
-            pos.y = array[array.length - 1].y + BOXHEIGHT;
-        }
+        this.getLayerIndex = () => {
+            return this.layerIndex++;
+        };
 
-        return pos
+        this.getDepthWiseIndex = (depth) => {
+            // console.log(this.depthWiseIndex[depth]);
+            if (this.depthWiseIndex.hasOwnProperty(depth)) {
+                return ++this.depthWiseIndex[depth];
+            } else {
+                return this.depthWiseIndex[depth] = 0;
+            }
+        };
+
+        this.initialize();
+    };
+
+    this.indexRegister = new indexRegisterCtor();
+
+    const getLayerPosition = depth => {
+        const depthWiseIndex = this.indexRegister.getDepthWiseIndex(depth);
+
+        return {x: GRID * (2 + depthWiseIndex * 15), y: GRID * (2 + depth * 4)};
+    };
+
+    const setupGetNodeAndLinkRecursive = (network, outputVariables) => {
+        const visit = [];
+
+        const recursive = (sourceNode, depthFromNode) => {
+            let nodes = [], links = [];
+
+            let source = {
+                layerIndex: sourceNode.layerIndex,
+                linkIndex: 1,
+                x: sourceNode.x + GRID * 5,
+                y: sourceNode.y + 41
+            };
+
+            for (let sourceOutput of sourceNode.output) {
+
+                // user define output
+                if (outputVariables.findIndex(v => v.variableName === sourceOutput) > -1) {
+                    let _node = {
+                        layerIndex: this.indexRegister.getLayerIndex(),
+                        inputParam: null, input: [sourceOutput], name: sourceOutput,
+                        output: [], type: "OutputVariable",
+                        ...getLayerPosition(depthFromNode)
+                    };
+
+                    let _link = {
+                        source,
+                        destination: {
+                            layerIndex: _node.layerIndex,
+                            linkIndex: 0,
+                            x: _node.x + GRID * 5,
+                            y: _node.y - 1}
+                    };
+
+                    nodes = [...nodes, _node];
+                    links = [...links, _link];
+                }
+
+                let destNodes = network.function.filter(f => f.input.find(name => name === sourceOutput));
+
+                for (let destNode of destNodes) {
+                    let _node = {
+                        ...destNode,
+                        layerIndex: this.indexRegister.getLayerIndex(),
+                        ...getLayerPosition(depthFromNode)
+                    };
+
+                    let _link = {
+                        source,
+                        destination: {
+                            layerIndex: _node.layerIndex,
+                            linkIndex: 0,
+                            x: _node.x + GRID * 5,
+                            y: _node.y - 1
+                        }
+                    };
+
+                    if (visit.findIndex(x => x === _node.name) === -1) { // if not already visited this node
+                        visit.push(_node.name);
+
+                        let [_nodes, _links] = recursive(_node, depthFromNode + 1);
+
+                        nodes = [...nodes, _node, ..._nodes];
+                        links = [...links, _link, ..._links];
+                    }
+                }
+            }
+
+            return [nodes, links];
+        };
+
+        return recursive;
     };
 
     this.getFileType = path => {
@@ -35,24 +127,37 @@ const SSEhelper = function() {
         const json = JSON.parse(event.data);
 
         const graphInfoArray = [];
-        for (let network of json.network || {}) {
-            let graphInfo = {
-                name: network.name,
-                nodes: [],
-                links: []
-            };
 
-            // currently layer property is ignored.
-            for (let layer of network.function || []) {
-                const pos = calcLayerPosition(graphInfo.nodes);
+        for (let executor of json.executor || []) {
+            const network = json.network.find(x => x.name === executor.networkName);
 
-                let layerInfo = Object.assign({}, layer, {x: pos.x, y: pos.y});
+            const outputVariables = executor.outputVariable; //list
 
-                graphInfo.nodes.push(layerInfo);
+            this.indexRegister.initialize();
+
+            // create input nodes
+            let inputNodes = [];
+            for (let v of executor.dataVariable) {
+                let inputNode = {
+                    layerIndex: this.indexRegister.getLayerIndex(),
+                    inputParam: null, input: [], name: v.dataName,
+                    output: [v.variableName], type: "InputVariable",
+                    ...getLayerPosition(0)
+                };
+
+                inputNodes.push(inputNode);
             }
 
-            graphInfoArray.push(graphInfo);
+            let nodes = [...inputNodes], links = [];
 
+            let recursive = setupGetNodeAndLinkRecursive(network, outputVariables);
+            for (let inputNode of inputNodes) {
+                let [_nodes, _links] = recursive(inputNode, 1);
+                nodes = [...nodes, ..._nodes];
+                links = [...links, ..._links];
+            }
+
+            graphInfoArray.push({name: executor.name, nodes, links});
         }
 
         return graphInfoArray;
