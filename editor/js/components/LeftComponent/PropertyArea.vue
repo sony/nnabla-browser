@@ -8,6 +8,8 @@
 
 <script>
     import Definitions from './../../misc/Definitions';
+    import { allFunctions } from './../../utils/svgAreaHelper';
+    import { mapGetters } from "vuex";
 
     const propertyArea = {
         template: `
@@ -21,14 +23,14 @@
                     />
             </div>`,
         computed: {
-            selectedLayer: function () {
-                return this.$store.state.graphInfo.selectedLayer;
-            },
+            ...mapGetters({
+                selectedLayer: "activeLayer"
+            }),
             isLayerSelected: function () {
                 return Object.keys(this.selectedLayer).length > 0;
             },
             defaultProps: function () {
-                return window.nnablaCoreAllFunctions.find(x => x.layer_name === this.selectedLayer.type);
+                return allFunctions.find(x => x.layer_name === this.selectedLayer.type);
             }
         },
         components: {

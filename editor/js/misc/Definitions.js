@@ -45,12 +45,6 @@ export default {
         BACKSPACE: 8,
         INSERT: 45,
     },
-    strings: {
-        menu_training_extract_network: 'Open in EDIT Tab',
-        menu_training_extract_network_w_weight: 'Open in EDIT Tab with Weight',
-        menu_retrain_not_in_place: 'Retrain',
-        data_preview_limit: 'Display only first 50 pages',
-    },
     GRAPH: {
         MARGIN: {
             TOP: 25,
@@ -65,8 +59,7 @@ export default {
         SIZE: {
             WIDTH: 809,
             HEIGHT: 442,
-        },
-        TRADE_OFF_PROT_SIZE: 8,
+        }
     },
     PREVIEWABLE_DATA_NUM: 500,
     ITEMS_PER_PAGE: 10,
@@ -76,29 +69,6 @@ export default {
         GRID: {
             RADIUS: 1,
             SIZE: 20,
-        },
-        CONNECTOR: {
-            IN: 'in',
-            OUT: 'out',
-            ACCEPTS: {
-                MULTIPLE: 'Multiple',
-                NONE: 'None',
-                SINGLE: 'Single',
-            },
-        },
-        LINK: {
-            STROKE_COLOR: color.gray5,
-            DEFAULT: {
-                STROKE_WIDTH: 2,
-            },
-            FOCUSED: {
-                STROKE_WIDTH: 3,
-                STROKE_COLOR: color.system3,
-            },
-            FOCUSED_DRAG: {
-                STROKE_WIDTH: 2,
-                STROKE_COLOR: color.system3,
-            },
         },
         LAYER: (() => {
             const GRID = 20; // XXX should be changed to refer this EDIT.GRID.SIZE
@@ -110,14 +80,6 @@ export default {
                 RECT_WIDTH: WIDTH,
                 RECT_HEIGHT: HEIGHT,
                 RECT_BORDER_WIDTH: 1,
-
-                WARN: {
-                    OFFSET_X: -8,
-                    OFFSET_Y: 11,
-                    WIDTH: 16,
-                    HEIGHT: 16,
-                    IMAGE_SOURCE: './editor/image/Warning.svg',
-                },
 
                 DROPCAP_CHAR: {
                     OFFSET_X: GRID * 1,
@@ -141,33 +103,6 @@ export default {
                     FONTCOLOR: 'white',
                     FONTSIZE: '12px',
                     OPACITY: 0.6,
-                },
-
-                CONNECTOR: {
-                    OFFSET_X: WIDTH / 2,
-                    OUTPIN_OFFSET_Y: HEIGHT,
-                    RADIUS: 4,
-                    JOIN_RADIUS: 2,
-                    STROKE_COLOR: color.gray5,
-                    STROKE_WIDTH: 2, // リンク接続ありのコネクタとサイドコネクタは円に枠を付けている
-
-                    SIDE: {
-                        RADIUS: 10,
-                        OPACITY: 0.5,
-                        FILL_COLOR: 'gray',
-                        START_OFFSET_X: 186,
-                        START_OFFSET_Y: 26,
-                        MARGIN_X: 16,
-                        MARGIN_Y: 13,
-                        LABEL: {
-                            OFFSET_X: 1,
-                            OFFSET_Y: 3,
-                            FONTCOLOR: 'white',
-                            FONTSIZE: '9px',
-                            FONTWEIGHT: 'bold',
-                            OPACITY: 0.75,
-                        },
-                    },
                 },
 
                 STATISTICS: {
@@ -229,10 +164,5 @@ export default {
                 },
             };
         })(),
-        LASSO: {
-            FILL_COLOR: 'none',
-            STROKE_COLOR: 'gray',
-            STROKE_WIDTH: 2,
-        },
     },
 };

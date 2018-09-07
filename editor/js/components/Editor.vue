@@ -18,7 +18,7 @@
     import sduApp from './../editor/SDUApp';
     import tooltip from './../editor/tooltip';
     import jqueryUiCustom from './../misc/jquery-ui-custom';
-    import SSEhelper from "../io/ServerSentEventHelper";
+    import SSEhelper from "../utils/ServerSentEventHelper";
 
     export default {
         components: {
