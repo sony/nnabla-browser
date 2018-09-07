@@ -37,14 +37,6 @@ const mutations = {
         const activeGraph = getActiveGraph(state);
 
         activeGraph.links.push({source, destination});
-    },
-
-    updateLink: function (state, {index, source, destination}) {
-        const activeGraph = getActiveGraph(state);
-
-        activeGraph.links[index].source = source;
-        activeGraph.links[index].destination = destination;
-
     }
 };
 
@@ -63,7 +55,7 @@ const getters = {
         const ret = [];
         for (let index in getters.activeGraph.links) {
             let link = getters.activeGraph.links[index];
-            if (link.source.layerIndex === id || link.destination.layerIndex === id) {
+            if (link.source === id || link.destination === id) {
                 ret.push({index, ...link});
             }
         }

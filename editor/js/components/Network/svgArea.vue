@@ -8,11 +8,11 @@
                :key="$store.state.graphInfo.nntxtPath + '-layer-' + index"
                :transform="createTransform(node)"
                @mousedown="clickLayer(index)">
-                <g class="link-circles top" >
+                <g class="link-circles top" v-if="node.type !== 'InputVariable'">
                     <circle class="linker" cx="100" cy="-1" r="3.5"></circle>
                     <circle class="hide-linker top" cx="100" cy="-1" r="9" opacity="0"></circle>
                 </g>
-                <g class="link-circles bottom" >
+                <g class="link-circles bottom" v-if="node.type !== 'OutputVariable'">
                     <circle class="linker" cx="100" cy="41" r="3.5"></circle>
                     <circle class="hide-linker bottom"
                             cx="100" cy="41" r="9" opacity="0"
@@ -60,7 +60,11 @@
             getTextAttr: () => StyleHelper.createTextAttr(),
             getTextStyle: () => StyleHelper.createTextStyle(),
             getLinkLineStyle: () => StyleHelper.createLinkLineStyle(),
-            createLinkLineContext: link => svgAreaOperator.createLinkLineContext(link.source, link.destination)
+            createLinkLineContext: link => {
+                const source = svgAreaOperator.getLinkerPosition(link.source, true);
+                const destination = svgAreaOperator.getLinkerPosition(link.destination, false);
+                return svgAreaOperator.createLinkLineContext(source, destination);
+            }
         },
     }
 

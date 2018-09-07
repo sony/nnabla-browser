@@ -102,7 +102,7 @@ export const StyleHelper = new StyleHelperCtor();
 const svgAreaOperatorCtor = function () {
     const self = this;
 
-    this.drawingLinkMemory = {source: {}, destination: {}, svgLine: {}};
+    this.drawingLinkMemory = {source: {}, destination: {}, tmpLine: {}, delta: {x: 0, y: 0}};
 
     this.connectedLinks = [];
 
@@ -130,6 +130,24 @@ const svgAreaOperatorCtor = function () {
         const y = tmp[1].trim().split(")")[0];
 
         return [parseInt(x), parseInt(y)];
+    };
+
+    const getLayerIndex = (layerNode) => {
+        return layerNode.id.split("-")[1];
+    };
+
+    const getLayerPosition = index => {
+        const targetLayer = store.getters.activeGraph.nodes[index];
+        return {x: targetLayer.x, y: targetLayer.y};
+    };
+
+    const getLinkerPosition = (layerIndex, isSourceNode) => {
+        let {x, y} = getLayerPosition(layerIndex);
+
+        x += layerDef.GRID * 5;
+        y += isSourceNode ? layerDef.GRID * 2 + 1: -1;
+
+        return {x, y};
     };
 
     const layerDefocusing = () => {
@@ -218,15 +236,22 @@ const svgAreaOperatorCtor = function () {
         self.connectedLinks = [];
 
         for (let link of links) {
-            if (link.source.layerIndex === i) {
-                self.connectedLinks.push({
-                    update: function ({x, y}) {this.source = {...this.source, x: x + offsetX, y: y + 41}},
-                    ...link});
-            } else if (link.destination.layerIndex === i) {
-                self.connectedLinks.push({
-                    update: function ({x, y}) {this.destination = {...this.destination, x: x + offsetX, y: y - 1}},
-                    ...link});
+            let insert;
+            if (link.source === i) {
+                insert = {
+                    index: link.index,
+                    destination: getLinkerPosition(link.destination, false),
+                    update: function ({x, y}) {this.source = {x: x + layerDef.GRID * 5 , y: y + layerDef.GRID * 2 + 1}}
+                }
+            } else if (link.destination === i) {
+                insert = {
+                    index: link.index,
+                    source: getLinkerPosition(link.source, true),
+                    update: function ({x, y}) {this.destination = {x: x + layerDef.GRID * 5 , y: y - 1}}
+                }
             }
+
+            self.connectedLinks.push(insert);
         }
     };
 
@@ -255,7 +280,6 @@ const svgAreaOperatorCtor = function () {
         for (let link of self.connectedLinks) {
             link.update({x, y});
             d3.select("path#link-"+link.index).attr("d", createLinkLineContext(link.source, link.destination));
-            store.commit("updateLink", link);
         }
 
         self.connectedLinks = [];
@@ -269,71 +293,60 @@ const svgAreaOperatorCtor = function () {
         layerFocusing(this.parentNode);
     };
 
+    const layerMouseOver = function (v, i, nodes) {
+        d3.select(this).select("rect").attr("fill-opacity", "0.5");
+        self.drawingLinkMemory.destination = getLayerIndex(nodes[i]);
+    };
+
+    const layerMouseOut = function () {
+        d3.select(this).select("rect").attr("fill-opacity", "1");
+        self.drawingLinkMemory.destination = null;
+    };
+
+
     // for link event
-    const getAbsoluteCoordinate = (circleNode) => {
-        // <g class="layer" transform="...">
-        //     <g class="link-circles">
-        //         <circle class="hide-linker" cx="..." cy="..." r="..." ></circle> <= circleNode
-
-        const parentNode = circleNode.parentNode.parentNode;
-        const [px, py] = getTranslateCoordinate(parentNode);
-
-        const x = circleNode.cx.baseVal.value, y = circleNode.cy.baseVal.value;
-
-        return [px + x, py + y];
-    };
-
-    const createLinkerNodeObj = (linkNode) => {
-        const [x, y] = getAbsoluteCoordinate(linkNode);
-
-        const layerIndex = parseInt(linkNode.parentNode.parentNode.id.split("-")[1]);
-
-        return {layerIndex, x, y};
-    };
-
-    const linkMouseOver = function (v, i, nodes) {
-        self.drawingLinkMemory.destination = {linkIndex: i, ...createLinkerNodeObj(nodes[i])};
-    };
-
-    const linkMouseOut = function () {
-        self.drawingLinkMemory.destination = {};
-    };
 
     const linkDragStart = function (v, i, nodes) {
         layerFocusing(nodes[i].parentNode.parentNode);
 
         d3.select(nodes[i].parentNode).select(".linker").style("fill", "var(--color-system3)");
 
-        self.drawingLinkMemory.source = {linkIndex: 1, ...createLinkerNodeObj(nodes[i])};
+        self.drawingLinkMemory.source = getLayerIndex(nodes[i].parentNode.parentNode);
 
         const lineIndex = d3.select("#svg-links").selectAll("path").nodes().length;
 
-        self.drawingLinkMemory.svgLine = d3.select("#svg-links").append("path").attr("id", "link-" + lineIndex);
+        self.drawingLinkMemory.tmpLine = d3.select("#svg-links").append("path").attr("id", "link-" + lineIndex);
     };
 
     const linkDragging = function () {
-        // 描画するlineが既存のlinkerに重なった際、上に描画されるため、mouseEnter/Leave/Over/Outがおかしくなる。検知領域分マージンを取る
-        if (Object.keys(self.drawingLinkMemory.destination).length < 1) {
-            const [x, y] = d3.mouse(document.getElementById("network-editor"));
 
-            const context = createLinkLineContext(self.drawingLinkMemory.source, {x, y});
+        let [x, y] = d3.mouse(document.getElementById("network-editor"));
 
-            self.drawingLinkMemory.svgLine
-                .attr("d", context)
-                .style("fill", "none")
-                .style("stroke", "var(--color-system3)")
-                .style("stroke-width", "1.5")
-        }
+        if (d3.event.dx) {self.drawingLinkMemory.delta.x = Math.sign(d3.event.dx) * 2}
+        if (d3.event.dy) {self.drawingLinkMemory.delta.y = Math.sign(d3.event.dy) * 2}
+
+        // 描画するlineが既存のlinkerに重なった際、上に描画されるため、mouseEnter/Leave/Over/Outがおかしくなる。すこしずらす。
+        x -= self.drawingLinkMemory.delta.x;
+        y -= self.drawingLinkMemory.delta.y;
+
+        const context = createLinkLineContext(getLinkerPosition(self.drawingLinkMemory.source, true), {x, y});
+
+        self.drawingLinkMemory.tmpLine
+            .attr("d", context)
+            .style("fill", "none")
+            .style("stroke", "var(--color-system3)")
+            .style("stroke-width", "1.5")
     };
 
     const linkDragEnd = function (v, i, nodes) {
         const m = self.drawingLinkMemory;
 
-        if (Object.keys(m.destination).length > 1 &&
-            m.source.linkIndex !== m.destination.linkIndex && m.source.layerIndex !== m.destination.layerIndex) {
-            const context = createLinkLineContext(m.source, m.destination);
+        if (m.destination !== null) {
+            const context = createLinkLineContext(getLinkerPosition(m.source, true), getLinkerPosition(m.destination, false));
 
-            m.svgLine
+            console.log(context);
+
+            m.tmpLine
                 .attr("d", context)
                 .style("stroke", "var(--color-gray5)")
                 .style("stroke-width", "1.5")
@@ -342,9 +355,9 @@ const svgAreaOperatorCtor = function () {
             store.commit("addNewLink", m);
         }
 
-        m.svgLine.remove();
+        m.tmpLine.remove();
 
-        self.drawingLinkMemory = {source: {}, destination: {}, svgLine: {}};
+        self.drawingLinkMemory = {source: {}, destination: {}, tmpLine: {}, delta: {x: 0, y: 0}};
 
         d3.select(nodes[i].parentNode).select(".linker").style("fill", null);
 
@@ -352,6 +365,8 @@ const svgAreaOperatorCtor = function () {
 
     // member method
     this.adjustSvgSize = adjustSvgSize;
+
+    this.getLinkerPosition = getLinkerPosition;
 
     this.createLinkLineContext = createLinkLineContext;
 
@@ -370,17 +385,10 @@ const svgAreaOperatorCtor = function () {
 
             // mouse over event
             allLayers
-                .on("mouseover", function () {
-                    d3.select(this).select("rect").attr("fill-opacity", "0.5")
-                })
-                .on("mouseout", function () {
-                    d3.select(this).select("rect").attr("fill-opacity", "1")
-                });
+                .on("mouseover", layerMouseOver)
+                .on("mouseout", layerMouseOut);
 
             // linker event
-            allLayers.selectAll("circle.hide-linker")
-                .on("mouseover", linkMouseOver)
-                .on("mouseout", linkMouseOut);
 
             allLayers.selectAll("circle.hide-linker.bottom")
                 .call(d3.drag()
