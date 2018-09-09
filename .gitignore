@@ -3,5 +3,6 @@ nnabla_tutorial/
 node_modules/
 .cache/
 .idea/
+__pycache__/
 
 dist/
