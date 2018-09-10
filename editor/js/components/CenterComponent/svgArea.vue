@@ -36,7 +36,7 @@
 </template>
 
 <script>
-    import {svgAreaOperator, StyleHelper} from "./../../utils/svgAreaHelper";
+    import {svgAreaOperator, StyleHelper} from "../../utils/svgAreaHelper";
     import {mapGetters} from "vuex";
 
     export default {

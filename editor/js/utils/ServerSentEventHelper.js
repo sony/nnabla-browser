@@ -115,7 +115,9 @@ const SSEhelper = function () {
             return "nntxtFiles";
         } else if (ext === "txt" && secondaryExt === "series") {
             return "monitorFiles";
-        } else {
+        } else if ((ext === "csv" && secondaryExt === "result")){
+            return "csvResultFiles";
+        }else {
             return false;
         }
     };
@@ -184,6 +186,20 @@ const SSEhelper = function () {
         }
 
         return {t: times, v: values}
+    };
+
+    this.getCsvResult = event => {
+        const split = event.data.split("\n");
+        const keys = split.splice(0, 1)[0].split(", ");
+
+        let values = [];
+
+        for (let elm of split) {
+            let [path, pred, label] = elm.split(", ");
+            values.push([path, pred, label]);
+        }
+
+        return {keys, values};
     };
 
     this.deleteChartInfo = (rootDir, id, store) => {

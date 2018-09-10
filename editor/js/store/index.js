@@ -5,6 +5,7 @@ import editor from "./modules/editor"
 import directoryInfo from "./modules/DirectoryInfo";
 import graphInfo from "./modules/graphInfo";
 import chartInfo from "./modules/chartInfo";
+import csvInfo from "./modules/csvInfo";
 
 Vue.config.devtools = true;
 
@@ -15,6 +16,7 @@ export default new Vuex.Store({
         editor,
         directoryInfo,
         graphInfo,
-        chartInfo
+        chartInfo,
+        csvInfo
     }
 });

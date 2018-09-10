@@ -17,11 +17,11 @@
 </template>
 
 <script>
-    import contextMenu from './../../editor/editorContextMenu';
-    import clipboard from './../../editor/clipboard';
-    import EditorUtils from './../../EditorUtils';
+    import contextMenu from '../../editor/editorContextMenu';
+    import clipboard from '../../editor/clipboard';
+    import EditorUtils from '../../EditorUtils';
     import svgArea from "./svgArea";
-    import Definitions from './../../misc/Definitions';
+    import Definitions from '../../misc/Definitions';
 
     export default {
         props: {
@@ -178,7 +178,7 @@
 <style>
     .network-tabs {
         width: 100%;
-        height: 40px;
+        height: 41px;
         border-bottom: solid 1px var(--color-gray2);
         overflow: auto;
     }

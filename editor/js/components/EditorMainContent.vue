@@ -16,8 +16,9 @@
 
 <script>
     import LeftContent from './LeftComponent/LeftContent';
-    import MonitoringCenterContent from './Monitoring/CenterContent';
-    import NetworkCenterContent from './Network/NetworkEditor.vue';
+    import MonitoringComponent from './CenterComponent/Monitoring';
+    import NetworkComponent from './CenterComponent/NetworkEditor';
+    import CsvResultComponent from './CenterComponent/CsvResult';
 
     export default {
         props: {
@@ -28,14 +29,13 @@
             'left-content': {
                 template: `
                     <div class="left-content" id="leftContent">
-                        <component
-                        @selected-layer="name => $emit('selected-layer', name)"
+                        <left-content
                         @trigger-job="value => $emit('trigger-job', value)"
                         @history="command => $emit('history', command)"
                         />
                     </div>`,
                 components: {
-                    'component': LeftContent,
+                    'left-content': LeftContent,
                 },
             },
             'center-content': {
@@ -53,18 +53,25 @@
                                 @zoom="operation => $emit('zoom', operation)"
                             />
                             <monitoring-result v-else-if="selectedMonitoringTab" />
+
+                            <csv-result v-else-if="selectedCsvResultTab" />
                         </keep-alive>
                     </div>`,
                 components: {
-                    'edit-network-graph': NetworkCenterContent,
-                    'monitoring-result': MonitoringCenterContent,
+                    'edit-network-graph': NetworkComponent,
+                    'monitoring-result': MonitoringComponent,
+                    'csv-result': CsvResultComponent
                 },
                 computed: {
+                    // todo: change to ":is" binding from this rule base switching after re-implementing history and zoom
                     selectedEditTab: function () {
-                        return this.$store.state.editor.activeTabName === 'graph';
+                        return String(this.$store.state.editor.activeTabName) === 'graph';
                     },
                     selectedMonitoringTab: function () {
-                        return this.$store.state.editor.activeTabName === "monitoring";
+                        return String(this.$store.state.editor.activeTabName) === "monitoring";
+                    },
+                    selectedCsvResultTab: function () {
+                        return String(this.$store.state.editor.activeTabName) === "result";
                     },
                 },
             },

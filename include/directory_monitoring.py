@@ -61,7 +61,7 @@ class Monitor(FileSystemEventHandler):
     def add_new_info(self, path):
         if fnmatch.fnmatch(path, "*.nntxt"):
             self.add_new_nntxt_info(path)
-        elif fnmatch.fnmatch(path, "*.series.txt"):
+        elif fnmatch.fnmatch(path, "*.series.txt") or fnmatch.fnmatch(path, "*.result.csv"):
             self.add_new_monitor_info(path)
 
     def set_send_info(self, target):
@@ -77,6 +77,7 @@ class Monitor(FileSystemEventHandler):
         res["children"] = []
         res["monitorFiles"] = []
         res["nntxtFiles"] = []
+        res["csvResultFiles"] = []
 
         files = glob.glob(os.path.join(path, "*"))
 
@@ -89,6 +90,8 @@ class Monitor(FileSystemEventHandler):
                     res["nntxtFiles"].append({"name": filename, "data": None})
                 elif fnmatch.fnmatch(file, "*.series.txt"):
                     res["monitorFiles"].append({"name": filename, "data": None})
+                elif fnmatch.fnmatch(file, "*.result.csv"):
+                    res["csvResultFiles"].append({"name": filename, "data": None})
 
         return res
 
@@ -110,7 +113,7 @@ class Monitor(FileSystemEventHandler):
         if fnmatch.fnmatch(modified, "*.nntxt"):
             msg = nnabla_proto_to_json(modified)
 
-        elif fnmatch.fnmatch(modified, "*.series.txt"):
+        elif fnmatch.fnmatch(modified, "*.series.txt") or fnmatch.fnmatch(modified, "*.result.csv"):
             with open(modified, "r") as f:
                 msg = f.read()
         else:

@@ -3,6 +3,7 @@
         <div style="margin-left: 30px;">
             <appbar-tab tab-name="graph"/>
             <appbar-tab tab-name="monitoring"/>
+            <appbar-tab tab-name="result" />
         </div>
         <div class="editor-navbar-center"></div>
         <div style="height: 100%; float: right;">

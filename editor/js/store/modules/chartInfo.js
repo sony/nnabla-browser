@@ -6,19 +6,18 @@ const mutations = {
     insertChartData: function (state, {chartTitle, data}) {
         const targetChart = state.charts.find(x => x.name === chartTitle);
 
-        const updateFunction = function(target, data, index) {
+        const updateFunction = function(target, data, index, isUpdate) {
             index = index > -1 ? index : target.length;
 
-            target.splice(index, 0, data)
+            target.splice(index, isUpdate, data);
         };
 
         if (typeof targetChart !== "undefined") { //update chart data
             let insertIndex = targetChart.data.findIndex(x => x.name === data.name);
-            updateFunction(targetChart.data, data, insertIndex);
-
+            updateFunction(targetChart.data, data, insertIndex, 1);
         } else { // insert new chart
             let insertIndex = state.charts.findIndex(x => x.name.toLowerCase() > chartTitle.toLowerCase());
-            updateFunction(state.charts, {name: chartTitle, data: [data]}, insertIndex);
+            updateFunction(state.charts, {name: chartTitle, data: [data]}, insertIndex, 0);
         }
     },
 

@@ -17,7 +17,8 @@
                 // chart : {name: "", data: [{name: "", values: {t: [], v: []}}, ...]}
                 props: {chart: Object},
                 template: `
-                <div class="chart-block" :id="chart.name" :key="chart.name">
+                <div class="chart-block" :id="chart.name" :key="chart.name"
+                style="margin: 15px 10px; border: 1px solid; color: var(--color-gray2)">
                     <vue-c3 :handler="handler" :key="chart.name"></vue-c3>
                 </div>
                 `,
@@ -28,7 +29,7 @@
                 },
                 watch: {
                     "chart.data": {
-                        handler: function (newData, oldData) {
+                        handler: function () {
                             let options = this.createChartOptions();
                             let nextLoaded = Object.keys(options.data.xs);
 

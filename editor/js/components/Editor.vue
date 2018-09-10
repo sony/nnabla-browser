@@ -163,9 +163,14 @@
                                 data = SSEhelper.getGraphInfoFromNNtxt(event);
                             } else if (fileType === "monitorFiles") {
                                 data = SSEhelper.getMonitorInfo(event);
+                            } else if (fileType === "csvResultFiles") {
+                                data = SSEhelper.getCsvResult(event);
                             }
 
-                            this.$store.commit(operation, {path: id, fileType, data});
+                            if (data) {
+                                this.$store.commit(operation, {path: id, fileType, data});
+                            }
+
                         }
                     }
                 };
@@ -348,7 +353,7 @@
     .network-action,
     .job-action {
         width: 100%;
-        height: 40px;
+        height: 41px;
         border-bottom: solid 1px var(--color-gray2);
         /* forbid wrap round */
         white-space: no-wrap;

@@ -344,8 +344,6 @@ const svgAreaOperatorCtor = function () {
         if (m.destination !== null) {
             const context = createLinkLineContext(getLinkerPosition(m.source, true), getLinkerPosition(m.destination, false));
 
-            console.log(context);
-
             m.tmpLine
                 .attr("d", context)
                 .style("stroke", "var(--color-gray5)")

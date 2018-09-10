@@ -9,6 +9,8 @@ const searchTargetObj = (path, fileType, target) => {
             return ext === ".nntxt";
         } else if (fileType === "monitorFiles") {
             return ext === ".txt";
+        } else if (fileType === "csvResultFiles") {
+            return ext === ".csv";
         }
     };
 
@@ -20,7 +22,8 @@ const searchTargetObj = (path, fileType, target) => {
 
         let tmp_result = target.children.find(x => x.name === dir);
         if (typeof tmp_result === "undefined") {
-            tmp_result = {name: dir, children: [], monitorFiles: [], nntxtFiles: []};
+            tmp_result = {name: dir, children: [],
+                monitorFiles: [], nntxtFiles: [], csvResultFiles: []};
             target.children.push(tmp_result);
         }
 
@@ -37,7 +40,8 @@ const state = {
         children: [],
         name: "",
         nntxtFiles: [],
-        monitorFiles: []
+        monitorFiles: [],
+        csvResultFiles: []
     }
 };
 
@@ -52,7 +56,7 @@ const mutations = {
         if (fileIndex > -1) {
             target[fileType][fileIndex].data = Object.assign({}, target[fileType][fileIndex].data, data)
         } else {
-            target[fileType].push({name: filename, data: data});
+            target[fileType].push({name: filename, data});
         }
     },
 

@@ -7,7 +7,7 @@ import os
 import gevent
 from gevent.wsgi import WSGIServer
 from werkzeug.contrib.fixers import ProxyFix
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, send_file
 
 from multiprocessing import Pool, Manager, Lock
 from watchdog.observers import Observer
@@ -29,6 +29,7 @@ app = Flask(__name__, template_folder="./editor", static_folder="./editor")
 parser = argparse.ArgumentParser()
 parser.add_argument("--port", "-p", default=8888, type=int)
 parser.add_argument("--logdir", "-d", default="./logdir", type=str)
+parser.add_argument("--communication_interval", "-c", default=0.1, type=float)
 
 args = parser.parse_args()
 
@@ -101,13 +102,22 @@ def subscribe():
                         else:
                             send_flags[info_index] = {"flag": False, "targets": []}
 
-                else:
-                    gevent.sleep(5)
+                gevent.sleep(args.communication_interval)
 
         except GeneratorExit:
             pass
 
     return Response(send(), mimetype="text/event-stream")
+
+
+@app.route("/subscribe/image/<path:path>.png")
+def get_image(path):
+
+    file_path = "/" + path + ".png"
+
+    # file = open(file_path, "rb").read()
+
+    return send_file(file_path, mimetype='image/png')
 
 
 print("open server : {}".format(args.port))

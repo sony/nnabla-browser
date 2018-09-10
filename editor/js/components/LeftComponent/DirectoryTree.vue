@@ -42,19 +42,21 @@
         },
         methods: {
             changeEvent: function () {
-                this.monitor.isView = this.checked;
+                if (this.monitor.data) {
+                    this.monitor.isView = this.checked;
 
-                const chartData = {
-                    chartTitle: this.monitor.name.split(".")[0],
-                    data: {
-                        name: this.dirName,
-                        values: this.monitor.data
-                    }
-                };
+                    const chartData = {
+                        chartTitle: this.monitor.name.split(".")[0],
+                        data: {
+                            name: this.dirName,
+                            values: this.monitor.data
+                        }
+                    };
 
-                const mutation = this.checked ? "insertChartData" : "deleteChartData";
+                    const mutation = this.checked ? "insertChartData" : "deleteChartData";
 
-                this.$store.commit(mutation, chartData);
+                    this.$store.commit(mutation, chartData);
+                }
             }
         },
         watch: {
@@ -72,6 +74,30 @@
                 <input type="checkbox" :id="dirName + '/' + monitor.name" v-model="checked" @change="changeEvent">
                 <label :for="dirName + '/' + monitor.name">{{ monitor.name }}</label>
             </div>`
+    };
+
+    const csvResultsComponent = {
+        props: ["csvResult", "dirName"],
+        template: `
+            <div class="csvResult"
+            :class="classObject"
+            @click="clickEvent"> {{csvResult.name}} </div>`,
+        computed: {
+            classObject: function () {
+                return {active: this.$store.state.editor.activeTabName === "result"}
+            }
+        },
+        methods: {
+            clickEvent: function () {
+                if (this.classObject.active) {
+                    const path = this.dirName + "/" + this.csvResult.name;
+
+                    if (path !== this.$store.state.csvInfo.path) {
+                        this.$store.commit("setCsvResult", {path, data: this.csvResult.data});
+                    }
+                }
+            }
+        }
     };
 
     const directoryComponent = {
@@ -103,16 +129,23 @@
 
                 <monitors-component
                     style="margin-left: 10px"
+                    v-for="monitor in info.monitorFiles"
                     :monitor="monitor"
                     :dirName="dirName"
-                    v-for="monitor in info.monitorFiles"
+                    />
+
+                <csv-results-component
+                    v-for="csvResult in info.csvResultFiles"
+                    :csvResult="csvResult"
+                    :dirName="dirName"
                     />
             </div>
         </div>
         `,
         components: {
             "nntxts-component": nntxtsComponent,
-            "monitors-component": monitorsComponent
+            "monitors-component": monitorsComponent,
+            "csv-results-component":csvResultsComponent
         },
         computed: {
             expandArrow: function () {
@@ -156,7 +189,7 @@
 </script>
 
 <style>
-    .nntxt.active {
+    .nntxt.active, .csvResult.active {
         color: var(--color-brand);
         cursor: pointer;
     }
