@@ -167,7 +167,15 @@
         watch: {
             confusionMatrix: {
                 handler: function () {
-                    d3.select(".csv-result-confusion-matrix").select("table").remove();
+                    d3.select(".csv-result-confusion-matrix").style("opacity", 0);
+
+                    d3.select(".csv-result-confusion-matrix").select("table")
+                        .transition().duration(200).remove();
+
+                    //fade in
+                    d3.select(".csv-result-confusion-matrix")
+                        .transition().ease(d3.easeCubicIn).duration(600).style("opacity", 1);
+
                     this.createTable();
                 },
                 deep: true
@@ -175,6 +183,7 @@
         },
         methods: {
             createTable: function () {
+
                 // get statics
                 const [precisionList, recallList, FScoreList] = precisionRecallFScore(this.confusionMatrix, 4);
                 const accuracy = accuracyFromConfusionMatrix2D(this.confusionMatrix);
@@ -252,6 +261,7 @@
 
                 // mean F-measure
                 this.insertTableRow(body, "Avg. F-measure", [average1D(FScoreList, 4)]);
+
 
             },
             insertTableRow: function (selection, rowTitle, valueList) {
@@ -352,11 +362,6 @@
 
     #image-preview {
         position: absolute;
-        border: 3px solid #333;
-        background: #444;
-        padding: 5px;
-        color: #FFF;
-        text-align: center;
     }
 
 </style>

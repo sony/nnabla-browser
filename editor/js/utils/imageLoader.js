@@ -7,9 +7,13 @@ export const loadImage = function (path, target_DOM_id) {
         const reader = new FileReader();
 
         reader.onloadend = function() {
-            document.getElementById(target_DOM_id).src = reader.result;
+            const DOM = document.getElementById(target_DOM_id);
+            if (DOM){
+                DOM.src = reader.result;
 
-            d3.select("#" + target_DOM_id).attr("width", "100px")
+                d3.select("#" + target_DOM_id).attr("width", "100px")
+                    .transition().duration(400).style("opacity", 1);
+            }
         };
 
         reader.readAsDataURL(request.response);
@@ -24,7 +28,8 @@ export const previewImage = function () {
     d3.select(this).append("img")
         .attr("id", "image-preview")
         .style("top", String(pos[1] - 30) + "px")
-        .style("left", "50px");
+        .style("left", "50px")
+        .style("opacity", 0);
 
     const path = d3.select(this).attr("value");
     loadImage(path, "image-preview");
