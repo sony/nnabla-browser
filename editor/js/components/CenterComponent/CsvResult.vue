@@ -1,26 +1,52 @@
 <template>
     <div style="height: 100%">
-        <information-tab :csvResult="csvResult"
-                         :showDataLength="showDataLength"
-                         :showFrom="showFrom"/>
+        <information-tab
+                :viewerMode="viewerMode"
+                :showDataLength="showDataLength"
+                :showFrom="showFrom"/>
 
         <viewer-selection-tab
                 :viewerMode="viewerMode"
                 @changeViewerMode="changeViewerMode"/>
 
-        <viewer  v-if="csvResult.length > 0"
-                 :viewerMode="viewerMode"
-                 :csvResult="csvResult"
-                 :showDataLength="showDataLength"
-                 :showFrom="showFrom"/>
+        <viewer v-if="csvResult.length > 0"
+                :viewerMode="viewerMode"
+                :showDataLength="showDataLength"
+                :showFrom="showFrom"/>
     </div>
 </template>
 
 <script>
-    import { previewImage, deletePreviewImage } from "../../utils/imageLoader";
+    import {previewImage, deletePreviewImage} from "../../utils/imageLoader";
+    import {mapState, mapGetters} from "vuex/dist/vuex.esm";
+    import {
+        range,
+        precisionRecallFScore,
+        calcPercentage,
+        accuracyFromConfusionMatrix2D,
+        average1D
+    } from "../../utils/arrayOperator";
 
     const informationTab = {
-        props: ["csvResult", "showDataLength", "showFrom"],
+        props: ["showDataLength", "showFrom", "viewerMode"],
+        computed: {
+            ...mapState({csvResult: "csvInfo"}),
+
+            DataLengthString: function () {
+                let ret;
+                if (this.viewerMode === "confusionMatrix") {
+                    ret = this.csvResult.length;
+                } else if (this.viewerMode === "simpleViewer") {
+                    if (this.csvResult.length === 0) {
+                        ret = "0 / " + this.csvResult.length;
+                    } else {
+                        ret = this.showFrom + " - " + this.showDataLength + " / " + this.csvResult.length;
+                    }
+                }
+
+                return ret;
+            }
+        },
         template: `
             <div class="csv-result-tab">
                 <div class="result-information-tab" style="width: 70%">
@@ -30,21 +56,11 @@
 
                 <div class="result-information-tab" style="width: 30%">
                     <div class="category-name"> Data Length:  </div>
-                    <div class="category-value"> {{ DataLengthString + " / " + csvResult.length }}</div>
+                    <div class="category-value"> {{ DataLengthString }}</div>
                 </div>
 
              </div>
-        `,
-        computed: {
-            DataLengthString: function () {
-                if (this.csvResult.length === 0){
-                    return 0;
-                } else {
-                    return this.showFrom + " - " + this.showDataLength;
-                }
-
-            }
-        }
+        `
     };
 
     const viewerSelectionTab = {
@@ -81,23 +97,15 @@
     };
 
     const simpleViewer = {
-        props: ["csvResult", "showDataLength", "showFrom"],
-        data: function () {
-            const columns = this.csvResult.data.keys;
-
-            const sortOrders = {};
-            columns.forEach(key => sortOrders[key] = 1);
-
-            return {
-                columns,
-                sortKey: '',
-                sortOrders: sortOrders
-            }
-        },
+        props: ["showDataLength", "showFrom"],
         computed: {
-          values: function () {
-              return this.$store.getters.getPartialData(this.showFrom, this.showDataLength);
-          }
+            ...mapState({csvResult: "csvInfo"}),
+            columns: function () {
+                return this.csvResult.data.keys;
+            },
+            values: function () {
+                return this.$store.getters.getPartialData(this.showFrom, this.showDataLength);
+            }
         },
         template: `
             <div class="csv-result-table" style="padding: 10px;"></div>`,
@@ -149,32 +157,145 @@
 
     };
 
+    const confusionMatrix = {
+        template: `
+        <div class="csv-result-confusion-matrix" style="padding: 10px;"></div>
+        `,
+        computed: {
+            ...mapGetters(["confusionMatrix", "labelLength"]),
+        },
+        watch: {
+            confusionMatrix: {
+                handler: function () {
+                    d3.select(".csv-result-confusion-matrix").select("table").remove();
+                    this.createTable();
+                },
+                deep: true
+            }
+        },
+        methods: {
+            createTable: function () {
+                // get statics
+                const [precisionList, recallList, FScoreList] = precisionRecallFScore(this.confusionMatrix, 4);
+                const accuracy = accuracyFromConfusionMatrix2D(this.confusionMatrix);
+
+                const table = d3.select(".csv-result-confusion-matrix")
+                    .append("table")
+                    .attr("class", "table table-bordered")
+                    .style("text-align", "center");
+
+                const thead = table.append("thead");
+
+                // header 1
+                const thead1 = thead.append("tr");
+
+                thead1.append("th")
+                    .style("text-align", "center")
+                    .attr("scope", "col"); // blank
+
+                thead1.append("th")
+                    .style("text-align", "center")
+                    .style("font-size", "18px")
+                    .attr("scope", "col")
+                    .attr("colspan", this.labelLength)
+                    .text("Predicted Label"); // prediction
+
+                thead1.append("th")
+                    .style("text-align", "center")
+                    .attr("scope", "col"); // blank
+
+                // header 2
+                const thead2 = thead.append("tr");
+
+                thead2.selectAll("th")
+                    .data(() => ["", ...range(0, this.labelLength), "Recall"]).enter()
+                    .append("th")
+                    .style("text-align", "center")
+                    .attr("scope", "col")
+                    .text(d => d); // label index
+
+
+                // body
+                const body = table.append("tbody");
+
+                body.selectAll("tr")
+                    .data(this.confusionMatrix).enter()
+                    .append("tr")
+                    .selectAll("td")
+                    .data((row, i) => {
+                        const f = (color, value) => {
+                            return {color, value}
+                        };
+                        const getColor = (ratio) => `rgba(110, 178, 206, ${0.8 * Math.sqrt(ratio)})`;
+
+                        return [f("", i),
+                            ...row.map((x, j) => f(getColor(calcPercentage(row, j, 4)), x)),
+                            f("", recallList[i])]
+                    }).enter()
+                    .append("td")
+                    .style("font-weight", (d, i) => i === 0 ? "bold" : "")
+                    .style("background-color", (d, i) => d.color)
+                    .text(d => d.value);
+
+                // body bottom
+                // precision
+                this.insertTableRow(body, "Precision", precisionList);
+
+                // F-measure
+                this.insertTableRow(body, "F-measure", FScoreList);
+
+                // blank
+                this.insertTableRow(body, "", []);
+
+                // accuracy
+                this.insertTableRow(body, "Accuracy", [accuracy]);
+
+                // mean F-measure
+                this.insertTableRow(body, "Avg. F-measure", [average1D(FScoreList, 4)]);
+
+            },
+            insertTableRow: function (selection, rowTitle, valueList) {
+                const blankList = Array(this.labelLength - valueList.length + 1).fill("");
+
+                selection.append("tr").selectAll("td")
+                    .data(() => [rowTitle, ...valueList, ...blankList]).enter()
+                    .append("td")
+                    .style("font-weight", (d, i) => i === 0 ? "bold" : "")
+                    .text(d => d);
+            }
+        },
+        mounted: function () {
+            this.createTable();
+        },
+    };
+
     export default {
         name: "csvResult",
         data: function () {
             return {
                 viewerMode: "simpleViewer",
-                csvResult: this.$store.state.csvInfo,
                 showDataLength: 100,
                 showFrom: 0
             }
+        },
+        computed: {
+            ...mapState({csvResult: "csvInfo"})
         },
         components: {
             informationTab,
             viewerSelectionTab,
             viewer: {
-                props: ["viewerMode", "csvResult", "showDataLength", "showFrom"],
+                props: ["viewerMode", "showDataLength", "showFrom"],
                 template: `
                 <div class="viewer-scroller">
                     <component :is="viewerMode"
-                    :csvResult="csvResult"
                     :showDataLength="showDataLength"
-                    :showFrom="showFrom"/>
+                    :showFrom="showFrom" />
                 </div>
                 `,
                 components: {
                     simpleViewer,
-                    ConfusionMatrix: {}
+                    confusionMatrix
                 }
             },
         },
@@ -220,6 +341,7 @@
         font-size: 20px;
         padding-top: 6px;
         overflow: auto;
+        white-space: nowrap;
     }
 
     .viewer-scroller {

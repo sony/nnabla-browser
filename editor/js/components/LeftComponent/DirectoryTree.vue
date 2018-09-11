@@ -12,21 +12,29 @@
         template: `
             <div class="nntxt"
             :class="classObject"
+            :style="activeStyle"
             @click="clickEvent"> {{nntxt.name}} </div>`,
         computed: {
             classObject: function () {
-                return {active: this.$store.state.editor.activeTabName === "graph"}
+                return {
+                    active: this.$store.state.editor.activeTabName === "graph"}
+            },
+            nntxtPath: function () {
+                return this.dirName + "/" + this.nntxt.name
+            },
+            activeStyle: function () {
+                const isSelected = this.$store.state.directoryInfo.activeFile === this.nntxtPath && this.classObject.active;
+                return {color: isSelected ? "var(--color-brand)" : ""};
             }
         },
         methods: {
             clickEvent: function () {
                 if (this.classObject.active) {
-                    const nntxtPath = this.dirName + "/" + this.nntxt.name;
-
-                    if (nntxtPath !== this.$store.state.graphInfo.nntxtPath) {
+                    if (this.nntxtPath !== this.$store.state.graphInfo.nntxtPath) {
                         this.$store.commit("setGraphs", this.nntxt.data);
                         this.$store.commit("setActiveGraphIndex", 0);
-                        this.$store.commit("setNNtxtPath", nntxtPath);
+                        this.$store.commit("setNNtxtPath", this.nntxtPath);
+                        this.$store.commit("updateActiveFile", this.nntxtPath);
                     }
                 }
             }
@@ -81,19 +89,26 @@
         template: `
             <div class="csvResult"
             :class="classObject"
+            :style="activeStyle"
             @click="clickEvent"> {{csvResult.name}} </div>`,
         computed: {
             classObject: function () {
                 return {active: this.$store.state.editor.activeTabName === "result"}
+            },
+            path: function () {
+                return this.dirName + "/" + this.csvResult.name;
+            },
+            activeStyle: function () {
+                const isSelected = this.$store.state.directoryInfo.activeFile === this.path && this.classObject.active;
+                return {color: isSelected ? "var(--color-brand)" : ""};
             }
         },
         methods: {
             clickEvent: function () {
                 if (this.classObject.active) {
-                    const path = this.dirName + "/" + this.csvResult.name;
-
-                    if (path !== this.$store.state.csvInfo.path) {
-                        this.$store.commit("setCsvResult", {path, data: this.csvResult.data});
+                    if (this.path !== this.$store.state.csvInfo.path) {
+                        this.$store.commit("setCsvResult", {path: this.path, data: this.csvResult.data});
+                        this.$store.commit("updateActiveFile", this.path);
                     }
                 }
             }
@@ -189,8 +204,17 @@
 </script>
 
 <style>
+    .nntxt, .csvResult{
+        opacity: 0.6;
+    }
+
     .nntxt.active, .csvResult.active {
-        color: var(--color-brand);
+        opacity: 1.0;
+        font-weight: bold;
         cursor: pointer;
+    }
+
+    .nntxt.active:hover, .csvResult.active:hover{
+        color: var(--color-brand);
     }
 </style>

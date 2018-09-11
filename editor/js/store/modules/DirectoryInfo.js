@@ -42,7 +42,8 @@ const state = {
         nntxtFiles: [],
         monitorFiles: [],
         csvResultFiles: []
-    }
+    },
+    activeFile: ""
 };
 
 const mutations = {
@@ -66,6 +67,10 @@ const mutations = {
         if (fileIndex > -1) {
             target[fileType].splice(fileIndex, 1);
         }
+    },
+
+    updateActiveFile: function (state, path) {
+        state.activeFile = path;
     }
 };
 

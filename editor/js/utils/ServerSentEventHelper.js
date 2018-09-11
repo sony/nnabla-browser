@@ -196,7 +196,7 @@ const SSEhelper = function () {
 
         for (let elm of split) {
             let [path, pred, label] = elm.split(", ");
-            values.push([path, pred, label]);
+            values.push([path, parseInt(pred), parseInt(label)]);
         }
 
         return {keys, values};
