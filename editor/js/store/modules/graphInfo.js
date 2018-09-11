@@ -1,8 +1,15 @@
 import Vue from "vue/dist/vue.esm.js"
 
-const getActiveGraph = state => state.graphs[state.activeIndex.Graph] || {};
+const getActiveGraph = state => {
+    return state.graphs[state.activeIndex.Graph] || {};
+};
+
+const updatePrevGraph = state => {
+    Vue.set(state, "prevGraph", state.graphs[state.activeIndex.Graph] || {});
+};
 
 const state = {
+    prevGraph: {},
     graphs: [],
     nntxtPath: "",
     activeIndex: {Graph: -1, Layer: -1}
@@ -10,10 +17,17 @@ const state = {
 
 const mutations = {
     setGraphs: function (state, graphs) {
+        updatePrevGraph(state);
+
         Vue.set(state, "graphs", graphs);
+
+        state.activeIndex.Graph = 0;
+        state.activeIndex.Layer = -1;
     },
 
     setActiveGraphIndex: function (state, index) {
+        updatePrevGraph(state);
+
         state.activeIndex.Graph = index;
         state.activeIndex.Layer = -1;
     },

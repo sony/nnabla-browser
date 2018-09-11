@@ -107,6 +107,7 @@ const svgAreaOperatorCtor = function () {
     this.connectedLinks = [];
 
     const layerDef = Definitions.EDIT.LAYER;
+    const grid = layerDef.GRID;
 
     const adjustSvgSize = () => {
         const svg = d3.select("svg#network-editor");
@@ -115,8 +116,8 @@ const svgAreaOperatorCtor = function () {
         let layersDOM = svgLayers.node().getClientRects()[0];
 
         svg.attr("width", Math.max(document.getElementById("centerContent").clientWidth,
-            layersDOM.width + layerDef.GRID * 4));
-        svg.attr("height", layersDOM.height + layerDef.GRID * 4);
+            layersDOM.width + grid * 4));
+        svg.attr("height", layersDOM.height + grid * 4);
     };
 
     const getTranslateCoordinate = (node) => {
@@ -144,8 +145,8 @@ const svgAreaOperatorCtor = function () {
     const getLinkerPosition = (layerIndex, isSourceNode) => {
         let {x, y} = getLayerPosition(layerIndex);
 
-        x += layerDef.GRID * 5;
-        y += isSourceNode ? layerDef.GRID * 2 + 1: -1;
+        x += grid * 5;
+        y += isSourceNode ? grid * 2 + 1: -1;
 
         return {x, y};
     };
@@ -241,13 +242,13 @@ const svgAreaOperatorCtor = function () {
                 insert = {
                     index: link.index,
                     destination: getLinkerPosition(link.destination, false),
-                    update: function ({x, y}) {this.source = {x: x + layerDef.GRID * 5 , y: y + layerDef.GRID * 2 + 1}}
+                    update: function ({x, y}) {this.source = {x: x + grid * 5 , y: y + grid * 2 + 1}}
                 }
             } else if (link.destination === i) {
                 insert = {
                     index: link.index,
                     source: getLinkerPosition(link.source, true),
-                    update: function ({x, y}) {this.destination = {x: x + layerDef.GRID * 5 , y: y - 1}}
+                    update: function ({x, y}) {this.destination = {x: x + grid * 5 , y: y - 1}}
                 }
             }
 
@@ -271,22 +272,27 @@ const svgAreaOperatorCtor = function () {
 
     const layerDragEnd = function (v, index) {
         const [currentX, currentY] = getTranslateCoordinate(this);
-        const x = Math.max(5, currentX);
-        const y = Math.max(15, currentY);
 
-        d3.select(this).transition().duration(500).attr("transform", `translate(${x}, ${y})`);
+        // auto positioning
+        const x = Math.max(Math.floor(currentX / grid), 0) * grid;
+        const y = Math.max(Math.floor(currentY / grid), 0) * grid;
 
         // redraw all links
         for (let link of self.connectedLinks) {
             link.update({x, y});
-            d3.select("path#link-"+link.index).attr("d", createLinkLineContext(link.source, link.destination));
+            d3.select("path#link-"+link.index)
+                .transition().duration(300).attr("d", createLinkLineContext(link.source, link.destination));
         }
 
         self.connectedLinks = [];
 
-        store.commit("setNodePosition", {index, x, y});
-
-        adjustSvgSize();
+        d3.select(this)
+            .transition().duration(300)
+            .attr("transform", `translate(${x}, ${y})`)
+            .on("end", () => {
+                store.commit("setNodePosition", {index, x, y})
+                adjustSvgSize();
+            });
     };
 
     const layerClicked = function () {
@@ -367,6 +373,14 @@ const svgAreaOperatorCtor = function () {
     this.getLinkerPosition = getLinkerPosition;
 
     this.createLinkLineContext = createLinkLineContext;
+
+    this.graphExchangeTransition = (transitionList) => {
+        for (let elm of transitionList) {
+            d3.select("#layer-" + elm.index)
+                .transition().duration(1000).ease(d3.easeCubicOut)
+                .attr("transform", elm.transform);
+        }
+    };
 
     this.registerMouseEvent = () => {
         const allLayers = d3.selectAll("#svg-layers .layer");

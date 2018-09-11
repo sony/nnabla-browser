@@ -1,11 +1,13 @@
 <template>
     <div>
         <monitoring-list style="top: 0; bottom: 370px; border-bottom: 1px solid var(--color-gray2);"
-                         class="app-row" />
+                         class="app-row"/>
     </div>
 </template>
 
 <script>
+
+    import {mapState} from "vuex/dist/vuex.esm";
 
     const nntxtsComponent = {
         props: ["nntxt", "dirName"],
@@ -17,7 +19,8 @@
         computed: {
             classObject: function () {
                 return {
-                    active: this.$store.state.editor.activeTabName === "graph"}
+                    active: this.$store.state.editor.activeTabName === "graph"
+                }
             },
             nntxtPath: function () {
                 return this.dirName + "/" + this.nntxt.name
@@ -25,14 +28,21 @@
             activeStyle: function () {
                 const isSelected = this.$store.state.directoryInfo.activeFile === this.nntxtPath && this.classObject.active;
                 return {color: isSelected ? "var(--color-brand)" : ""};
-            }
+            },
+            ...mapState({graphInfo: state => state.graphInfo})
         },
         methods: {
             clickEvent: function () {
                 if (this.classObject.active) {
-                    if (this.nntxtPath !== this.$store.state.graphInfo.nntxtPath) {
+                    if (this.nntxtPath !== this.graphInfo.nntxtPath) {
+                        d3.select("#svg-links")
+                            .transition().style("opacity", 0);
+
+                        d3.select("#network-editor")
+                            .transition().duration(200).attr("opacity", 0.3)
+                            .transition().duration(1000).attr("opacity", 1);
+
                         this.$store.commit("setGraphs", this.nntxt.data);
-                        this.$store.commit("setActiveGraphIndex", 0);
                         this.$store.commit("setNNtxtPath", this.nntxtPath);
                         this.$store.commit("updateActiveFile", this.nntxtPath);
                     }
@@ -160,7 +170,7 @@
         components: {
             "nntxts-component": nntxtsComponent,
             "monitors-component": monitorsComponent,
-            "csv-results-component":csvResultsComponent
+            "csv-results-component": csvResultsComponent
         },
         computed: {
             expandArrow: function () {
@@ -204,7 +214,7 @@
 </script>
 
 <style>
-    .nntxt, .csvResult{
+    .nntxt, .csvResult {
         opacity: 0.6;
     }
 
@@ -214,7 +224,7 @@
         cursor: pointer;
     }
 
-    .nntxt.active:hover, .csvResult.active:hover{
+    .nntxt.active:hover, .csvResult.active:hover {
         color: var(--color-brand);
     }
 </style>
