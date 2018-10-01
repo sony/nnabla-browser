@@ -1500,35 +1500,6 @@ const nnablaCore = {
           }
         }
       },
-      "Slice": {
-        "layer_name": "Slice",
-        "color": "0xc0c0c0",
-        "snake_name": "slice",
-        "inputs": {
-          "x": {
-            "parameter": false
-          }
-        },
-        "arguments": {
-          "start": {
-            "type": "repeated int64",
-            "default": "(0,) * len(x.shape)"
-          },
-          "stop": {
-            "type": "repeated int64",
-            "default": "tuple(x.shape)"
-          },
-          "step": {
-            "type": "repeated int64",
-            "default": "(1,) * len(x.shape)"
-          }
-        },
-        "outputs": {
-          "y": {
-            "parameter": false
-          }
-        }
-      },
       "Pad": {
         "layer_name": "Pad",
         "color": "0xc0c0c0",
@@ -2692,6 +2663,42 @@ const nnablaCore = {
         }
       }
     },
+    "Slice": {
+      "layer_name": "Slice",
+      "snake_name": "slice",
+      "color": "0xd77b6a",
+      "api_type": "functions_api",
+      "inputs": {
+        "ctx": {
+          "optional": false
+        },
+        "x": {
+          "optional": false
+        }
+      },
+      "arguments": {
+        "start": {
+          "default": "None",
+          "optional": true
+        },
+        "stop": {
+          "default": "None",
+          "optional": true
+        },
+        "step": {
+          "default": "None",
+          "optional": true
+        },
+        "n_outputs": {
+          "default": "-1",
+          "optional": true
+        },
+        "outputs": {
+          "default": "None",
+          "optional": true
+        }
+      }
+    },
     "FixedPointQuantize": {
       "layer_name": "FixedPointQuantize",
       "snake_name": "fixed_point_quantize",
@@ -2803,6 +2810,35 @@ const nnablaCore = {
       },
       "arguments": {
         "axis": {
+          "default": "None",
+          "optional": true
+        }
+      }
+    },
+    "Interpolate": {
+      "layer_name": "Interpolate",
+      "snake_name": "interpolate",
+      "color": "0xd77b6a",
+      "api_type": "functions_api",
+      "inputs": {
+        "x": {
+          "optional": false
+        }
+      },
+      "arguments": {
+        "scale": {
+          "default": "None",
+          "optional": true
+        },
+        "output_size": {
+          "default": "None",
+          "optional": true
+        },
+        "mode": {
+          "default": "'linear'",
+          "optional": true
+        },
+        "align_corners": {
           "default": "None",
           "optional": true
         }

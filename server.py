@@ -5,7 +5,7 @@ import json
 import os
 
 import gevent
-from gevent.wsgi import WSGIServer
+from gevent.pywsgi import WSGIServer
 from werkzeug.contrib.fixers import ProxyFix
 from flask import Flask, render_template, Response, send_file
 

@@ -23,12 +23,14 @@ export const loadImage = function (path, target_DOM_id) {
 };
 
 export const previewImage = function () {
-    const pos = d3.mouse(d3.select("#centerContent").node());
+    const pos = d3.mouse(d3.select(".main-content").node());
+
+    const leftContentSize = d3.select("#leftContent").node().getClientRects()[0].width;
 
     d3.select(this).append("img")
         .attr("id", "image-preview")
-        .style("top", String(pos[1] - 30) + "px")
-        .style("left", "50px")
+        .style("top", String(pos[1]) + "px")
+        .style("left", String(leftContentSize + 5) + "px")
         .style("opacity", 0);
 
     const path = d3.select(this).attr("value");
