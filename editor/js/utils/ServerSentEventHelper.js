@@ -190,13 +190,13 @@ const SSEhelper = function () {
 
     this.getCsvResult = event => {
         const split = event.data.split("\n");
-        const keys = split.splice(0, 1)[0].split(", ");
+        const keys = [...split.splice(0, 1)[0].split(", "), "correctness"];
 
         let values = [];
 
         for (let elm of split) {
             let [path, pred, label] = elm.split(", ");
-            values.push([path, parseInt(pred), parseInt(label)]);
+            values.push([path, parseInt(pred), parseInt(label), pred === label]);
         }
 
         return {keys, values};

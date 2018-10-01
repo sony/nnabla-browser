@@ -1,7 +1,7 @@
 <template>
     <div>
         <component-palette class="app-row"
-                           style="top: 0; bottom: 370px; border-bottom: 1px solid var(--color-gray2);"
+                           style="top: 0; bottom: 50%; border-bottom: 1px solid var(--color-gray2);"
                            @history="command => $emit('history', command)"
         />
     </div>

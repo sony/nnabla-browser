@@ -22,7 +22,7 @@ Vue.component('nnc-modal-loading', ModalLoadingVue);
 Vue.component('nnc-zoom-box', ZoomBoxVue);
 Vue.component('context-menu', ContextMenuVue);
 
-Vue.config.devtools = true;
+// Vue.config.devtools = true;
 
 const router = new VueRouter({
     routes: [

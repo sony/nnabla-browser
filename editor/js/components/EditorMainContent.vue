@@ -1,15 +1,11 @@
 <template>
     <div class="main-content">
         <left-content
-                @selected-layer="name => $emit('selected-layer', name)"
-                @trigger-job="value => $emit('trigger-job', value)"
                 @history="command => $emit('history', command)"
         />
         <center-content
                 :history-info="historyInfo"
-                :zoom-info="zoomInfo"
                 @history="command => $emit('history', command)"
-                @zoom="operation => $emit('zoom', operation)"
         />
     </div>
 </template>
@@ -48,9 +44,7 @@
                         <keep-alive>
                             <edit-network-graph v-if="selectedEditTab"
                                 :history-info="historyInfo"
-                                :network-graph="zoomInfo.networkGraph"
                                 @history="command => $emit('history', command)"
-                                @zoom="operation => $emit('zoom', operation)"
                             />
                             <monitoring-result v-else-if="selectedMonitoringTab" />
 
@@ -81,12 +75,7 @@
             $('.left-content').resizable({
                 handles: 'e',
                 alsoResizeReverse: '.center-content',
-                minWidth: 280,
-            });
-
-            $('.center-content').resizable({
-                handles: 'e',
-                alsoResizeReverse: '.right-content',
+                minWidth: "15%",
             });
         },
     };
@@ -95,14 +84,16 @@
 <style>
     .left-content {
         position: relative;
-        width: 280px;
+        width: 15%;
         height: 100%;
+        min-width: 280px;
         background-color: var(--color-gray1);
         float: left;
         border-right: solid 1px var(--color-gray2);
     }
 
     .center-content {
+        width: 84%;
         height: 100%;
         float: left;
         border-right: solid 1px var(--color-gray2);

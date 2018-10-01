@@ -114,11 +114,21 @@
                 if (!value) return '';
                 value = value.toString();
                 return value.charAt(0).toUpperCase() + value.slice(1);
+            },
+            getCellText: function (value, columnIndex) {
+                if (this.columns[columnIndex].toLowerCase() === "path"){
+                    return ".../" + value.split("/").slice(-3).join("/")
+                } else if (this.columns[columnIndex].toLowerCase() === "correctness"){
+                    return value ? "○" : "×";
+                } else {
+                    return value;
+                }
             }
         },
         mounted: function () {
             const table = d3.select(".csv-result-table")
                 .append("table")
+                .style("font-size", "18px")
                 .attr("class", "table table-bordered table-hover");
 
             table.append("thead")
@@ -128,7 +138,12 @@
                 .append("th")
                 .attr("scope", "col")
                 .style("text-align", "center")
-                .text(d => this.capitalize(d));
+                .text(d => this.capitalize(d))
+                .on("click", (d, i) => {
+                    if (this.columns[i].toLowerCase() === "correctness"){
+                        console.log("click");
+                    }
+                });
 
             table.append("tbody")
                 .selectAll("tr")
@@ -136,18 +151,12 @@
                 .append("tr")
                 .attr("id", (d, i) => "result-" + String(i))
                 .selectAll("td")
-                .data(row => d3.entries(row)).enter()
+                .data(row => row).enter()
                 .append("td")
-                .attr("class", d => "col-" + d.key)
+                .attr("class", (d, i) => "col-" + i)
                 .style("text-align", "center")
-                .text((d, i) => {
-                    if (i > 0) {
-                        return d.value
-                    } else {
-                        return ".../" + d.value.split("/").slice(-3).join("/")
-                    }
-                })
-                .attr("value", d => d.value);
+                .text(this.getCellText)
+                .attr("value", d => d);
 
             d3.select("tbody").selectAll("td.col-0")
                 .on("mouseenter", previewImage)
@@ -189,6 +198,7 @@
                 const accuracy = accuracyFromConfusionMatrix2D(this.confusionMatrix);
 
                 const table = d3.select(".csv-result-confusion-matrix")
+                    .style("font-size", "16px")
                     .append("table")
                     .attr("class", "table table-bordered")
                     .style("text-align", "center");

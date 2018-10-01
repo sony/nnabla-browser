@@ -3,9 +3,7 @@
         <editor-application-bar />
         <main-content
                   :history-info="historyInfo"
-                  :zoom-info="zoomInfo"
-                  @history="command => history.execute(command)"
-                  @zoom="operateZooming" />
+                  @history="command => history.execute(command)" />
     </div>
 </template>
 
@@ -13,7 +11,6 @@
     import EditorApplicationBar from './EditorApplicationBar';
     import MainContent from './EditorMainContent';
     import EditorWindowSize from './../EditorWindowSize';
-    import ZOOM_INFO from './../misc/ZoomInfo';
     import Vue from 'vue/dist/vue.esm.js';
     import sduApp from './../editor/SDUApp';
     import tooltip from './../editor/tooltip';
@@ -59,21 +56,6 @@
                         }
                     },
                 },
-                zoomInfo: (() => {
-                    const Zoomer = function (name) {
-                        const info = ZOOM_INFO[name];
-                        this.percentages = info.percentages;
-                        this.percentage = 100;
-                        this.callback = info.callback;
-                        this.zoom = (percentage) => {
-                            this.percentage = percentage;
-                            this.callback(percentage / 100);
-                        };
-                    };
-                    return {
-                        networkGraph: new Zoomer('Editor')
-                    };
-                })()
             };
         },
         computed: {
@@ -136,15 +118,6 @@
                     show: true, // show dialog
                 });
             },
-            operateZooming: function (operation) {
-                this.zoomInfo[
-                    {
-                        'Editor': 'networkGraph',
-                        'Learning Curve': 'learningCurve',
-                        'Trade-off Graph': 'tradeOffGraph'
-                    }[operation.name]
-                    ].zoom(operation.percentage);
-            },
             setupSSE: function(){
 
                 const eventSrc = new EventSource("/subscribe");
@@ -179,11 +152,9 @@
             }
         },
         mounted: function () {
-
-            window.activeTab = this.$store.state.editor.activeTabName;
-
             EditorWindowSize.init();
             EditorWindowSize.bind();
+
             $.ajaxSetup({
                 headers: {'X-Requested-With': 'XMLHttpRequest'},
                 xhrFields: {withCredentials: true},

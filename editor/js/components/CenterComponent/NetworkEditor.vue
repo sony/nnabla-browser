@@ -1,17 +1,10 @@
 <template>
     <div>
-        <network-action
-                :history-info="historyInfo"
-                :zoom-percantages="networkGraph.percentages"
-                :zoom-current-percentage="networkGraph.percentage"
-                @history="command => $emit('history', command)"
-                @zoom="operation => $emit('zoom', operation)"
-        />
         <network-tabs
                 @history="command => $emit('history', command)"
         />
         <div class="tab-content network-editor-scroller">
-            <svg-area />
+            <svg-area/>
         </div>
     </div>
 </template>
@@ -19,14 +12,59 @@
 <script>
     import contextMenu from '../../editor/editorContextMenu';
     import clipboard from '../../editor/clipboard';
-    import EditorUtils from '../../EditorUtils';
     import svgArea from "./svgArea";
     import Definitions from '../../misc/Definitions';
+
+    const networkAction = {
+        props: {historyInfo: Object},
+        template: `
+                <div class="network-action">
+                    <tool-button image-name="Undo"  :disabled="!historyInfo.undo.enabled" @pressed="$emit('history', {type: 'undo'})" />
+                    <tool-button image-name="Redo"  :disabled="!historyInfo.redo.enabled" @pressed="$emit('history', {type: 'redo'})" />
+                    <tool-button image-name="Cut"   :disabled="false"     @pressed="cut" />
+                    <tool-button image-name="Copy"  :disabled="false"     @pressed="copy" />
+                    <tool-button image-name="Paste" :disabled="false"                     @pressed="paste" />
+                    <div class="pull-right" style="width: 200px;">
+                        <button
+                        @click="dropDownMenu"
+                         class="btn network-action-button"
+                         data-toggle="dropdown"
+                         style="float: right">
+                            Action
+                            <span class="caret" />
+                        </button>
+                        <div class="action-menu-item dropdown-menu" />
+                        <nnc-zoom-box
+                        style="float: right"" />
+                    </div>
+                </div>
+            `,
+        components: {
+            'tool-button': {
+                props: {imageName: String, disabled: Boolean},
+                template: `
+                        <img v-if="disabled" :src="'./editor/image/' + imageName + '.svg'" class="network-action-image nnc-disabled" />
+                        <img v-else          :src="'./editor/image/' + imageName + '.svg'" class="network-action-image nnc-enabled nnc-invoker" @click.stop.prevent="$emit('pressed')" />
+                    `,
+            },
+        },
+        methods: {
+            cut: () => clipboard.cut(),
+            copy: () => clipboard.copy(),
+            paste: () => clipboard.paste(),
+            dropDownMenu: () => {
+                // 右クリックメニューを閉じる
+                $('.network-context-menu.context-menu').remove();
+                // Actionメニューのメニューをリセット
+                $('.action-menu-item').children().remove();
+                $('.action-menu-item').append(contextMenu.createContextMenu);
+            },
+        },
+    };
 
     export default {
         props: {
             historyInfo: Object,
-            networkGraph: Object,
         },
         data: function () {
             return {
@@ -85,92 +123,11 @@
                         }
                     },
                     'graph-tab-append': {
-                        template: `<div class="graphs-tab graph-add" @click="clickedAddNetworkGraph"><img class="graph-addnew-img" src="./editor/image/AddNew.svg"/></div>`,
-                        methods: {
-                            clickedAddNetworkGraph: function () {},
-                        },
-                    },
-                },
-            },
-            'network-action': {
-                props: {historyInfo: Object, zoomPercantages: Array, zoomCurrentPercentage: Number},
-                template: `
-                <div class="network-action">
-                    <tool-button image-name="Undo"  :disabled="!historyInfo.undo.enabled" @pressed="$emit('history', {type: 'undo'})" />
-                    <tool-button image-name="Redo"  :disabled="!historyInfo.redo.enabled" @pressed="$emit('history', {type: 'redo'})" />
-                    <tool-button image-name="Cut"   :disabled="false"     @pressed="cut" />
-                    <tool-button image-name="Copy"  :disabled="false"     @pressed="copy" />
-                    <tool-button image-name="Paste" :disabled="false"                     @pressed="paste" />
-                    <div class="pull-right" style="width: 200px;">
-                        <button
-                        @click="dropDownMenu"
-                         class="btn network-action-button"
-                         data-toggle="dropdown"
-                         style="float: right">
-                            Action
-                            <span class="caret" />
-                        </button>
-                        <div class="action-menu-item dropdown-menu" />
-                        <nnc-zoom-box
-                        style="float: right"
-                        :percentages="zoomPercantages"
-                        :percentage="zoomCurrentPercentage"
-                        @zoom-value="value => $emit('zoom', {name: 'Editor', percentage: value})" />
-                    </div>
-                </div>
-            `,
-                components: {
-                    'tool-button': {
-                        props: {imageName: String, disabled: Boolean},
-                        template: `
-                        <img v-if="disabled" :src="'./editor/image/' + imageName + '.svg'" class="network-action-image nnc-disabled" />
-                        <img v-else          :src="'./editor/image/' + imageName + '.svg'" class="network-action-image nnc-enabled nnc-invoker" @click.stop.prevent="$emit('pressed')" />
-                    `,
-                    },
-                },
-                methods: {
-                    cut: () => clipboard.cut(),
-                    copy: () => clipboard.copy(),
-                    paste: () => clipboard.paste(),
-                    dropDownMenu: () => {
-                        // 右クリックメニューを閉じる
-                        $('.network-context-menu.context-menu').remove();
-                        // Actionメニューのメニューをリセット
-                        $('.action-menu-item').children().remove();
-                        $('.action-menu-item').append(contextMenu.createContextMenu);
+                        template: `<div class="graphs-tab graph-add"><img class="graph-addnew-img" src="./editor/image/AddNew.svg"/></div>`,
                     },
                 },
             },
             'svg-area': svgArea
-        },
-        computed: {
-            values: function () {
-                return EditorUtils.indexOperator(this.networkGraph.percentages, this.networkGraph.percentage);
-            },
-        },
-        methods: {
-            popUpMenu: contextMenu.showContextMenu,
-            zooming: function (event) {
-                let percentage;
-                switch (event.key) {
-                    case '0':
-                        percentage = 100;
-                        break;
-                    case '+':
-                        if (this.values.canMoveNext) percentage = this.values.next;
-                        break;
-                    case '-':
-                        if (this.values.canMovePrev) percentage = this.values.prev;
-                        break;
-                }
-                if (window.uop() && percentage) this.$emit('zoom', {name: 'Editor', percentage: percentage});
-            },
-            zoomingByWheel: function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                const percentage = event.wheelDelta <= -120 && this.values.canMovePrev ? this.values.prev : event.wheelDelta >= 120 && this.values.canMoveNext ? this.values.next : undefined;
-                if (percentage) this.$emit('zoom', {name: 'Editor', percentage: percentage});
-            },
         },
     };
 </script>

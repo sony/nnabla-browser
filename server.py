@@ -16,22 +16,26 @@ from include.directory_monitoring import Monitor
 from include.server_sent_event import ServerSentEvent
 from include.parse_nnabla_function import create_nnabla_core_js
 
-# create nnablaCore.js
-output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/js/nnablaCore.js")
-create_nnabla_core_js(output_path)
-
-# build
-subprocess.call("npm run build".split(" "))
-# subprocess.call("npm run build-nnploader".split(" "))
-
-app = Flask(__name__, template_folder="./editor", static_folder="./editor")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--port", "-p", default=8888, type=int)
 parser.add_argument("--logdir", "-d", default="./logdir", type=str)
 parser.add_argument("--communication_interval", "-c", default=0.1, type=float)
+parser.add_argument("--build", "-b", default=False, type=float)
 
 args = parser.parse_args()
+
+if args.build:
+    # create nnablaCore.js
+    output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/js/nnablaCore.js")
+    create_nnabla_core_js(output_path)
+
+    # build
+    subprocess.call("npm run build".split(" "))
+    # subprocess.call("npm run build-nnploader".split(" "))
+
+app = Flask(__name__, template_folder="./editor", static_folder="./editor")
+
 
 # check if logdir exists
 logdir = os.path.abspath(args.logdir)

@@ -73,7 +73,7 @@
         bottom: 0;
         left: 0;
         margin: 0 auto;
-        width: 480px;
+        width: 25%;
         height: 40px;
         text-align: center;
         line-height: 40px;

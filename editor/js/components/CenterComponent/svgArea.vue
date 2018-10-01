@@ -48,16 +48,18 @@
             ...mapState({prevGraph: state => state.graphInfo.prevGraph})
         },
         updated: function () {
+
+            svgAreaOperator.registerMouseEvent();
+
             if (this.nextTransition.length > 0) {
                 svgAreaOperator.graphExchangeTransition(this.nextTransition);
                 this.nextTransition = [];
+            } else {
+                svgAreaOperator.adjustSvgSize();
             }
 
             d3.select("#svg-links")
                 .transition().delay(500).duration(500).style("opacity", 1);
-
-            svgAreaOperator.adjustSvgSize();
-            svgAreaOperator.registerMouseEvent();
         },
         methods: {
             clickLayer: function (index) {

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <property-area class="app-row" style="height: 370px; bottom: 0;"
+        <property-area class="app-row" style="height: 50%; bottom: 0;"
                        @history="command => $emit('history', command)"
         />
     </div>

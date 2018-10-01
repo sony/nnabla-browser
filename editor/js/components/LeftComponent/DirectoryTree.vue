@@ -1,6 +1,6 @@
 <template>
     <div>
-        <monitoring-list style="top: 0; bottom: 370px; border-bottom: 1px solid var(--color-gray2);"
+        <monitoring-list style="top: 0; bottom: 50%; border-bottom: 1px solid var(--color-gray2);"
                          class="app-row"/>
     </div>
 </template>
@@ -35,8 +35,7 @@
             clickEvent: function () {
                 if (this.classObject.active) {
                     if (this.nntxtPath !== this.graphInfo.nntxtPath) {
-                        d3.select("#svg-links")
-                            .transition().style("opacity", 0);
+                        d3.select("#svg-links").style("opacity", 0);
 
                         d3.select("#network-editor")
                             .transition().duration(200).attr("opacity", 0.3)

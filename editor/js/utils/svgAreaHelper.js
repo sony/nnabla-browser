@@ -151,6 +151,13 @@ const svgAreaOperatorCtor = function () {
         return {x, y};
     };
 
+    const getCorrectPosition = (x, y) => {
+        const X = Math.max(Math.floor(x / grid), 0) * grid;
+        const Y = Math.max(Math.floor(y / grid), 0) * grid;
+
+        return [X, Y];
+    };
+
     const layerDefocusing = () => {
         this.focusLayerRect.transition().ease(d3.easeCircleOut).duration(300)
             .style("fill-opacity", 0.2)
@@ -257,6 +264,9 @@ const svgAreaOperatorCtor = function () {
     };
 
     const layerDragging = function (v, i) {
+        //remove auxiliary layer
+        d3.select("#svg-layers").select("rect#auxiliary-layer").remove();
+
         const [currentX, currentY] = getTranslateCoordinate(this);
 
         const x = currentX + d3.event.dx, y = currentY + d3.event.dy;
@@ -268,14 +278,27 @@ const svgAreaOperatorCtor = function () {
             link.update({x, y});
             d3.select("path#link-"+link.index).attr("d", createLinkLineContext(link.source, link.destination));
         }
+
+        // show end position
+        const [endX, endY] = getCorrectPosition(x, y);
+        const {width, height} = StyleHelper.createNodeAttr();
+
+        d3.select("#svg-layers").append("rect")
+            .attr("id", "auxiliary-layer")
+            .attr("x", endX).attr("y", endY)
+            .attr("width", width).attr("height", height)
+            .style("fill", "none")
+            .style("stroke", "var(--color-brand)")
+            .style("stroke-dasharray", 3)
+            .style("stroke-opacity", 0.4)
+            .lower();
     };
 
     const layerDragEnd = function (v, index) {
         const [currentX, currentY] = getTranslateCoordinate(this);
 
         // auto positioning
-        const x = Math.max(Math.floor(currentX / grid), 0) * grid;
-        const y = Math.max(Math.floor(currentY / grid), 0) * grid;
+        const [x, y] = getCorrectPosition(currentX, currentY);
 
         // redraw all links
         for (let link of self.connectedLinks) {
@@ -290,9 +313,13 @@ const svgAreaOperatorCtor = function () {
             .transition().duration(300)
             .attr("transform", `translate(${x}, ${y})`)
             .on("end", () => {
-                store.commit("setNodePosition", {index, x, y})
+                store.commit("setNodePosition", {index, x, y});
                 adjustSvgSize();
             });
+
+        // remove auxiliary layer
+        d3.select("#svg-layers").selectAll("rect#auxiliary-layer")
+            .transition().duration(300).attr("opacity", 0).remove();
     };
 
     const layerClicked = function () {
@@ -378,7 +405,8 @@ const svgAreaOperatorCtor = function () {
         for (let elm of transitionList) {
             d3.select("#layer-" + elm.index)
                 .transition().duration(1000).ease(d3.easeCubicOut)
-                .attr("transform", elm.transform);
+                .attr("transform", elm.transform)
+                .on("end", () => adjustSvgSize());
         }
     };
 

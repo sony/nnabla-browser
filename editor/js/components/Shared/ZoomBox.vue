@@ -1,32 +1,23 @@
 <template>
     <div class="zoom-box">
-        <action-zoom image-name="Out" :disabled="!values.canMovePrev" @pressed="$emit('zoom-value', values.prev)" />
-        <span class="zoom-percentage">{{ percentage }}%</span>
-        <action-zoom image-name="In" :disabled="!values.canMoveNext" @pressed="$emit('zoom-value', values.next)" />
+        <action-zoom image-name="Out" />
+        <action-zoom image-name="In" />
     </div>
 </template>
 
 <script>
-import EditorUtils from './../../EditorUtils';
 export default {
-    props: {percentages: Array, percentage: Number},
     components: {
         'action-zoom': {
-            props: {imageName: String, disabled: Boolean},
+            props: {imageName: String},
             template: `
-                 <img v-if="disabled" :src="imagePath" class="icon nnc-disabled" />
-                 <img v-else          :src="imagePath" class="icon nnc-enabled nnc-invoker" @click.stop.prevent="$emit('pressed')" />
+                 <img :src="imagePath" class="icon nnc-disabled" />
             `,
             computed: {
                 imagePath: function() {
                     return './editor/image/Zoom' + this.imageName + '.svg';
                 },
             },
-        },
-    },
-    computed: {
-        values() {
-            return EditorUtils.indexOperator(this.percentages, this.percentage);
         },
     },
 };
