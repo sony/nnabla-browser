@@ -1,5 +1,0 @@
-from upper directory, execute:
-
-$ PYTHON_PATH=make_nnabla_settings\
- python -m make_nnabla_settings.exec\
- $NEURAL_NETWORK_COSOLE/settings/NNabla/

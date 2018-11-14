@@ -2584,6 +2584,14 @@ const nnablaCore = {
         "keepdims": {
           "default": "False",
           "optional": true
+        },
+        "with_index": {
+          "default": "False",
+          "optional": true
+        },
+        "only_index": {
+          "default": "False",
+          "optional": true
         }
       }
     },
@@ -2603,6 +2611,14 @@ const nnablaCore = {
           "optional": true
         },
         "keepdims": {
+          "default": "False",
+          "optional": true
+        },
+        "with_index": {
+          "default": "False",
+          "optional": true
+        },
+        "only_index": {
           "default": "False",
           "optional": true
         }
@@ -2840,6 +2856,35 @@ const nnablaCore = {
         },
         "align_corners": {
           "default": "None",
+          "optional": true
+        }
+      }
+    },
+    "Sort": {
+      "layer_name": "Sort",
+      "snake_name": "sort",
+      "color": "0xd77b6a",
+      "api_type": "functions_api",
+      "inputs": {
+        "x": {
+          "optional": false
+        }
+      },
+      "arguments": {
+        "axis": {
+          "default": "-1",
+          "optional": true
+        },
+        "reverse": {
+          "default": "False",
+          "optional": true
+        },
+        "with_index": {
+          "default": "False",
+          "optional": true
+        },
+        "only_index": {
+          "default": "False",
           "optional": true
         }
       }
@@ -3257,6 +3302,10 @@ const nnablaCore = {
         "stopping_criterion": {
           "default": "1e-5",
           "optional": true
+        },
+        "lambda_reg": {
+          "default": "0.0",
+          "optional": true
         }
       }
     },
@@ -3669,6 +3718,10 @@ const nnablaCore = {
         },
         "fix_parameters": {
           "default": "False",
+          "optional": true
+        },
+        "param_init": {
+          "default": "None",
           "optional": true
         }
       }
@@ -4122,6 +4175,137 @@ const nnablaCore = {
         },
         "ste_fine_grained_b": {
           "default": "True",
+          "optional": true
+        }
+      }
+    },
+    "PrunedAffine": {
+      "layer_name": "PrunedAffine",
+      "snake_name": "pruned_affine",
+      "color": "0x6aa1bd",
+      "api_type": "parametric_functions_api",
+      "inputs": {
+        "inp": {
+          "optional": false
+        },
+        "n_outmaps": {
+          "optional": false
+        }
+      },
+      "arguments": {
+        "base_axis": {
+          "default": "1",
+          "optional": true
+        },
+        "w_init": {
+          "default": "None",
+          "optional": true
+        },
+        "b_init": {
+          "default": "None",
+          "optional": true
+        },
+        "fix_parameters": {
+          "default": "False",
+          "optional": true
+        },
+        "rng": {
+          "default": "None",
+          "optional": true
+        },
+        "with_bias": {
+          "default": "True",
+          "optional": true
+        },
+        "prune_w": {
+          "default": "True",
+          "optional": true
+        },
+        "rate_w": {
+          "default": "0.9",
+          "optional": true
+        },
+        "prune_b": {
+          "default": "True",
+          "optional": true
+        },
+        "rate_b": {
+          "default": "0.9",
+          "optional": true
+        }
+      }
+    },
+    "PrunedConvolution": {
+      "layer_name": "PrunedConvolution",
+      "snake_name": "pruned_convolution",
+      "color": "0x6aa1bd",
+      "api_type": "parametric_functions_api",
+      "inputs": {
+        "inp": {
+          "optional": false
+        },
+        "outmaps": {
+          "optional": false
+        },
+        "kernel": {
+          "optional": false
+        }
+      },
+      "arguments": {
+        "pad": {
+          "default": "None",
+          "optional": true
+        },
+        "stride": {
+          "default": "None",
+          "optional": true
+        },
+        "dilation": {
+          "default": "None",
+          "optional": true
+        },
+        "group": {
+          "default": "1",
+          "optional": true
+        },
+        "w_init": {
+          "default": "None",
+          "optional": true
+        },
+        "b_init": {
+          "default": "None",
+          "optional": true
+        },
+        "base_axis": {
+          "default": "1",
+          "optional": true
+        },
+        "fix_parameters": {
+          "default": "False",
+          "optional": true
+        },
+        "rng": {
+          "default": "None",
+          "optional": true
+        },
+        "with_bias": {
+          "default": "True",
+          "optional": true
+        },
+        "prune_w": {
+          "default": "True",
+          "optional": true
+        },
+        "rate_w": {
+          "default": "0.9",
+          "optional": true
+        },
+        "prune_b": {
+          "default": "True",
+          "optional": true
+        },
+        "rate_b": {
+          "default": "0.9",
           "optional": true
         }
       }

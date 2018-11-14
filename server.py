@@ -1,3 +1,6 @@
+
+from __future__ import absolute_import
+
 import time
 import argparse
 import subprocess
@@ -12,121 +15,129 @@ from flask import Flask, render_template, Response, send_file
 from multiprocessing import Pool, Manager, Lock
 from watchdog.observers import Observer
 
-from include.directory_monitoring import Monitor
-from include.server_sent_event import ServerSentEvent
-from include.parse_nnabla_function import create_nnabla_core_js
+from python_modules.directory_monitoring import Monitor
+from python_modules.server_sent_event import ServerSentEvent
+from python_modules.parse_nnabla_function import create_nnabla_core_js
+from python_modules.utils import str_to_bool
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--port", "-p", default=8888, type=int)
-parser.add_argument("--logdir", "-d", default="./logdir", type=str)
-parser.add_argument("--communication_interval", "-c", default=0.1, type=float)
-parser.add_argument("--build", "-b", default=False, type=float)
+def get_args():
 
-args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", "-p", default=8888, type=int)
+    parser.add_argument("--logdir", "-d", default="./logdir", type=str)
+    parser.add_argument("--communication_interval", "-c", default=0.1, type=float)
+    parser.add_argument("--build", "-b", default=False, type=str_to_bool)
 
-if args.build:
-    # create nnablaCore.js
-    output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/js/nnablaCore.js")
-    create_nnabla_core_js(output_path)
+    args = parser.parse_args()
 
-    # build
-    subprocess.call("npm run build".split(" "))
-    # subprocess.call("npm run build-nnploader".split(" "))
-
-app = Flask(__name__, template_folder="./editor", static_folder="./editor")
+    return args
 
 
-# check if logdir exists
-logdir = os.path.abspath(args.logdir)
-if not os.path.exists(logdir):
-    os.makedirs(logdir)
+if __name__ == '__main__':
+    args = get_args()
 
-manager = Manager()
-send_flags = manager.list()
-D = manager.dict()
-path_maps = manager.dict()
+    if args.build:
+        # create nnablaCore.js
+        output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/js/nnablaCore.js")
+        create_nnabla_core_js(output_path)
 
+        # build
+        subprocess.call("npm run build".split(" "))
 
-def supervise(shared_dict, send_flags, path_maps):
-    monitor = Monitor(logdir=logdir, shared_dict=shared_dict, send_flags=send_flags)
-    path_maps.update(monitor.path_maps)
-
-    observer = Observer()
-    observer.schedule(monitor, monitor.logdir, recursive=True)
-    observer.start()
-
-    try:
-        while True:
-            time.sleep(10)
-    except KeyboardInterrupt:
-        observer.stop()
-
-    observer.join()
+    app = Flask(__name__, template_folder="./editor", static_folder="./editor")
 
 
-p = Pool(1)
-p.Process(target=supervise, args=[D, send_flags, path_maps]).start()
+    # check if logdir exists
+    logdir = os.path.abspath(args.logdir)
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
+
+    manager = Manager()
+    send_flags = manager.list()
+    D = manager.dict()
+    path_maps = manager.dict()
 
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+    def supervise(shared_dict, send_flags, path_maps):
+        monitor = Monitor(logdir=logdir, shared_dict=shared_dict, send_flags=send_flags)
+        path_maps.update(monitor.path_maps)
 
-
-@app.route("/subscribe")
-def subscribe():
-    def send():
-        # send dir tree information
-        ev = ServerSentEvent(json.dumps(dict(path_maps)), _id="pathMap")
-        yield ev.msg_encode()
-
-        initial_send_info = {"flag": len(D.keys()) > 0, "targets": list(D.keys())}
-        with Lock():
-            info_index = len(send_flags)
-            send_flags.insert(info_index, initial_send_info)
+        observer = Observer()
+        observer.schedule(monitor, monitor.logdir, recursive=True)
+        observer.start()
 
         try:
             while True:
-                if send_flags[info_index]["flag"]:
-                    with Lock():
-                        targets = send_flags[info_index]["targets"]
-                        if len(targets) > 0:
-                            idx = targets[0]
-                            target = D[idx]
-                            ev = ServerSentEvent(str(target["data"]), _id=str(idx))
+                time.sleep(10)
+        except KeyboardInterrupt:
+            observer.stop()
 
-                            updated = targets[1:]
-
-                            send_flags[info_index] = {"flag": len(updated) > 0,
-                                                      "targets": updated}
-
-                            yield ev.msg_encode()
-
-                        else:
-                            send_flags[info_index] = {"flag": False, "targets": []}
-
-                gevent.sleep(args.communication_interval)
-
-        except GeneratorExit:
-            pass
-
-    return Response(send(), mimetype="text/event-stream")
+        observer.join()
 
 
-@app.route("/subscribe/image/<path:path>.png")
-def get_image(path):
-
-    file_path = "/" + path + ".png"
-
-    # file = open(file_path, "rb").read()
-
-    return send_file(file_path, mimetype='image/png')
+    p = Pool(1)
+    p.Process(target=supervise, args=[D, send_flags, path_maps]).start()
 
 
-print("open server : {}".format(args.port))
-app.wsgi_app = ProxyFix(app.wsgi_app)
-server = WSGIServer(("0.0.0.0", args.port), app)
-server.serve_forever()
+    @app.route("/")
+    def index():
+        return render_template("index.html")
 
-p.close()
+
+    @app.route("/subscribe")
+    def subscribe():
+        def send():
+            # send dir tree information
+            ev = ServerSentEvent(json.dumps(dict(path_maps)), _id="pathMap")
+            yield ev.msg_encode()
+
+            initial_send_info = {"flag": len(D.keys()) > 0, "targets": list(D.keys())}
+            with Lock():
+                info_index = len(send_flags)
+                send_flags.insert(info_index, initial_send_info)
+
+            try:
+                while True:
+                    if send_flags[info_index]["flag"]:
+                        with Lock():
+                            targets = send_flags[info_index]["targets"]
+                            if len(targets) > 0:
+                                idx = targets[0]
+                                target = D[idx]
+                                ev = ServerSentEvent(str(target["data"]), _id=str(idx))
+
+                                updated = targets[1:]
+
+                                send_flags[info_index] = {"flag": len(updated) > 0,
+                                                          "targets": updated}
+
+                                yield ev.msg_encode()
+
+                            else:
+                                send_flags[info_index] = {"flag": False, "targets": []}
+
+                    gevent.sleep(args.communication_interval)
+
+            except GeneratorExit:
+                pass
+
+        return Response(send(), mimetype="text/event-stream")
+
+
+    @app.route("/subscribe/image/<path:path>.png")
+    def get_image(path):
+
+        file_path = "/" + path + ".png"
+
+        # file = open(file_path, "rb").read()
+
+        return send_file(file_path, mimetype='image/png')
+
+
+    print("open server : {}".format(args.port))
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+    server = WSGIServer(("0.0.0.0", args.port), app)
+    server.serve_forever()
+
+    p.close()
