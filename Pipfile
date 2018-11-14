@@ -9,10 +9,13 @@ flask = "*"
 watchdog = "*"
 google = "*"
 protobuf = "*"
-nnabla = "*"
+numpy = "*"
+scikit-image = "*"
 nnabla-ext-cuda = "*"
+nnabla = "*"
 
 [dev-packages]
+pyinstaller = "*"
 
 [requires]
 python_version = "3.6"
