@@ -15,10 +15,10 @@ from flask import Flask, render_template, Response, send_file
 from multiprocessing import Pool, Manager, Lock
 from watchdog.observers import Observer
 
-from python_modules.directory_monitoring import Monitor
-from python_modules.server_sent_event import ServerSentEvent
-from python_modules.parse_nnabla_function import create_nnabla_core_js
-from python_modules.utils import str_to_bool
+from .python_modules.directory_monitoring import Monitor
+from .python_modules.server_sent_event import ServerSentEvent
+from .python_modules.parse_nnabla_function import create_nnabla_core_js
+from .python_modules.utils import str_to_bool
 
 
 def get_args():

@@ -30,7 +30,7 @@ setup(
         # 'Programming Language :: Python :: 3',
         # 'Programming Language :: Python :: 3.2',
         # 'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.6.5',
     ],
     install_requires=[
         # todo: fix versions?
@@ -42,8 +42,13 @@ setup(
         "numpy",
         "nnabla"
     ],
-    python_requires="~=3.6",
-    packages=find_packages(),
+    python_requires="~=3.6.5",
+    package_dir={
+        "nnabla_browser": "src",
+        "nnabla_browser/python_modules": "src/python_modules",
+        'nnabla_browser/editor': 'src/editor'},
+    packages=["nnabla_browser", "nnabla_browser/python_modules", "nnabla_browser/editor"],
+    package_data={'nnabla_browser/editor': ['*', "dist/*", "image/*.svg", "lib/css/*.css", "lib/fonts/*", "lib/js/*.js"]},
     entry_points={
         "console_scripts": [
             "nnabla-browser = nnabla_browser.server:main"
