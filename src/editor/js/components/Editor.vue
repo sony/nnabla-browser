@@ -8,8 +8,8 @@
 </template>
 
 <script>
-    import EditorApplicationBar from './EditorApplicationBar';
-    import MainContent from './EditorMainContent';
+    import EditorApplicationBar from './EditorApplicationBar.vue';
+    import MainContent from './EditorMainContent.vue';
     import EditorWindowSize from './../EditorWindowSize';
     import Vue from 'vue/dist/vue.esm.js';
     import sduApp from './../editor/SDUApp';

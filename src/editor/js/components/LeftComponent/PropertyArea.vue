@@ -42,7 +42,9 @@
                             {{ defaultProps.layer_name.substring(0, 1) }}
                          </div>
                         <div class="name">{{ defaultProps.layer_name }}</div>
-                        <a title="Refer documentation" :href="getDocUrl()" target="_blank" />
+                        <a title="Refer documentation" :href="getDocUrl()" target="_blank">
+                            <img src="./editor/image/Dictionary.svg">
+                        </a>
                     </div>`,
                 methods: {
                     getDocUrl: function () {
@@ -189,8 +191,6 @@
         width: 24px;
         height: 24px;
         display: inline-block;
-
-        background-image: url('../../../../editor/image/Dictionary.svg');
         background-position: right;
         background-repeat: no-repeat;
         background-size: 24px 24px;
@@ -298,7 +298,6 @@
         position: absolute;
         right: 16px;
 
-        background-image: url('../../../image/Warning.svg');
         background-size: 16px 16px;
     }
 </style>

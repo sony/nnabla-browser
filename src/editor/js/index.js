@@ -1,6 +1,6 @@
 import Vue from 'vue/dist/vue.esm.js';
 import VueRouter from 'vue-router';
-import Editor from './components/Editor';
+import Editor from './components/Editor.vue';
 import CheckBoxVue from './components/Shared/CheckBox.vue';
 import RadioButtonVue from './components/Shared/RadioButton.vue';
 import DialogVue from './components/Shared/Dialog.vue';
@@ -9,7 +9,7 @@ import ModalLoadingVue from './components/Shared/ModalLoading.vue';
 import ZoomBoxVue from './components/Shared/ZoomBox.vue';
 import ContextMenuVue from './components/Shared/ContextMenu.vue';
 
-import store from "./store/index";
+import store from "./store/index.js";
 
 Vue.use(VueRouter);
 
@@ -22,7 +22,7 @@ Vue.component('nnc-modal-loading', ModalLoadingVue);
 Vue.component('nnc-zoom-box', ZoomBoxVue);
 Vue.component('context-menu', ContextMenuVue);
 
-// Vue.config.devtools = true;
+Vue.config.devtools = true;
 
 const router = new VueRouter({
     routes: [

@@ -8,20 +8,31 @@ NNabla browser is a browser base visualizer for Neural Network Libraries.
 TODO
 
 ## Requirements
-npm  
-node  
-pipenv
+#### for run
+ - pipenv
+
+#### for dev
+ - npm  
+ - node.js  
 
 ## Before running
-```shell
-# install node dependency 
-$ npm install 
 
+#### for run
+```shell
 # install python dependency
 $ pipenv install
 $ pipenv shell
 ```
 Note that if you can create same python environment written in PipFile, you don`t need to install pipenv. 
+
+#### for dev
+```shell
+# install node dependency 
+$ npm install 
+
+# bundle packages
+$ npm run build
+```
 
 ## Run server
 ```shell
