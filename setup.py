@@ -29,7 +29,7 @@ setup(
         # 'Programming Language :: Python :: 2.7',
         # 'Programming Language :: Python :: 3',
         # 'Programming Language :: Python :: 3.2',
-        # 'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6.5',
     ],
     install_requires=[
@@ -42,7 +42,7 @@ setup(
         "numpy",
         "nnabla"
     ],
-    python_requires="~=3.6.5",
+    python_requires="~=3.5, <=3.6.5",
     package_dir={
         "nnabla_browser": "src",
         "nnabla_browser/python_modules": "src/python_modules",

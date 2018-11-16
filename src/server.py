@@ -39,7 +39,7 @@ def main():
 
     if args.build:
         # create nnablaCore.js
-        output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/js/nnablaCore.js")
+        output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/lib/js/nnablaCore.js")
         create_nnabla_core_js(output_path)
 
         # build

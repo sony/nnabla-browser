@@ -10,12 +10,10 @@ watchdog = "*"
 google = "*"
 protobuf = "*"
 numpy = "*"
-scikit-image = "*"
-nnabla-ext-cuda = "*"
 nnabla = "*"
 
 [dev-packages]
-pyinstaller = "*"
+wheel = "*"
 
 [requires]
-python_version = "3.6.5"
+mpython_version = "3.6.5"

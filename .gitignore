@@ -6,6 +6,8 @@ node_modules/
 __pycache__/
 
 dist/
+build/
+*egg-info/
 !editor/dist/
 
 !Pipfile
