@@ -43,7 +43,7 @@
                          </div>
                         <div class="name">{{ defaultProps.layer_name }}</div>
                         <a title="Refer documentation" :href="getDocUrl()" target="_blank">
-                            <img src="./editor/image/Dictionary.svg">
+                            <img src="./editor/image/Link.svg" border="0">
                         </a>
                     </div>`,
                 methods: {

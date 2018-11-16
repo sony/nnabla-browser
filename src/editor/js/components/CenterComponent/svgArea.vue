@@ -7,7 +7,7 @@
                :id="'layer-' + index"
                :key="$store.state.graphInfo.nntxtPath + '-layer-' + index"
                :transform="createTransform(node, index)"
-               @:mousedown="clickLayer(index)">
+               @mousedown="clickLayer(index)">
                 <g class="link-circles top" v-if="node.type !== 'InputVariable'">
                     <circle class="linker" cx="100" cy="-1" r="3.5"></circle>
                     <circle class="hide-linker top" cx="100" cy="-1" r="9" opacity="0"></circle>
