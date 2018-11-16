@@ -3,29 +3,42 @@
 NNabla browser is a browser base visualizer for Neural Network Libraries.
 
 
-## Installation
+# For user
 
-TODO
+### Environment (recomennded)
+python=3.6.5 
 
-## Requirements
-#### for run
+### Build wheel
+```shell
+$ python setup.py bdist_wheel
+```
+.whl file is created in ./dist for default setting.
+
+### Install
+``` shell
+$ pip install ./dist/nnablabrowser-<version>-<env>.whl
+```
+
+### Run server
+Once you install nnabla-browser in your environment, you can launch server from anywhere as long as you use same python environment.
+
+``` shell
+$nnabla-browser --logdir /path/to/logdir --port PORT
+```
+
+### Access server
+Launch any browser application and just access to \<server-address\>:PORT/  
+For example, when you launch server on the same computer which browser can be used, you can access localhost:8888/
+
+
+# For developer
+
+### Requirements
  - pipenv
-
-#### for dev
  - npm  
  - node.js  
 
-## Before running
-
-#### for run
-```shell
-# install python dependency
-$ pipenv install
-$ pipenv shell
-```
-Note that if you can create same python environment written in PipFile, you don`t need to install pipenv. 
-
-#### for dev
+### Bundle all js package
 ```shell
 # install node dependency 
 $ npm install 
@@ -34,13 +47,17 @@ $ npm install
 $ npm run build
 ```
 
-## Run server
+### Run server
 ```shell
-$ python server.py --logdir /path/to/logdir --port PORT
-```
+# install python dependency
+$ pipenv install
+$ pipenv shell
 
-If you want to bundle js files again, try --build option like
- 
- ```shell
- $ python server.py --build True --logdir /path/to/logdir --port PORT
- ```
+$ python server.py --logdir /path/to/logdir --port PORT
+
+# If you want to bundle js files again from python script, try --build option like below
+$ python server.py --build True --logdir /path/to/logdir --port PORT
+
+```
+Note that if you can create same python environment written in PipFile, you don`t need to install pipenv. 
+
