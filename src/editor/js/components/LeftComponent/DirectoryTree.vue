@@ -132,7 +132,7 @@
         ],
         template: `
         <div class="branch" v-if="checkDisplay">
-            <div class="branch-name" @click="expand = !expand;">
+            <div class="branch-name" @click="expand = !expand;" v-if="info.name.length > 0">
                 <img class="icon-small" :src="expandArrow" >
                 {{ info.name }}
             </div>
@@ -180,7 +180,7 @@
             }
         },
         data: function () {
-            return {expand: false};
+            return {expand: true};
         },
     };
 
