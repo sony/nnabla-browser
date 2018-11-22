@@ -8,7 +8,7 @@ import chartInfo from "./modules/chartInfo";
 import csvInfo from "./modules/csvInfo";
 
 // for debug
-// Vue.config.devtools = true;
+Vue.config.devtools = true;
 
 Vue.use(Vuex);
 

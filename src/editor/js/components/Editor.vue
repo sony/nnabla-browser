@@ -1,9 +1,9 @@
 <template>
     <div>
-        <editor-application-bar />
+        <editor-application-bar/>
         <main-content
-                  :history-info="historyInfo"
-                  @history="command => history.execute(command)" />
+                :history-info="historyInfo"
+                @history="command => history.execute(command)"/>
     </div>
 </template>
 
@@ -16,6 +16,7 @@
     import tooltip from './../editor/tooltip';
     import jqueryUiCustom from './../misc/jquery-ui-custom';
     import SSEhelper from "../utils/ServerSentEventHelper";
+    import pathOperator from "../utils/pathOperator";
 
     export default {
         components: {
@@ -118,37 +119,37 @@
                     show: true, // show dialog
                 });
             },
-            setupSSE: function(){
-
+            setupSSE: function () {
                 const eventSrc = new EventSource("/subscribe");
 
-                eventSrc.onmessage = event => {
-                    const id = event.lastEventId;
+                eventSrc.addEventListener("add", event => {
+                    const filePath = event.lastEventId;
 
-                    if (id === "pathMap") {
-                        this.$store.commit("initDirectoryInfo", JSON.parse(event.data));
-                    } else {
-                        const operation = (event.data === "delete" ? "delete" : "add") + "DirectoryInfo";
-
-                        let fileType, data;
-                        if (fileType = SSEhelper.getFileType(id)) {
-                            if (fileType === "nntxtFiles") {
-                                data = SSEhelper.getGraphInfoFromNNtxt(event);
-                            } else if (fileType === "monitorFiles") {
-                                data = SSEhelper.getMonitorInfo(event);
-                            } else if (fileType === "csvResultFiles") {
-                                data = SSEhelper.getCsvResult(event);
-                            }
-
-                            if (data) {
-                                this.$store.commit(operation, {path: id, fileType, data});
-                            }
-
+                    let fileType, data;
+                    if (fileType = pathOperator.getFileType(filePath)) {
+                        if (fileType === "nntxtFiles") {
+                            data = SSEhelper.getGraphInfoFromNNtxt(event);
+                        } else if (fileType === "monitorFiles") {
+                            data = SSEhelper.getMonitorInfo(event);
+                        } else if (fileType === "csvResultFiles") {
+                            data = SSEhelper.getCsvResult(event);
                         }
-                    }
-                };
 
-                eventSrc.onerror = () => eventSrc.close();
+                        this.$store.commit("addDirectoryInfo", {path: filePath, data});
+
+                    }
+                }, false);
+
+                eventSrc.addEventListener("delete", event => {
+                    const filePath = event.lastEventId;
+
+                    this.$store.commit("deleteDirectoryInfo", {path: filePath, });
+
+                }, false);
+
+                eventSrc.onerror = () => {
+                    eventSrc.close();
+                };
             }
         },
         mounted: function () {

@@ -8,19 +8,33 @@ import os
 import gevent
 from gevent.pywsgi import WSGIServer
 from werkzeug.contrib.fixers import ProxyFix
-from flask import Flask, render_template, Response, send_file
+from flask import Flask, render_template, Response, send_file, jsonify
 
 from multiprocessing import Pool, Manager, Lock
 from watchdog.observers import Observer
 
-from .python_modules.directory_monitoring import Monitor
-from .python_modules.server_sent_event import ServerSentEvent
-from .python_modules.parse_nnabla_function import create_nnabla_core_js
-from .python_modules.utils import str_to_bool
+from nnabla.logger import logger
+
+try:
+    from .python_modules.directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
+    from .python_modules.parse_nnabla_function import create_nnabla_core_js
+    from .python_modules.utils import sse_msg_encoding, str_to_bool
+
+except ImportError:
+    from python_modules.directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
+    from python_modules.parse_nnabla_function import create_nnabla_core_js
+    from python_modules.utils import sse_msg_encoding, str_to_bool
+
+# flask application
+app = Flask(__name__, template_folder="./editor", static_folder="./editor")
+
+# shared manager
+manager = Manager()
+send_manager = manager.list()
+directory_manager = manager.list()
 
 
 def get_args():
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", "-p", default=8888, type=int)
     parser.add_argument("--logdir", "-d", default="./logdir", type=str)
@@ -32,32 +46,30 @@ def get_args():
     return args
 
 
-def main():
-    args = get_args()
+def build():
+    # create nnablaCore.js
+    output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/lib/js/nnablaCore.js")
+    create_nnabla_core_js(output_path)
 
-    if args.build:
-        # create nnablaCore.js
-        output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/js/nnablaCore.js")
-        create_nnabla_core_js(output_path)
+    # build
+    subprocess.call("npm run --prefix ../ build ".split(" "))
 
-        # build
-        subprocess.call("npm run --prefix ../ build ".split(" "))
 
-    app = Flask(__name__, template_folder="./editor", static_folder="./editor")
-
-    # check if logdir exists
-    logdir = os.path.abspath(args.logdir)
+def check_and_create_logdir(logdir):
     if not os.path.exists(logdir):
-        os.makedirs(logdir)
+        ans = str(input("{} dose not exist. Would you like to create new directory? [y/N]:").format(logdir))
+        if ans.strip().lower() in ["y", "yes"]:
+            os.makedirs(logdir)
+        else:
+            logger.error("Directory dose not exist ({}).".format(logdir))
+            return False
 
-    manager = Manager()
-    send_flags = manager.list()
-    D = manager.dict()
-    path_maps = manager.dict()
+    return True
 
-    def supervise(shared_dict, send_flags, path_maps):
-        monitor = Monitor(logdir=logdir, shared_dict=shared_dict, send_flags=send_flags)
-        path_maps.update(monitor.path_maps)
+
+def create_supervise_process(logdir):
+    def supervise(_send_manager, _directory_manager):
+        monitor = Monitor(logdir=logdir, send_manager=_send_manager, directory_manager=_directory_manager)
 
         observer = Observer()
         observer.schedule(monitor, monitor.logdir, recursive=True)
@@ -71,60 +83,69 @@ def main():
 
         observer.join()
 
+    return supervise
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/subscribe/image/<path:path>.png")
+def get_image(path):
+    file_path = "/" + path + ".png"
+
+    return send_file(file_path, mimetype='image/png')
+
+
+def create_subscribe_response(communication_interval, base_path):
+    @app.route('/subscribe')
+    def subscribe():
+        def send():
+            # init
+            global send_manager
+            with Lock():
+                idx = len(send_manager)
+                send_manager.insert(idx, initialize_send_queue(directory_manager, base_path))
+
+            try:
+                while True:
+                    if len(send_manager[idx]) > 0:
+                        with Lock():
+                            info = send_manager[idx][0]
+                            send_manager[idx] = send_manager[idx][1:]
+                            yield sse_msg_encoding(str(info["data"]), _id=str(info["path"]), _event=str(info["action"]))
+
+                    gevent.sleep(communication_interval)
+
+            except GeneratorExit:
+                pass
+
+        return Response(send(), mimetype="text/event-stream")
+
+
+def main():
+    args = get_args()
+
+    if args.build:
+        build()
+
+    # check if logdir exists
+    logdir = os.path.abspath(args.logdir)
+    if not check_and_create_logdir(logdir):
+        return
+
+    # init directory_manager
+    global directory_manager
+    directory_manager += get_directory_tree_recursive(logdir)
+
+    global send_manager
+
     with Pool(1) as p:
-        p.Process(target=supervise, args=[D, send_flags, path_maps]).start()
 
-        @app.route("/")
-        def index():
-            return render_template("index.html")
+        p.Process(target=create_supervise_process(logdir), args=[send_manager, directory_manager]).start()
 
-        @app.route("/subscribe")
-        def subscribe():
-            def send():
-                # send dir tree information
-                ev = ServerSentEvent(json.dumps(dict(path_maps)), _id="pathMap")
-                yield ev.msg_encode()
-
-                initial_send_info = {"flag": len(D.keys()) > 0, "targets": list(D.keys())}
-                with Lock():
-                    info_index = len(send_flags)
-                    send_flags.insert(info_index, initial_send_info)
-
-                try:
-                    while True:
-                        if send_flags[info_index]["flag"]:
-                            with Lock():
-                                targets = send_flags[info_index]["targets"]
-                                if len(targets) > 0:
-                                    idx = targets[0]
-                                    target = D[idx]
-                                    ev = ServerSentEvent(str(target["data"]), _id=str(idx))
-
-                                    updated = targets[1:]
-
-                                    send_flags[info_index] = {"flag": len(updated) > 0,
-                                                              "targets": updated}
-
-                                    yield ev.msg_encode()
-
-                                else:
-                                    send_flags[info_index] = {"flag": False, "targets": []}
-
-                        gevent.sleep(args.communication_interval)
-
-                except GeneratorExit:
-                    pass
-
-            return Response(send(), mimetype="text/event-stream")
-
-        @app.route("/subscribe/image/<path:path>.png")
-        def get_image(path):
-
-            file_path = "/" + path + ".png"
-
-            # file = open(file_path, "rb").read()
-
-            return send_file(file_path, mimetype='image/png')
+        create_subscribe_response(args.communication_interval, logdir)
 
         print("open server : {}".format(args.port))
         app.wsgi_app = ProxyFix(app.wsgi_app)

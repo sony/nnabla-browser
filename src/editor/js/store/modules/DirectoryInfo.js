@@ -1,38 +1,81 @@
-const Path = require("path");
 
-const searchTargetObj = (path, fileType, target) => {
-    let filename;
+import pathOperator from "../../utils/pathOperator";
 
-    const checkExt = (path) => {
-        const ext = Path.extname(path);
-        if (fileType === "nntxtFiles") {
-            return ext === ".nntxt";
-        } else if (fileType === "monitorFiles") {
-            return ext === ".txt";
-        } else if (fileType === "csvResultFiles") {
-            return ext === ".csv";
-        }
+const createNewNode = (name) => {
+    return {
+        name: name, children: [],
+        monitorFiles: [], nntxtFiles: [], csvResultFiles: []
     };
+};
 
-    for (let dir of path.split("/")) {
-        if (checkExt(dir)) {
-            filename = dir;
+const createNewSubTree = (relPath, insertData) => {
+    const split = relPath.split("/");
+
+    let subTree = createNewNode(split[0]);
+    let currentNode = subTree;
+    let i;
+    for (i = 1; i < split.length - 1; i++) {
+        let dir = split[i];
+
+        let tmp = createNewNode(dir);
+        currentNode.children.push(tmp);
+        currentNode = tmp;
+    }
+
+    let fileType = pathOperator.getFileType(split[i]);
+    currentNode[fileType].push({name: split[i], data: insertData});
+
+    return subTree
+};
+
+const searchParent = (path, graph) => {
+
+    const split = path.split("/");
+
+    let currentNode = graph;
+    let i;
+    for (i = 0; i < split.length - 1; i++) {
+        let dir = split[i];
+
+        let nextNode = currentNode.children.find(x => x.name === dir);
+
+        if (typeof nextNode === "undefined") {
             break;
         }
 
-        let tmp_result = target.children.find(x => x.name === dir);
-        if (typeof tmp_result === "undefined") {
-            tmp_result = {name: dir, children: [],
-                monitorFiles: [], nntxtFiles: [], csvResultFiles: []};
-            target.children.push(tmp_result);
-        }
-
-        target = tmp_result
+        currentNode = nextNode;
     }
 
-    let index = target[fileType].findIndex(x => x.name === filename);
+    return [currentNode, split.slice(i, split.length).join("/")];
 
-    return [target, index, filename];
+};
+
+const findInsertIndex = (list, name) => {
+    let insertIndex = list.findIndex(x => x.name.toLowerCase() > name.toLowerCase());
+    insertIndex = insertIndex > -1 ? insertIndex : list.length;
+
+    return insertIndex;
+};
+
+const insertFile = (parent, fileName, insertData) => {
+    let fileType = pathOperator.getFileType(fileName);
+
+    if (fileType) {
+        const index = parent[fileType].findIndex(x => x.name === fileName);
+        if (index > -1) {
+            parent[fileType][index].data = Object.assign({}, parent[fileType][index].data, insertData);
+        } else {
+            let insertIndex = findInsertIndex(parent[fileType], fileName);
+            parent[fileType].splice(insertIndex, 0, {name: fileName, data: insertData});
+        }
+    }
+};
+
+const deleteDirectoryInfo = (parent, fileName, fileType) => {
+    let index = parent[fileType].findIndex(x => x.name === fileName);
+    if (index > -1) {
+        parent[fileType].splice(index, 1);
+    }
 };
 
 const state = {
@@ -47,26 +90,25 @@ const state = {
 };
 
 const mutations = {
-    initDirectoryInfo: function (state, obj) {
-        state.data = Object.assign({}, state.data, obj);
-    },
+    addDirectoryInfo: function (state, {path, data}) {
+        let [parent, relPath] = searchParent(path, state.data);
 
-    addDirectoryInfo: function (state, {path, fileType, data}) {
-        let [target, fileIndex, filename] = searchTargetObj(path, fileType, state.data);
-
-        if (fileIndex > -1) {
-            target[fileType][fileIndex].data = Object.assign({}, target[fileType][fileIndex].data, data)
+        if (relPath.split("/").length === 1) {
+            insertFile(parent, relPath, data);
         } else {
-            target[fileType].push({name: filename, data});
+            const subTree = createNewSubTree(relPath, data);
+            let insertIndex = findInsertIndex(parent.children, relPath.split("/")[0]);
+            parent.children.splice(insertIndex, 0, subTree);
         }
     },
 
-    deleteDirectoryInfo: function (state, {path, fileType}) {
-        let [target, fileIndex, filename] = searchTargetObj(path, fileType, state.data);
+    deleteDirectoryInfo: function (state, {path}) {
+        let [parent, relPath] = searchParent(path, state.data);
 
-        if (fileIndex > -1) {
-            target[fileType].splice(fileIndex, 1);
-        }
+        let fileType = pathOperator.getFileType(relPath);
+        if (!fileType) fileType = "children";
+
+        deleteDirectoryInfo(parent, relPath, fileType);
     },
 
     updateActiveFile: function (state, path) {

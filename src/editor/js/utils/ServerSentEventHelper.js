@@ -75,7 +75,7 @@ const SSEhelper = function () {
                     links = [...links, link];
                 }
 
-                let destLayers = network.function.filter(f => f.input.find(name => name === sourceOutput));
+                let destLayers = network.function.filter(f => (f.input || []).find(name => name === sourceOutput));
 
                 for (let destLayer of destLayers) {
                     let tmpLayer = {
@@ -106,29 +106,18 @@ const SSEhelper = function () {
         return recursive;
     };
 
-    this.getFileType = path => {
-        const split = path.split(".");
-        const ext = split[split.length - 1];
-        const secondaryExt = split[split.length - 2];
-
-        if (ext === "nntxt") {
-            return "nntxtFiles";
-        } else if (ext === "txt" && secondaryExt === "series") {
-            return "monitorFiles";
-        } else if ((ext === "csv" && secondaryExt === "result")){
-            return "csvResultFiles";
-        }else {
-            return false;
-        }
-    };
 
     this.getGraphInfoFromNNtxt = event => {
         const json = JSON.parse(event.data);
 
         const graphInfoArray = [];
+        const networks = json.network || [];
+        const executors = json.executor || [];
 
-        for (let executor of json.executor || []) {
-            const network = json.network.find(x => x.name === executor.networkName);
+        for (let executor of executors) {
+            const network = networks.find(x => x.name === executor.networkName);
+
+            if (typeof network === "undefined") continue;
 
             const outputVariables = executor.outputVariable; //list
 
