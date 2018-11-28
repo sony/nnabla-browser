@@ -9,13 +9,13 @@
                :transform="createTransform(node, index)"
                @mousedown="clickLayer(index)">
                 <g class="link-circles top" v-if="node.type !== 'InputVariable'">
-                    <circle class="linker" cx="100" cy="-1" r="3.5"></circle>
-                    <circle class="hide-linker top" cx="100" cy="-1" r="9" opacity="0"></circle>
+                    <circle class="linker" cx="100" cy="0" r="3.5"></circle>
+                    <circle class="hide-linker top" cx="100" cy="0" r="9" opacity="0"></circle>
                 </g>
                 <g class="link-circles bottom" v-if="node.type !== 'OutputVariable'">
-                    <circle class="linker" cx="100" cy="41" r="3.5"></circle>
+                    <circle class="linker" cx="100" cy="40" r="3.5"></circle>
                     <circle class="hide-linker bottom"
-                            cx="100" cy="41" r="9" opacity="0"
+                            cx="100" cy="40" r="9" opacity="0"
                             @mousedown.stop="clickLayer(index)"></circle>
                 </g>
                 <rect class="layer-rect" v-bind="getNodeAttr()" :style="getNodeStyle(node)"></rect>

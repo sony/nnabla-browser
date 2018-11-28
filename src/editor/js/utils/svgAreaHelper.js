@@ -146,7 +146,7 @@ const svgAreaOperatorCtor = function () {
         let {x, y} = getLayerPosition(layerIndex);
 
         x += grid * 5;
-        y += isSourceNode ? grid * 2 + 1: -1;
+        y += isSourceNode ? grid * 2: 0;
 
         return {x, y};
     };
@@ -249,13 +249,13 @@ const svgAreaOperatorCtor = function () {
                 insert = {
                     index: link.index,
                     destination: getLinkerPosition(link.destination, false),
-                    update: function ({x, y}) {this.source = {x: x + grid * 5 , y: y + grid * 2 + 1}}
+                    update: function ({x, y}) {this.source = {x: x + grid * 5 , y: y + grid * 2}}
                 }
             } else if (link.destination === i) {
                 insert = {
                     index: link.index,
                     source: getLinkerPosition(link.source, true),
-                    update: function ({x, y}) {this.destination = {x: x + grid * 5 , y: y - 1}}
+                    update: function ({x, y}) {this.destination = {x: x + grid * 5 , y: y}}
                 }
             }
 
