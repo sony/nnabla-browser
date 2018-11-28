@@ -25,6 +25,11 @@ const mutations = {
         state.activeIndex.Layer = -1;
     },
 
+    resetGraphs: function (state) {
+        Vue.set(state, "graphs", []);
+        updatePrevGraph(state);
+    },
+
     setActiveGraphIndex: function (state, index) {
         updatePrevGraph(state);
 
@@ -34,6 +39,10 @@ const mutations = {
 
     setNNtxtPath: function (state, path) {
         state.nntxtPath = path;
+    },
+
+    resetNNtxtPath: function (state) {
+        state.nntxtPath = "";
     },
 
     setActiveLayerIndex: function (state, index) {

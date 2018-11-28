@@ -136,14 +136,13 @@
                         }
 
                         this.$store.commit("addDirectoryInfo", {path: filePath, data});
-
                     }
                 }, false);
 
                 eventSrc.addEventListener("delete", event => {
                     const filePath = event.lastEventId;
 
-                    this.$store.commit("deleteDirectoryInfo", {path: filePath, });
+                    this.$store.dispatch("deleteDirectoryInfo", {path: filePath, });
 
                 }, false);
 

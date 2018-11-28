@@ -1,5 +1,6 @@
-
 import pathOperator from "../../utils/pathOperator";
+
+const Path = require("path");
 
 const createNewNode = (name) => {
     return {
@@ -75,7 +76,11 @@ const deleteDirectoryInfo = (parent, fileName, fileType) => {
     let index = parent[fileType].findIndex(x => x.name === fileName);
     if (index > -1) {
         parent[fileType].splice(index, 1);
+
+        return true;
     }
+
+    return false;
 };
 
 const state = {
@@ -101,25 +106,43 @@ const mutations = {
             parent.children.splice(insertIndex, 0, subTree);
         }
     },
-
-    deleteDirectoryInfo: function (state, {path}) {
-        let [parent, relPath] = searchParent(path, state.data);
-
-        let fileType = pathOperator.getFileType(relPath);
-        if (!fileType) fileType = "children";
-
-        deleteDirectoryInfo(parent, relPath, fileType);
-    },
-
     updateActiveFile: function (state, path) {
         state.activeFile = path;
+    },
+    resetActiveFile: function (state) {
+        state.activeFile = "";
+    }
+};
+
+const actions = {
+    deleteDirectoryInfo: function ({commit, state}, {path}) {
+        let [parent, dirName] = searchParent(path, state.data);
+
+        let fileType = pathOperator.getFileType(dirName);
+        if (!fileType) fileType = "children";
+
+        if(deleteDirectoryInfo(parent, dirName, fileType)) {
+            if (Path.relative(path, state.activeFile).length <  state.activeFile.length) {
+                // active file is under deleted folder.
+                // reset current display.
+
+                d3.select("#network-editor")
+                    .transition().duration(500).attr("opacity", 0)
+                    .on("end", () => {
+                        commit("resetActiveFile");
+                        commit("resetGraphs");
+                        commit("resetNNtxtPath");
+                    });
+            }
+        }
     }
 };
 
 
 const directoryInfoModule = {
     state,
-    mutations
+    mutations,
+    actions
 };
 
 export default directoryInfoModule;
