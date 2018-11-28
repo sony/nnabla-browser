@@ -10,14 +10,6 @@ from multiprocessing import Lock
 from nnabla.logger import logger
 
 
-def check_directory_supervised(rel_path, keys):
-    for key in keys:
-        if fnmatch.fnmatch(key, "{}*".format(rel_path)):
-            return True
-
-    return False
-
-
 def nnabla_proto_to_json(file_path):
     proto = nnabla_pb2.NNablaProtoBuf()
 
@@ -47,7 +39,7 @@ def get_directory_tree_recursive(path):
             current += get_directory_tree_recursive(file)
         else:
             if check_file_extension(file):
-                current.append(os.path.relpath(file))
+                current.append(os.path.abspath(file))
 
     return current
 
@@ -69,6 +61,7 @@ def initialize_send_queue(path_list, base_path):
 
     for path in path_list:
         send_info = {"path": os.path.relpath(path, base_path),
+                     "action": "add",
                      "data": get_file_content(path)}
         ret.append(send_info)
 
@@ -85,28 +78,38 @@ class Monitor(FileSystemEventHandler):
 
         self.directory_manager = directory_manager
 
-    def set_send_queue(self, path):
-        send_info = {"path": os.path.relpath(path, self.logdir),
-                     "data": get_file_content(path)}
+    def set_send_queue(self, abs_path, action):
+
+        data = get_file_content(abs_path) if action == "add" else None
+
+        if data == "":
+            return
+
+        send_info = {"path": os.path.relpath(abs_path, self.logdir),
+                     "action": action,
+                     "data": data}
 
         with Lock():
             num_access = len(self.send_manager)
             for i in range(num_access):
-                self.send_manager[i].append(send_info)
+                self.send_manager[i] = self.send_manager[i] + [send_info,]
 
     def on_created(self, event):
-        self.set_send_queue(event.src_path)
+        abs_path = os.path.abspath(event.src_path)
+        self.directory_manager += [abs_path, ]
+
+        self.set_send_queue(abs_path, "add")
 
     def on_modified(self, event):
-        self.set_send_queue(event.src_path)
+        abs_path = os.path.abspath(event.src_path)
+        self.set_send_queue(abs_path, "add")
 
     def on_deleted(self, event):
-        pass
-        # if event.is_directory:
-        #     # directory deleted event
-        #     pass
-        # else:
-        #     if check_directory_supervised(rel_path, self.dataInfo.keys()):
-        #         self.set_send_info(deleted, "delete")
+        abs_path = os.path.relpath(event.src_path)
 
+        if abs_path in self.directory_manager:
+            index = self.directory_manager.index(abs_path)
+            self.directory_manager = self.directory_manager[:index] + self.directory_manager[index+1:]
+
+        self.set_send_queue(abs_path, "delete")
 

@@ -23,7 +23,7 @@ Vue.component('nnc-zoom-box', ZoomBoxVue);
 Vue.component('context-menu', ContextMenuVue);
 
 // for debug
-// Vue.config.devtools = true;
+Vue.config.devtools = true;
 
 const router = new VueRouter({
     routes: [

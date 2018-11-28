@@ -8,7 +8,7 @@ import os
 import gevent
 from gevent.pywsgi import WSGIServer
 from werkzeug.contrib.fixers import ProxyFix
-from flask import Flask, render_template, Response, send_file
+from flask import Flask, render_template, Response, send_file, jsonify
 
 from multiprocessing import Pool, Manager, Lock
 from watchdog.observers import Observer
@@ -68,8 +68,8 @@ def check_and_create_logdir(logdir):
 
 
 def create_supervise_process(logdir):
-    def supervise():
-        monitor = Monitor(logdir=logdir, send_manager=send_manager, directory_manager=directory_manager)
+    def supervise(_send_manager, _directory_manager):
+        monitor = Monitor(logdir=logdir, send_manager=_send_manager, directory_manager=_directory_manager)
 
         observer = Observer()
         observer.schedule(monitor, monitor.logdir, recursive=True)
@@ -103,15 +103,18 @@ def create_subscribe_response(communication_interval, base_path):
     def subscribe():
         def send():
             # init
-            send_queue = initialize_send_queue(directory_manager, base_path)
-            send_manager.append(send_queue)
+            global send_manager
+            with Lock():
+                idx = len(send_manager)
+                send_manager.insert(idx, initialize_send_queue(directory_manager, base_path))
 
             try:
                 while True:
-                    if len(send_queue) > 0:
+                    if len(send_manager[idx]) > 0:
                         with Lock():
-                            info = send_queue.pop()
-                            yield sse_msg_encoding(str(info["data"]), _id=str(info["path"]))
+                            info = send_manager[idx][0]
+                            send_manager[idx] = send_manager[idx][1:]
+                            yield sse_msg_encoding(str(info["data"]), _id=str(info["path"]), _event=str(info["action"]))
 
                     gevent.sleep(communication_interval)
 
@@ -136,8 +139,11 @@ def main():
     global directory_manager
     directory_manager += get_directory_tree_recursive(logdir)
 
+    global send_manager
+
     with Pool(1) as p:
-        p.Process(target=create_supervise_process(logdir)).start()
+
+        p.Process(target=create_supervise_process(logdir), args=[send_manager, directory_manager]).start()
 
         create_subscribe_response(args.communication_interval, logdir)
 
