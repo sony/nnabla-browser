@@ -152,8 +152,8 @@ const svgAreaOperatorCtor = function () {
     };
 
     const getCorrectPosition = (x, y) => {
-        const X = Math.max(Math.floor(x / grid), 0) * grid;
-        const Y = Math.max(Math.floor(y / grid), 0) * grid;
+        const X = Math.max(Math.round(x / grid), 0) * grid;
+        const Y = Math.max(Math.round(y / grid), 0) * grid;
 
         return [X, Y];
     };
