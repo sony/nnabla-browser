@@ -108,6 +108,9 @@ const svgAreaOperatorCtor = function () {
 
     const layerDef = Definitions.EDIT.LAYER;
     const grid = layerDef.GRID;
+    const layerWidth = layerDef.RECT_WIDTH;
+    const layerHeight = layerDef. RECT_HEIGHT;
+
     this.grid = grid;
 
     const adjustSvgSize = () => {
@@ -151,6 +154,30 @@ const svgAreaOperatorCtor = function () {
         y += isSourceNode ? grid * 2 : 0;
 
         return {x, y};
+    };
+
+    const checkOverlapLayers = ({x: x1, y: y1}, {x: x2, y: y2}) => {
+        const s1 = Math.max(x1, x2);
+        const t1 = Math.max(y1, y2);
+        const s2 = Math.min(x1 + layerWidth, x2 + layerWidth);
+        const t2 = Math.min(y1 + layerHeight, y2 + layerHeight);
+
+        return s2 - s1 > 0 && t2 - t1 > 0;
+    };
+
+    const getOverlapLayerPosition = ({x: x1, y: y1}, layerIndex) => {
+        // todo: nearest neighbor search
+
+        const numLayers = store.getters.activeGraph.nodes.length;
+
+        for (let i = 0; i < numLayers; i++) {
+            if (i === layerIndex) continue;
+
+            let position = getLayerPosition(i);
+            if (checkOverlapLayers({x: x1, y: y1}, position)) return position;
+        }
+
+        return false;
     };
 
     const getCorrectPosition = (x, y) => {
@@ -301,29 +328,40 @@ const svgAreaOperatorCtor = function () {
             .lower();
     };
 
-    const layerDragEnd = function (v, index) {
+    const layerDragEnd = function (v, layerIndex) {
         // remove assist dots
         d3.select("#svg-assist-dots").transition().duration(300).style("opacity", 0);
 
-        const [currentX, currentY] = getTranslateCoordinate(this);
+        let [x, y] = getTranslateCoordinate(this);
 
         // auto positioning
-        const [x, y] = getCorrectPosition(currentX, currentY);
+        while (true) {
+            [x, y] = getCorrectPosition(x, y);
+
+            let overlapLayerPosition = getOverlapLayerPosition({x, y}, layerIndex);
+            if (!overlapLayerPosition) {
+                break;
+            }
+
+            x = overlapLayerPosition.x + layerWidth + grid;
+            y = overlapLayerPosition.y + layerHeight + grid;
+        }
 
         // redraw all links
         for (let link of self.connectedLinks) {
             link.update({x, y});
             d3.select("path#link-" + link.index)
-                .transition().duration(300).attr("d", createLinkLineContext(link.source, link.destination));
+                .transition().ease(d3.easeCubicOut).duration(500)
+                .attr("d", createLinkLineContext(link.source, link.destination));
         }
 
         self.connectedLinks = [];
 
         d3.select(this)
-            .transition().duration(300)
+            .transition().ease(d3.easeCubicOut).duration(500)
             .attr("transform", `translate(${x}, ${y})`)
             .on("end", () => {
-                store.commit("setNodePosition", {index, x, y});
+                store.commit("setNodePosition", {index: layerIndex, x, y});
                 adjustSvgSize();
                 store.commit("endDragging");
             });
@@ -350,7 +388,6 @@ const svgAreaOperatorCtor = function () {
 
 
     // for link event
-
     const linkDragStart = function (v, i, nodes) {
         layerFocusing(nodes[i].parentNode.parentNode);
 
