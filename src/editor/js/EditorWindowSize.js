@@ -54,6 +54,7 @@ const EditorWindowSize = {
                 const networkActionHeight = boundingHeightOf('.network-action');
                 const graphHeight = contentHeight - graphsTabHeight - networkActionHeight;
                 $('.network-editor-scroller').height(graphHeight);
+                store.commit("setAssistAreaSize", {x: $('.network-editor-scroller').width(), y: graphHeight});
             }
         };
     })(),

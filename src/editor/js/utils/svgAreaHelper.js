@@ -108,6 +108,7 @@ const svgAreaOperatorCtor = function () {
 
     const layerDef = Definitions.EDIT.LAYER;
     const grid = layerDef.GRID;
+    this.grid = grid;
 
     const adjustSvgSize = () => {
         const svg = d3.select("svg#network-editor");
@@ -115,9 +116,10 @@ const svgAreaOperatorCtor = function () {
 
         let layersDOM = svgLayers.node().getClientRects()[0];
 
-        svg.attr("width", Math.max(document.getElementById("centerContent").clientWidth,
-            layersDOM.width + grid * 4));
-        svg.attr("height", layersDOM.height + grid * 4);
+        svg.attr("width",
+            Math.max(d3.select("div.tab-content.network-editor-scroller").node().clientWidth, layersDOM.width + grid * 4));
+        svg.attr("height",
+            Math.max(d3.select("div.tab-content.network-editor-scroller").node().clientHeight, layersDOM.height + grid * 4));
     };
 
     const getTranslateCoordinate = (node) => {
@@ -146,7 +148,7 @@ const svgAreaOperatorCtor = function () {
         let {x, y} = getLayerPosition(layerIndex);
 
         x += grid * 5;
-        y += isSourceNode ? grid * 2: 0;
+        y += isSourceNode ? grid * 2 : 0;
 
         return {x, y};
     };
@@ -197,12 +199,12 @@ const svgAreaOperatorCtor = function () {
 
         context.moveTo(x1, y1);
 
-        if ( (y2 - y1) > offset * 2 && Math.abs(x1 - x2) > offset * 2) {
+        if ((y2 - y1) > offset * 2 && Math.abs(x1 - x2) > offset * 2) {
             const halfY = (y1 + y2) / 2;
             const sign = x1 < x2 ? 1 : -1;
 
             points = [
-                [x1,  halfY - offset],
+                [x1, halfY - offset],
                 [x1, halfY, x1 + sign * offset, halfY], // cx, cy, x, y
                 [x2 - sign * offset, halfY],
                 [x2, halfY, x2, halfY + offset] // cx, cy, x, y
@@ -217,7 +219,7 @@ const svgAreaOperatorCtor = function () {
                 [x1 + halfX - offset, y1 + offset],
                 [x1 + halfX, y1 + offset, x1 + halfX, y1], // cx, cy, x, y
                 [x1 + halfX, y2],
-                [x1 + halfX, y2 - offset, x1 + halfX + sign * offset , y2 - offset], // cx, cy, x, y
+                [x1 + halfX, y2 - offset, x1 + halfX + sign * offset, y2 - offset], // cx, cy, x, y
                 [x2 - sign * offset, y2 - offset],
                 [x2, y2 - offset, x2, y2] // cx, cy, x, y
             ];
@@ -237,9 +239,10 @@ const svgAreaOperatorCtor = function () {
     const layerDragStart = function (v, i) {
         layerFocusing(this);
 
+        store.commit("startDragging");
+
         // get all links connecting this layer
         const links = store.getters.activeLinks(i);
-        const offsetX = Definitions.EDIT.LAYER.RECT_WIDTH / 2;
 
         self.connectedLinks = [];
 
@@ -249,13 +252,17 @@ const svgAreaOperatorCtor = function () {
                 insert = {
                     index: link.index,
                     destination: getLinkerPosition(link.destination, false),
-                    update: function ({x, y}) {this.source = {x: x + grid * 5 , y: y + grid * 2}}
+                    update: function ({x, y}) {
+                        this.source = {x: x + grid * 5, y: y + grid * 2}
+                    }
                 }
             } else if (link.destination === i) {
                 insert = {
                     index: link.index,
                     source: getLinkerPosition(link.source, true),
-                    update: function ({x, y}) {this.destination = {x: x + grid * 5 , y: y}}
+                    update: function ({x, y}) {
+                        this.destination = {x: x + grid * 5, y: y}
+                    }
                 }
             }
 
@@ -276,7 +283,7 @@ const svgAreaOperatorCtor = function () {
         // redraw all links
         for (let link of self.connectedLinks) {
             link.update({x, y});
-            d3.select("path#link-"+link.index).attr("d", createLinkLineContext(link.source, link.destination));
+            d3.select("path#link-" + link.index).attr("d", createLinkLineContext(link.source, link.destination));
         }
 
         // show end position
@@ -295,6 +302,9 @@ const svgAreaOperatorCtor = function () {
     };
 
     const layerDragEnd = function (v, index) {
+        // remove assist dots
+        d3.select("#svg-assist-dots").transition().duration(300).style("opacity", 0);
+
         const [currentX, currentY] = getTranslateCoordinate(this);
 
         // auto positioning
@@ -303,7 +313,7 @@ const svgAreaOperatorCtor = function () {
         // redraw all links
         for (let link of self.connectedLinks) {
             link.update({x, y});
-            d3.select("path#link-"+link.index)
+            d3.select("path#link-" + link.index)
                 .transition().duration(300).attr("d", createLinkLineContext(link.source, link.destination));
         }
 
@@ -315,11 +325,13 @@ const svgAreaOperatorCtor = function () {
             .on("end", () => {
                 store.commit("setNodePosition", {index, x, y});
                 adjustSvgSize();
+                store.commit("endDragging");
             });
 
         // remove auxiliary layer
         d3.select("#svg-layers").selectAll("rect#auxiliary-layer")
             .transition().duration(300).attr("opacity", 0).remove();
+
     };
 
     const layerClicked = function () {
@@ -355,8 +367,12 @@ const svgAreaOperatorCtor = function () {
 
         let [x, y] = d3.mouse(document.getElementById("network-editor"));
 
-        if (d3.event.dx) {self.drawingLinkMemory.delta.x = Math.sign(d3.event.dx) * 2}
-        if (d3.event.dy) {self.drawingLinkMemory.delta.y = Math.sign(d3.event.dy) * 2}
+        if (d3.event.dx) {
+            self.drawingLinkMemory.delta.x = Math.sign(d3.event.dx) * 2
+        }
+        if (d3.event.dy) {
+            self.drawingLinkMemory.delta.y = Math.sign(d3.event.dy) * 2
+        }
 
         // 描画するlineが既存のlinkerに重なった際、上に描画されるため、mouseEnter/Leave/Over/Outがおかしくなる。すこしずらす。
         x -= self.drawingLinkMemory.delta.x;

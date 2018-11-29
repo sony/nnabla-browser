@@ -1,38 +1,49 @@
 <template>
-    <svg id="network-editor" tabindex="0" >
-
-        <g class="layers" id="svg-layers" >
-            <g class="layer"
-               v-for="(node, index) in activeGraph.nodes"
-               :id="'layer-' + index"
-               :key="$store.state.graphInfo.nntxtPath + '-layer-' + index"
-               :transform="createTransform(node, index)"
-               @mousedown="clickLayer(index)">
-                <g class="link-circles top" v-if="node.type !== 'InputVariable'">
-                    <circle class="linker" cx="100" cy="0" r="3.5"></circle>
-                    <circle class="hide-linker top" cx="100" cy="0" r="9" opacity="0"></circle>
-                </g>
-                <g class="link-circles bottom" v-if="node.type !== 'OutputVariable'">
-                    <circle class="linker" cx="100" cy="40" r="3.5"></circle>
-                    <circle class="hide-linker bottom"
-                            cx="100" cy="40" r="9" opacity="0"
-                            @mousedown.stop="clickLayer(index)"></circle>
-                </g>
-                <rect class="layer-rect" v-bind="getNodeAttr()" :style="getNodeStyle(node)"></rect>
-                <text :style="getCapitalStyle()" v-bind="getCapitalAttr()">{{ node.type.substring(0, 1) }}</text>
-                <g class="text-component" v-bind="getTextComponentStyle()">
-                    <text :style="getTextStyle()" v-bind="getTextAttr()">{{node.name}}</text>
+    <div>
+        <svg id="network-editor" tabindex="0">
+            <keep-alive>
+            <g class="assist-dots" id="svg-assist-dots" :style="getAssistDotsStyle()" v-if="isDragging">
+                <g v-for="col in assistAreaX">
+                    <g v-for="row in assistAreaY">
+                        <circle :cx="col" :cy="row" r="1.0" style="fill: var(--color-brand)"></circle>
+                    </g>
                 </g>
             </g>
-        </g>
+            </keep-alive>
 
-        <g class="links" id="svg-links" style="opacity: 0">
-            <path v-for="(link, index) in activeGraph.links"
-                  :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
-                  :id="'link-' + index"
-                  :style="getLinkLineStyle()" :d="createLinkLineContext(link)" ></path>
-        </g>
-    </svg>
+            <g class="layers" id="svg-layers" >
+                <g class="layer"
+                   v-for="(node, index) in activeGraph.nodes"
+                   :id="'layer-' + index"
+                   :key="$store.state.graphInfo.nntxtPath + '-layer-' + index"
+                   :transform="createTransform(node, index)"
+                   @mousedown="clickLayer(index)">
+                    <g class="link-circles top" v-if="node.type !== 'InputVariable'">
+                        <circle class="linker" cx="100" cy="0" r="3.5"></circle>
+                        <circle class="hide-linker top" cx="100" cy="0" r="9" opacity="0"></circle>
+                    </g>
+                    <g class="link-circles bottom" v-if="node.type !== 'OutputVariable'">
+                        <circle class="linker" cx="100" cy="40" r="3.5"></circle>
+                        <circle class="hide-linker bottom"
+                                cx="100" cy="40" r="9" opacity="0"
+                                @mousedown.stop="clickLayer(index)"></circle>
+                    </g>
+                    <rect class="layer-rect" v-bind="getNodeAttr()" :style="getNodeStyle(node)"></rect>
+                    <text :style="getCapitalStyle()" v-bind="getCapitalAttr()">{{ node.type.substring(0, 1) }}</text>
+                    <g class="text-component" v-bind="getTextComponentStyle()">
+                        <text :style="getTextStyle()" v-bind="getTextAttr()">{{node.name}}</text>
+                    </g>
+                </g>
+            </g>
+
+            <g class="links" id="svg-links" style="opacity: 0">
+                <path v-for="(link, index) in activeGraph.links"
+                      :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
+                      :id="'link-' + index"
+                      :style="getLinkLineStyle()" :d="createLinkLineContext(link)" ></path>
+            </g>
+        </svg>
+    </div>
 </template>
 
 <script>
@@ -45,7 +56,17 @@
         },
         computed: {
             ...mapGetters(["activeGraph"]),
-            ...mapState({prevGraph: state => state.graphInfo.prevGraph})
+            ...mapState({
+                prevGraph: state => state.graphInfo.prevGraph,
+                isDragging: state => state.graphInfo.isDragging,
+                assistAreaSize: state => state.graphInfo.assistAreaSize,
+            }),
+            assistAreaX: function() {
+                return d3.range(0, this.assistAreaSize.x, svgAreaOperator.grid)
+            },
+            assistAreaY: function() {
+                return d3.range(0, this.assistAreaSize.y, svgAreaOperator.grid)
+            }
         },
         updated: function () {
 
@@ -77,6 +98,13 @@
                     }
                 }
                 return ret;
+            },
+            getAssistDotsStyle: () => {
+                const scroller = d3.select("div.tab-content.network-editor-scroller").node();
+                return {
+                    transform: "translate(" + scroller.scrollLeft + "px, " + scroller.scrollTop + "px)",
+                    opacity: 1.0
+                }
             },
             getNodeAttr: () => StyleHelper.createNodeAttr(),
             getNodeStyle: (node) => StyleHelper.createNodeStyle(node),

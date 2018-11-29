@@ -12,7 +12,9 @@ const state = {
     prevGraph: {},
     graphs: [],
     nntxtPath: "",
-    activeIndex: {Graph: -1, Layer: -1}
+    activeIndex: {Graph: -1, Layer: -1},
+    isDragging: false,
+    assistAreaSize: {x: 0, y: 0}
 };
 
 const mutations = {
@@ -60,6 +62,19 @@ const mutations = {
         const activeGraph = getActiveGraph(state);
 
         activeGraph.links.push({source, destination});
+    },
+
+    startDragging: function (state) {
+        state.isDragging = true;
+    },
+
+    endDragging: function (state) {
+        state.isDragging = false;
+    },
+
+    setAssistAreaSize: function (state, {x, y}) {
+        state.assistAreaSize.x = x;
+        state.assistAreaSize.y = y;
     }
 };
 
