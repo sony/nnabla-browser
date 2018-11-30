@@ -9,6 +9,8 @@
 
 <script>
 
+    import nnablaCore from "../../../lib/js/nnablaCore";
+
     const functionComponent = {
         props: ["layer"],
         template: `

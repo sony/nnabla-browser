@@ -61,7 +61,7 @@ const SSEhelper = function () {
                 // user define output
                 if (outputVariables.findIndex(v => v.variableName === sourceOutput) > -1) {
                     let tmpLayer = {
-                        inputParam: null, input: [sourceOutput], name: sourceOutput,
+                        outputParam: null, input: [sourceOutput], name: sourceOutput,
                         output: [], type: "OutputVariable",
                     };
 

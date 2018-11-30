@@ -1,26 +1,6 @@
 import Definitions from './../misc/Definitions';
 import store from "../store";
-
-export const allFunctions = [];
-
-const getAllFuncionsRecursive = (obj) => {
-    if (typeof obj.snake_name !== "undefined") {
-        return obj;
-    } else {
-        if (typeof obj === "object") {
-            for (let key in obj) {
-                const ret = getAllFuncionsRecursive(obj[key]);
-                if (ret) {
-                    allFunctions.push(ret);
-                }
-            }
-        } else {
-            return false;
-        }
-    }
-};
-
-getAllFuncionsRecursive(nnablaCore);
+import {allFunctions} from "./nnablaApi";
 
 const StyleHelperCtor = function () {
     const layerDef = Definitions.EDIT.LAYER;
@@ -32,7 +12,7 @@ const StyleHelperCtor = function () {
     };
 
     const getLayerColor = layerType => {
-        return "#" + getDefaultComponent(layerType).color.substring(2, 8);
+        return getDefaultComponent(layerType).color;
     };
 
     // method
@@ -109,7 +89,7 @@ const svgAreaOperatorCtor = function () {
     const layerDef = Definitions.EDIT.LAYER;
     const grid = layerDef.GRID;
     const layerWidth = layerDef.RECT_WIDTH;
-    const layerHeight = layerDef. RECT_HEIGHT;
+    const layerHeight = layerDef.RECT_HEIGHT;
 
     this.grid = grid;
 

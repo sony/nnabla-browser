@@ -1,11 +1,29 @@
 from __future__ import print_function
 
-import nnabla as nn
 import os
 import fnmatch
 import re
 import yaml
 from json import dumps
+import inspect
+import importlib
+
+# it`s too dirty...
+YAML_PATH = {
+    "functions": os.path.join(os.path.abspath(os.path.dirname(__file__)), "nnabla_core", "functions.yaml")
+}
+
+
+def get_activation_list():
+    with open(YAML_PATH["functions"], "r") as f:
+        yaml_obj = yaml.load(f)
+
+    activations = [x["snake_name"] for x in yaml_obj["Neural Network Activation Functions"].values()]
+
+    return activations
+
+
+_activations = get_activation_list()
 
 
 def _snake_to_camel(string):
@@ -16,164 +34,122 @@ def _camel_to_snake(string):
     return re.sub("([A-Z])", lambda x: "_" + x.group(1).lower(), string)
 
 
-def create_nntxt_name(function_name):
-    pass
+def treat_name_exception(snake_name):
+    if fnmatch.fnmatch(snake_name, "*relu*"):
+        # exception
+        return snake_name.replace("relu", "ReLU")
+
+    if fnmatch.fnmatch(snake_name, "*elu*"):
+        return snake_name.replace("elu", "ELU")
+
+    return snake_name
 
 
-def _get_color_by_category(category):
-    color_list = {
-        "Neural Network Layer": "0xa58e7f",
-        "Neural Network Activation Functions": "0xd77b6a",
-        "Arithmetic": "0x848484"
-    }
+def get_color(layer_name, default_color):
+    layer_name = layer_name.lower()
+    if fnmatch.fnmatch(layer_name, "*pooling*"):
+        return "#a58e7f"
 
-    if category in color_list.keys():
-        return color_list[category]
-    else:
-        return "0xc0c0c0"
+    if layer_name in _activations:
+        return "#d77b6a"
+
+    return default_color
 
 
-def get_all_function_api_definitions(path, default_color, type):
-    with open(path, "r") as f:
-        lines = f.readlines()
+def get_all_function_api_definitions(module_name, default_color, api_type, ignores=None):
+    module = importlib.import_module(module_name)
 
-    ret = []
-    flag = False
-    definition = ""
+    def predicate(value):
+        if inspect.isfunction(value):
+            if value.__module__ == module_name:
+                return True
 
-    for line in lines:
-        if fnmatch.fnmatch(line, "def *(*"):
-            flag = True
+        return False
 
-        if flag:
-            line = line.strip()
-            definition += line
-            if not fnmatch.fnmatch(line, "*:"):
-                continue
+    all_functions = inspect.getmembers(module, predicate)
+    ret = {}
 
-            func_def = definition[4:-2]
-            function_name, args_def = func_def.split("(", maxsplit=1)
-            layer_color = default_color
-            if type == "functions" and fnmatch.fnmatch(function_name.lower(), "*pooling*"):
-                layer_color = "0xa58e7f"
-
-            if function_name != "parametric_function_api":
-                inputs = {}
-                arguments = {}
-                for arg in args_def.split(","):
-                    split = arg.strip().split("=")
-
-                    # arguments
-                    if len(split) > 1:
-                        arguments[split[0]] = {"default": split[1], "optional": True}
-                    else:
-                        inputs[split[0]] = {"optional": False}
-
-                camel = _snake_to_camel(function_name)
-                layer_name = camel[0].upper() + camel[1:]
-
-                function_info = {
-                    "layer_name": layer_name,
-                    "snake_name": _camel_to_snake(function_name),
-                    "color": layer_color,
-                    "api_type": type + "_api",
-                    "inputs": inputs,
-                    "arguments": arguments
-                }
-
-                ret.append(function_info)
-
-            definition = ""
-            flag = False
-        else:
+    for snake_name, func in all_functions:
+        if ignores is not None and snake_name in ignores:
             continue
+
+        snake_name = treat_name_exception(snake_name.lower())
+        camel_name = _snake_to_camel(snake_name)
+        layer_name = camel_name[0].upper() + camel_name[1:]
+
+        sig = inspect.signature(func)
+
+        # parse parameters
+        inputs = {}
+        arguments = {}
+        for param_name, param in sig.parameters.items():
+            if param.default == inspect.Parameter.empty:
+                # inputs
+                inputs[param_name] = {"optional": False}
+            else:
+                arguments[param_name] = {"default": "None" if param.default is None else param.default,
+                                         "type": type(param.default).__name__,
+                                         "optional": True}
+
+        function_info = {
+            "layer_name": layer_name,
+            "snake_name": snake_name,
+            "color": get_color(layer_name, default_color),
+            "api_type": "{}_api".format(api_type),
+            "inputs": inputs,
+            "arguments": arguments
+        }
+
+        ret[layer_name] = function_info
 
     return ret
 
 
 def parse_function_APIs():
-    user_nnabla_path = nn.__path__[0]
+    # nnabla.parametric_functions
+    p_functions = get_all_function_api_definitions("nnabla.parametric_functions", "#6aa1bd",
+                                                   "parametric_functions",
+                                                   ignores=["parametric_function_api"])
 
-    functions_path = os.path.join(user_nnabla_path, "functions.py")
-    functions = get_all_function_api_definitions(functions_path, default_color="0xd77b6a", type="functions")
+    # nnabla.functions
+    functions = get_all_function_api_definitions("nnabla.function_bases", "#848484", "functions")
 
-    p_functions_path = os.path.join(user_nnabla_path, "parametric_functions.py")
-    p_functions = get_all_function_api_definitions(p_functions_path, default_color="0x6aa1bd",
-                                                   type="parametric_functions")
+    # remove deprecated (priority order is parametric_functions > functions > function_bases)
+    functions.update(get_all_function_api_definitions("nnabla.functions", "#d77b6a", "functions"))
+    keys = list(functions.keys())
+    for key in keys:
+        if key in p_functions:
+            functions.pop(key)
 
-    # remove deprecated (parametric functions have high priority)
-    ret = p_functions
-    name_list = [x["snake_name"] for x in p_functions]
-
-    for function in functions:
-        if function["snake_name"] not in name_list:
-            ret.append(function)
-
-    return ret
+    return p_functions, functions
 
 
-def parse_yaml(yaml_path):
-    function_apis = parse_function_APIs()
-
-    api_name_list = [x["snake_name"] for x in function_apis]
-
-    with open(yaml_path, "r") as f:
-        yaml_obj = yaml.load(f)
-
-    ret = {"base_functions": {}, "functions_api": {}, "parametric_functions_api": {}, "variables": {}}
-
-    def recursive(obj, result, depth, category):
-        for key, value in obj.items():
-            if depth == 1:
-                if value["snake_name"] in api_name_list:
-                    continue
-
-                result[key] = {"layer_name": key, "color": _get_color_by_category(category)}
-            else:
-                if key == "doc":
-                    continue
-
-                result[key] = {}
-
-            if isinstance(value, dict):
-                if not recursive(value, result[key], depth=depth + 1, category=key if depth == 0 else None):
-                    result[key] = {"parameter": False}
-            else:
-                result[key] = value
-
-        return False if len(result.values()) < 1 else True
-
-    recursive(yaml_obj, ret["base_functions"], depth=0, category=None)
-
-    for function_api in function_apis:
-        ret[function_api["api_type"]][function_api["layer_name"]] = function_api
-
+def create_variable_info():
     # input and output
-    ret["variables"]["input"] = {
-                    "layer_name": "InputVariable",
-                    "snake_name": "input",
-                    "color": "#000000",
-                    "arguments": []
-                }
-
-    ret["variables"]["output"] = {
-        "layer_name": "OutputVariable",
-        "snake_name": "output",
-        "color": "#000000",
-        "arguments": []
+    return {
+        "input": {
+            "layer_name": "InputVariable",
+            "snake_name": "input",
+            "color": "#000000",
+            "arguments": {}
+        },
+        "output": {
+            "layer_name": "OutputVariable",
+            "snake_name": "output",
+            "color": "#000000",
+            "arguments": {}
+        }
     }
 
-    return ret
 
+def parse_all():
+    p_functions, functions = parse_function_APIs()
+    variables = create_variable_info()
 
-def parse_all_yaml():
-    yaml_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "nnabla_core")
-
-    return parse_yaml(os.path.join(yaml_path, "functions.yaml"))
+    return {"parametric_functions": p_functions, "functions": functions, "variables": variables}
 
 
 def create_nnabla_core_js(out_path):
-    layer_components = parse_all_yaml()
-
     with open(out_path, "w") as f:
-        print("const nnablaCore = " + dumps(layer_components, indent=2), file=f)
+        print("const nnablaCore = " + dumps(parse_all(), indent=2)
+              + ";\n export default nnablaCore;", file=f)

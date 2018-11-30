@@ -1,14 +1,12 @@
 <template>
     <div>
-        <property-area class="app-row" style="height: 50%; bottom: 0;"
-                       @history="command => $emit('history', command)"
-        />
+        <property-area class="app-row" style="height: 50%; bottom: 0;"/>
     </div>
 </template>
 
 <script>
     import Definitions from './../../misc/Definitions';
-    import { allFunctions } from './../../utils/svgAreaHelper';
+    import { allFunctions } from './../../utils/nnablaApi';
     import { mapGetters } from "vuex";
 
     const propertyArea = {
@@ -18,8 +16,8 @@
                 <div v-if="isLayerSelected">
                     <layer-type :defaultProps="defaultProps" />
                     <layer-properties class="app-row app-scroll-x app-scroll-y" style="top: 88px; bottom: 0;"
-                        :defaultProps="defaultProps"
-                        @history="command => $emit('history', command)"
+                        :defaultParams="defaultProps.arguments"
+                        :layerParams="layerParams"
                     />
             </div>`,
         computed: {
@@ -31,6 +29,10 @@
             },
             defaultProps: function () {
                 return allFunctions.find(x => x.layer_name === this.selectedLayer.type);
+            },
+            layerParams: function () {
+                const paramKey = this.selectedLayer.type.toLowerCase() + "Param";
+                return this.selectedLayer[paramKey] || {};
             }
         },
         components: {
@@ -61,37 +63,38 @@
                 }
             },
             'layer-properties': {
-                props: ["defaultProps"],
+                props: ["defaultParams", "layerParams"],
                 template: `
                     <div>
-                        <div class="property" v-for="property, name in defaultProps.arguments">
+                        <div class="property" v-for="value, key in defaultParams">
                             <div class="content">
-                                <div class="name">{{ name }}</div>
+                                <div class="name">{{ key }}</div>
                                 <component
-                                :is="selectComponent(property)"
-                                :property="property"
-                                :name="name"
-                                :class="'value' + (property.error ? ' warning' : '')"
-                                :title="property.error"
+                                :is="selectComponent(value)"
+                                :defaultParam="value"
+                                :layerParam="getLayerParam(key)"
+                                :class="'value' + (value.error ? ' warning' : '')"
+                                :title="value.error"
                                 />
                             </div>
                         </div>
                     </div>`,
                 components: {
                     'prop-text': {
-                        props: ['property', "name"],
+                        props: ['defaultParam', "layerParam"],
                         template: `
                             <div>
                                 <input type="text" :value="getValue()" />
                             </div>`,
                         methods: {
                             getValue: function () {
-                                return this.property.default;
+                                if (this.layerParam !== null) return this.layerParam;
+                                return this.defaultParam.default;
                             }
                         }
                     },
                     'prop-bool': {
-                        props: ['property'],
+                        props: ['defaultParam', "layerParam"],
                         template: `
                             <div @click="onclick">
                                 <label>
@@ -101,7 +104,8 @@
                             </div>`,
                         computed: {
                             checked: function () {
-                                return this.property.default;
+                                if (this.layerParam !== null) return this.layerParam;
+                                return this.defaultParam.default;
                             }
                         },
                         methods: {
@@ -111,21 +115,29 @@
                         },
                     },
                     'prop-select': {
-                        props: ['property'],
+                        props: ['defaultParam', "layerParam"],
                         template: `
-                            <select :value="property.value" @change="onchange">
-                                <option v-for="value in property.choice" :checked="value === property.value">
+                            <select :value="defaultParam.value">
+                                <option v-for="value in defaultParam.choice" :checked="value === defaultParam.value">
                                     {{ value }}
                                 </option>
-                            </select>`,
-                        methods: {
-                            onchange: function (event) {
-                                this.$emit('update', {name: this.property.name, value: event.target.value});
-                            },
-                        },
+                            </select>`
                     },
                 },
                 methods: {
+                    snakeToCamel: function(name) {
+                        return name.replace(/_./g, s => s.charAt(1).toUpperCase());
+                    },
+                    getLayerParam: function(key) {
+                        let params = this.layerParams[this.snakeToCamel(key)];
+
+                        if (typeof params === "undefined") return null;
+
+                        if (typeof params === "object" && params.hasOwnProperty("dim"))  {
+                            return "[" + Object.values(params.dim).join(", ") + "]";
+                        }
+                        return params;
+                    },
                     selectComponent: function (prop) {
                         if (prop.hasOwnProperty("type")) {
                             if (prop.type === "bool") {
