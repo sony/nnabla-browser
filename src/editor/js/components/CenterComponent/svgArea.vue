@@ -101,8 +101,12 @@
             },
             getAssistDotsStyle: () => {
                 const scroller = d3.select("div.tab-content.network-editor-scroller").node();
+
+                const moveToRight =  Math.max(Math.ceil(scroller.scrollLeft  / svgAreaOperator.grid), 0) * svgAreaOperator.grid;
+                const moveToBottom =  Math.max(Math.ceil(scroller.scrollTop  / svgAreaOperator.grid), 0) * svgAreaOperator.grid;
+
                 return {
-                    transform: "translate(" + scroller.scrollLeft + "px, " + scroller.scrollTop + "px)",
+                    transform: "translate(" + moveToRight + "px, " + moveToBottom + "px)",
                     opacity: 1.0
                 }
             },
