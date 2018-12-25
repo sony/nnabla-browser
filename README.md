@@ -5,8 +5,8 @@ NNabla browser is a browser base visualizer for Neural Network Libraries.
 
 # For user
 
-### Environment (recomennded)
-python=3.6.5 
+### Environment
+python >=3.5, <=3.6.5 
 
 ### Build wheel
 ```shell
