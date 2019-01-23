@@ -50,7 +50,9 @@ setup(
         'nnabla_browser/editor': 'src/editor'},
     packages=["nnabla_browser", "nnabla_browser/python_modules", "nnabla_browser/editor"],
     package_data={
-        'nnabla_browser/editor': ['*', "dist/*", "image/*.svg", "lib/css/*.css", "lib/fonts/*", "lib/js/*.js"]},
+        'nnabla_browser/editor': ['*', "dist/*", "image/*.svg", "lib/css/*.css", "lib/fonts/*", "lib/js/*.js"],
+        'nnabla_browser/python_modules': ["nnabla_core/*"]
+    },
     entry_points={
         "console_scripts": [
             "nnabla-browser = nnabla_browser.server:main"
