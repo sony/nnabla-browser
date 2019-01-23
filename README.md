@@ -8,16 +8,19 @@ NNabla browser is a browser base visualizer for Neural Network Libraries.
 ### Environment
 python >=3.5, <=3.6.5 
 
-### Build wheel
-```shell
-$ python setup.py bdist_wheel
-```
-.whl file is created in ./dist for default setting.
-
 ### Install
-``` shell
-$ pip install ./dist/nnablabrowser-<version>-<env>.whl
-```
+
+- Pip install from git repository
+    ```shell
+    $ pip install git+http://ml-git.ubiq.sony.co.jp/Akio.Hayakawa/nnabla-browser-editor.git
+    ```
+
+- Building from source by yourself & install 
+    ```shell
+    $ python setup.py bdist_wheel
+    $ pip install ./dist/nnablabrowser-<version>-<env>.whl
+    ```
+    Note that .whl file is created in ./dist for default setting.
 
 ### Run server
 Once you install nnabla-browser in your environment, you can launch server from anywhere as long as you use same python environment.
