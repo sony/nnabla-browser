@@ -57,7 +57,7 @@ def build():
 
 def check_and_create_logdir(logdir):
     if not os.path.exists(logdir):
-        ans = str(input("{} dose not exist. Would you like to create new directory? [y/N]:").format(logdir))
+        ans = str(input("{} dose not exist. Would you like to create new directory? [y/N]:".format(logdir)))
         if ans.strip().lower() in ["y", "yes"]:
             os.makedirs(logdir)
         else:
