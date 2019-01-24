@@ -1,6 +1,7 @@
 import os
 import fnmatch
 import glob
+import zipfile
 
 from watchdog.events import FileSystemEventHandler
 from google.protobuf import text_format, json_format
@@ -13,14 +14,23 @@ from nnabla.logger import logger
 def nnabla_proto_to_json(file_path):
     proto = nnabla_pb2.NNablaProtoBuf()
 
-    with open(file_path, "r") as f:
-        text_format.Merge(f.read(), proto)
+    if fnmatch.fnmatch(file_path, "*.nntxt"):
+        with open(file_path, "r") as f:
+            text_format.Merge(f.read(), proto)
+    else:
+        with zipfile.ZipFile(file_path, "r") as zf:
+            nntxt_file_list = fnmatch.filter(zf.namelist(), "*.nntxt")
+            if len(nntxt_file_list) > 0:
+                with zf.open(nntxt_file_list[0]) as f:
+                    text_format.Merge(f.read(), proto)
+            else:
+                return ""
 
     return json_format.MessageToJson(proto)
 
 
 def check_file_extension(filepath):
-    patterns = ["*.nntxt", "*.series.txt", "*.result.csv"]
+    patterns = ["*.nntxt", "*.nnp", "*.series.txt", "*.result.csv"]
 
     for pattern in patterns:
         if fnmatch.fnmatch(filepath, pattern):
@@ -45,7 +55,7 @@ def get_directory_tree_recursive(path):
 
 
 def get_file_content(path):
-    if fnmatch.fnmatch(path, "*.nntxt"):
+    if fnmatch.fnmatch(path, "*.nntxt") or fnmatch.fnmatch(path, "*.nnp"):
         return nnabla_proto_to_json(path)
     elif fnmatch.fnmatch(path, "*.series.txt") or fnmatch.fnmatch(path, "*.result.csv"):
         with open(path, "r") as f:

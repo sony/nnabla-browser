@@ -5,7 +5,7 @@ const getFileType = path => {
     const ext = Path.extname(path);
     const subExt = Path.extname(Path.basename(path, ext));
 
-    if (ext === ".nntxt") {
+    if (ext === ".nntxt" || ext === ".nnp") {
         // "XXX.nntxt"
         return "nntxtFiles";
     } else if (subExt === ".series" && ext === ".txt") {
