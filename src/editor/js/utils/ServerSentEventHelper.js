@@ -58,7 +58,7 @@ const SSEhelper = function () {
 
             for (let sourceOutput of sourceLayer.output) {
 
-                // user define output
+                // find user define output
                 if (outputVariables.findIndex(v => v.variableName === sourceOutput) > -1) {
                     let tmpLayer = {
                         outputParam: null, input: [sourceOutput], name: sourceOutput,
@@ -156,6 +156,7 @@ const SSEhelper = function () {
                 nodes.push({...layer, depth: depth, ...getLayerPosition(depth)})
             }
 
+            nodes.sort((a,b) =>  a.index > b.index ? 1 : -1);
 
             graphInfoArray.push({name: executor.name, nodes, links});
         }

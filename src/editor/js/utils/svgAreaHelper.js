@@ -122,8 +122,8 @@ const svgAreaOperatorCtor = function () {
         return layerNode.id.split("-")[1];
     };
 
-    const getLayerPosition = index => {
-        const targetLayer = store.getters.activeGraph.nodes[index];
+    const getLayerPosition = layerIndex => {
+        const targetLayer = store.getters.activeGraph.nodes[layerIndex];
         return {x: targetLayer.x, y: targetLayer.y};
     };
 
@@ -254,7 +254,7 @@ const svgAreaOperatorCtor = function () {
         self.connectedLinks = [];
 
         for (let link of links) {
-            let insert;
+            let insert = {};
             if (link.source === i) {
                 insert = {
                     index: link.index,
@@ -272,8 +272,9 @@ const svgAreaOperatorCtor = function () {
                     }
                 }
             }
-
-            self.connectedLinks.push(insert);
+            if (Object.keys(insert).length > 0) {
+                self.connectedLinks.push(insert);
+            }
         }
     };
 
