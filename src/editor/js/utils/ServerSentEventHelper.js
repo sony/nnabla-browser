@@ -14,17 +14,20 @@ const SSEhelper = function () {
         };
 
         this.addLayer = (layer, depth) => {
-            let isRegister;
-            if (!this.layers.hasOwnProperty(layer.name)) {
-                this.layers[layer.name] = {...layer, index: this.counter, depth: [depth]};
-                this.counter++;
-                isRegister = true;
-            } else {
+            if (!this.layers.hasOwnProperty(layer.name)) { // first visit
+                this.layers[layer.name] = {...layer, index: this.counter++, depth: [depth], visitCount: 1};
+            } else { // visit again
                 this.layers[layer.name].depth.push(depth);
-                isRegister = false
+                this.layers[layer.name].visitCount++;
             }
 
-            return [this.layers[layer.name], isRegister];
+            const retLayer = this.layers[layer.name];
+
+            if (retLayer.input.length < retLayer.visitCount) {
+                console.log("something wrong!!");
+            }
+
+            return [retLayer, retLayer.input.length <= retLayer.visitCount];
         };
 
         this.getLayers = () => {
@@ -48,7 +51,7 @@ const SSEhelper = function () {
     const getLayerPosition = depth => {
         const depthWiseIndex = this.layerRegister.getDepthWiseIndex(depth);
 
-        return {x: GRID * (2 + depthWiseIndex * 15), y: GRID * (2 + depth * 4)};
+        return {x: GRID * (2 + depthWiseIndex * 15), y: GRID * (2 + depth * 2)};
     };
 
     const setupGetNodeAndLinkRecursive = (network, outputVariables) => {
@@ -73,6 +76,8 @@ const SSEhelper = function () {
                     };
 
                     links = [...links, link];
+
+                    continue;
                 }
 
                 let destLayers = network.function.filter(f => (f.input || []).find(name => name === sourceOutput));
@@ -82,7 +87,7 @@ const SSEhelper = function () {
                         ...destLayer,
                     };
 
-                    let [layer, isRegister] = this.layerRegister.addLayer(tmpLayer, depthFromRoot);
+                    let [layer, isVisitEnough] = this.layerRegister.addLayer(tmpLayer, depthFromRoot);
 
                     let link = {
                         source: sourceLayer.index,
@@ -91,9 +96,11 @@ const SSEhelper = function () {
 
                     links = [...links, link];
 
-                    if (isRegister) { // if not already visited this node
+                    console.log(isVisitEnough);
 
-                        let _links = recursive(layer, depthFromRoot + 1);
+                    if (false) { // if not already visited this node
+
+                        let _links = recursive(layer,  Math.max(layer.depth) + 1);
 
                         links = [...links, ..._links];
                     }
@@ -115,6 +122,7 @@ const SSEhelper = function () {
         const executors = json.executor || [];
 
         for (let executor of executors) {
+            console.log(executor);
             const network = networks.find(x => x.name === executor.networkName);
 
             if (typeof network === "undefined") continue;
@@ -132,6 +140,7 @@ const SSEhelper = function () {
                 };
 
                inputLayers.push(this.layerRegister.addLayer(inputLayer, 0)[0]);
+               console.log(inputLayers);
             }
 
             let links = [];
@@ -159,6 +168,8 @@ const SSEhelper = function () {
             nodes.sort((a,b) =>  a.index > b.index ? 1 : -1);
 
             graphInfoArray.push({name: executor.name, nodes, links});
+
+            console.log(this.layerRegister.depthWiseIndex);
         }
 
         return graphInfoArray;
