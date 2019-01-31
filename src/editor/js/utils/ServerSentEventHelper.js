@@ -7,25 +7,40 @@ const SSEhelper = function () {
     const GRID = Definition.EDIT.GRID.SIZE;
 
     const layerRegisterCtor = function () {
-        this.initialize = () => {
+        this.initialize = (parameters) => {
             this.counter = 0;
             this.layers = {};
             this.depthWiseIndex = {};
+            this.parameters = parameters;
         };
 
         this.addLayer = (layer, depth) => {
             if (!this.layers.hasOwnProperty(layer.name)) { // first visit
-                this.layers[layer.name] = {...layer, index: this.counter++, depth: [depth], visitCount: 1};
+
+                let visitCount = 1;
+                let parameters = [];
+                let buffers = [];
+
+                // collect all function parameters
+                for (let _input of layer.input) {
+                    let varIndex = this.parameters.findIndex(x => x.name === _input);
+                    if (varIndex > -1) {
+                        parameters.push(this.parameters[varIndex]);
+                        visitCount++;
+                    } else {
+                        buffers.push(_input);
+                    }
+                }
+
+                this.layers[layer.name] = {
+                    ...layer,
+                    index: this.counter++, depth: [depth], visitCount, parameters};
             } else { // visit again
                 this.layers[layer.name].depth.push(depth);
                 this.layers[layer.name].visitCount++;
             }
 
             const retLayer = this.layers[layer.name];
-
-            if (retLayer.input.length < retLayer.visitCount) {
-                console.log("something wrong!!");
-            }
 
             return [retLayer, retLayer.input.length <= retLayer.visitCount];
         };
@@ -98,9 +113,9 @@ const SSEhelper = function () {
 
                     console.log(isVisitEnough);
 
-                    if (false) { // if not already visited this node
+                    if (isVisitEnough) { // if not already visited this node
 
-                        let _links = recursive(layer,  Math.max(layer.depth) + 1);
+                        let _links = recursive(layer,  Math.max(...layer.depth) + 1);
 
                         links = [...links, ..._links];
                     }
@@ -122,14 +137,15 @@ const SSEhelper = function () {
         const executors = json.executor || [];
 
         for (let executor of executors) {
-            console.log(executor);
             const network = networks.find(x => x.name === executor.networkName);
 
             if (typeof network === "undefined") continue;
 
             const outputVariables = executor.outputVariable; //list
 
-            this.layerRegister.initialize();
+            const allParameters = network.variable.filter(x => x.type === "Parameter");
+
+            this.layerRegister.initialize(allParameters);
 
             // create input nodes
             let inputLayers = [];
@@ -140,7 +156,6 @@ const SSEhelper = function () {
                 };
 
                inputLayers.push(this.layerRegister.addLayer(inputLayer, 0)[0]);
-               console.log(inputLayers);
             }
 
             let links = [];
