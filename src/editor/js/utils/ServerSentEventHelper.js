@@ -1,4 +1,5 @@
 import Definition from "./../misc/Definitions"
+import {range} from "./arrayOperator"
 
 const Path = require("path");
 
@@ -6,35 +7,51 @@ const SSEhelper = function () {
 
     const GRID = Definition.EDIT.GRID.SIZE;
 
+    const createDummyInputLayer = variable => {
+        return {
+            inputParam: null, input: [], name: variable.dataName,
+            output: [variable.variableName], type: "InputVariable"
+        };
+    };
+
+    const createDummyOutputLayer = variable => {
+        return {
+            outputParam: null, input: [variable.variableName], name: variable.dataName,
+            output: [], type: "OutputVariable"
+        };
+    };
+
     const layerRegisterCtor = function () {
         this.initialize = (parameters) => {
             this.counter = 0;
             this.layers = {};
-            this.depthWiseIndex = {};
-            this.parameters = parameters;
+            this.links = [];
+            this.allParameters = parameters;
         };
 
         this.addLayer = (layer, depth) => {
             if (!this.layers.hasOwnProperty(layer.name)) { // first visit
-
                 let visitCount = 1;
                 let parameters = [];
                 let buffers = [];
 
                 // collect all function parameters
                 for (let _input of layer.input) {
-                    let varIndex = this.parameters.findIndex(x => x.name === _input);
+                    let varIndex = this.allParameters.findIndex(x => x.name === _input);
                     if (varIndex > -1) {
-                        parameters.push(this.parameters[varIndex]);
-                        visitCount++;
+                        parameters.push(this.allParameters[varIndex]);
                     } else {
+                        // check deprecated input
+                        if (buffers.findIndex(x => x === _input) > -1) visitCount++;
+
                         buffers.push(_input);
                     }
                 }
 
                 this.layers[layer.name] = {
-                    ...layer,
-                    index: this.counter++, depth: [depth], visitCount, parameters};
+                    ...layer, input: buffers,
+                    index: this.counter++, depth: [depth], visitCount, parameters
+                };
             } else { // visit again
                 this.layers[layer.name].depth.push(depth);
                 this.layers[layer.name].visitCount++;
@@ -45,89 +62,91 @@ const SSEhelper = function () {
             return [retLayer, retLayer.input.length <= retLayer.visitCount];
         };
 
-        this.getLayers = () => {
-            return Object.values(this.layers).sort((a, b) => Math.max(...a.depth) > Math.max(...b.depth) ? 1 : -1)
+        this.addLink = link => this.links.push(link);
+
+        this.getDepthToLayers = () => {
+            const depth2layers = {};
+
+            Object.values(this.layers).forEach(layer => {
+                const depthList = layer.depth;
+                const maxDepth = Math.max(...depthList);
+
+                if (layer.depth.length > 1) {
+                    const minDepth = Math.min(...depthList);
+
+                    for (let i of range(minDepth, maxDepth, true)) {
+                        let slice = depthList.filter(x => x < i).length + 1;
+                        if (depth2layers.hasOwnProperty(i)) depth2layers[i].needSlice += slice;
+                        else depth2layers[i] = {needSlice: slice, layers: []};
+                    }
+                }
+
+                if (depth2layers.hasOwnProperty(maxDepth)) depth2layers[maxDepth].layers.push({
+                    ...layer,
+                    depth: maxDepth
+                });
+                else depth2layers[maxDepth] = {needSlice: 0, layers: [{...layer, depth: maxDepth}]};
+            });
+
+            return depth2layers
         };
 
-        this.getDepthWiseIndex = (depth) => {
-            // console.log(this.depthWiseIndex[depth]);
-            if (this.depthWiseIndex.hasOwnProperty(depth)) {
-                return ++this.depthWiseIndex[depth];
-            } else {
-                return this.depthWiseIndex[depth] = 0;
-            }
-        };
+        this.getLinks = () => this.links; // for further update to do something like sort.
 
         this.initialize();
     };
 
     this.layerRegister = new layerRegisterCtor();
 
-    const getLayerPosition = depth => {
-        const depthWiseIndex = this.layerRegister.getDepthWiseIndex(depth);
-
-        return {x: GRID * (2 + depthWiseIndex * 15), y: GRID * (2 + depth * 2)};
+    const getLayerPosition = (depth, needSlice) => {
+        return {x: GRID * (2 + needSlice * 15), y: GRID * (2 + depth * 4)}; // this calculation for x is bad
     };
 
-    const setupGetNodeAndLinkRecursive = (network, outputVariables) => {
+    const setupGetNodeAndLinkRecursive = (functions, outputVariables) => {
 
-        const recursive = (sourceLayer, depthFromRoot) => {
-            let links = [];
-
+        const recursive = (sourceLayer, sourceDepthFromRoot) => {
             for (let sourceOutput of sourceLayer.output) {
 
                 // find user define output
-                if (outputVariables.findIndex(v => v.variableName === sourceOutput) > -1) {
-                    let tmpLayer = {
-                        outputParam: null, input: [sourceOutput], name: sourceOutput,
-                        output: [], type: "OutputVariable",
-                    };
+                const outputVariableIndex = outputVariables.findIndex(v => v.variableName === sourceOutput);
+                if (outputVariableIndex > -1) {
+                    const tmpLayer = createDummyOutputLayer(outputVariables[outputVariableIndex]);
 
-                    let [layer, _] = this.layerRegister.addLayer(tmpLayer, depthFromRoot);
+                    let [layer, _] = this.layerRegister.addLayer(tmpLayer, sourceDepthFromRoot + 1);
 
                     let link = {
                         source: sourceLayer.index,
                         destination: layer.index
                     };
 
-                    links = [...links, link];
-
-                    continue;
+                    this.layerRegister.addLink(link);
                 }
 
-                let destLayers = network.function.filter(f => (f.input || []).find(name => name === sourceOutput));
+                let destLayers = functions.filter(f => (f.input || []).find(name => name === sourceOutput));
+
+                let depthIncrement = destLayers.length > 1 ? 2 : 1;
 
                 for (let destLayer of destLayers) {
                     let tmpLayer = {
                         ...destLayer,
                     };
 
-                    let [layer, isVisitEnough] = this.layerRegister.addLayer(tmpLayer, depthFromRoot);
+                    let [layer, isVisitEnough] = this.layerRegister.addLayer(tmpLayer, sourceDepthFromRoot + depthIncrement);
 
                     let link = {
                         source: sourceLayer.index,
                         destination: layer.index
                     };
 
-                    links = [...links, link];
+                    this.layerRegister.addLink(link);
 
-                    console.log(isVisitEnough);
-
-                    if (isVisitEnough) { // if not already visited this node
-
-                        let _links = recursive(layer,  Math.max(...layer.depth) + 1);
-
-                        links = [...links, ..._links];
-                    }
+                    if (isVisitEnough) recursive(layer, Math.max(...layer.depth));
                 }
             }
-
-            return links;
         };
 
         return recursive;
     };
-
 
     this.getGraphInfoFromNNtxt = event => {
         const json = JSON.parse(event.data);
@@ -141,50 +160,45 @@ const SSEhelper = function () {
 
             if (typeof network === "undefined") continue;
 
+            const inputVariables = executor.dataVariable; //list
             const outputVariables = executor.outputVariable; //list
+
+            const functions = [], noInputFunctions = [];
+            network.function.forEach(f => {
+                if (f.hasOwnProperty("input")) functions.push(f);
+                else noInputFunctions.push({...f, input: []});
+            });
 
             const allParameters = network.variable.filter(x => x.type === "Parameter");
 
             this.layerRegister.initialize(allParameters);
 
+            let recursive = setupGetNodeAndLinkRecursive(functions, outputVariables);
+
             // create input nodes
-            let inputLayers = [];
-            for (let v of executor.dataVariable) {
-                let inputLayer= {
-                    inputParam: null, input: [], name: v.dataName,
-                    output: [v.variableName], type: "InputVariable",
-                };
+            const inputLayers = [
+                ...inputVariables.map(createDummyInputLayer), ...noInputFunctions,
+            ];
 
-               inputLayers.push(this.layerRegister.addLayer(inputLayer, 0)[0]);
-            }
-
-            let links = [];
-
-            let recursive = setupGetNodeAndLinkRecursive(network, outputVariables);
             for (let inputLayer of inputLayers) {
-                let  _links = recursive(inputLayer, 1);
-                links = [...links, ..._links];
+                let [layer, _] = this.layerRegister.addLayer(inputLayer, 0);
+                recursive(layer, 0);
             }
 
-            const layers = this.layerRegister.getLayers();
+            const depthToLayers = this.layerRegister.getDepthToLayers();
 
             const nodes = [];
-            for (let layer of layers){
-                let depth = Math.max(...layer.depth);
-                if (layer.depth.length > 1) {
-                    let startIndex = Math.min(...layer.depth);
-                    for (let i = startIndex; i < depth; i++){
-                        nodes[i].x += GRID * 15;
-                    }
+            for (let {needSlice, layers} of Object.values(depthToLayers)) {
+                for (let layer of layers.sort((a, b) => a > b ? 1 : -1)) {
+                    nodes.push({...layer, ...getLayerPosition(layer.depth, needSlice++)});
                 }
-                nodes.push({...layer, depth: depth, ...getLayerPosition(depth)})
             }
 
-            nodes.sort((a,b) =>  a.index > b.index ? 1 : -1);
+            nodes.sort((a, b) => a.index > b.index ? 1 : -1);
+
+            const links = this.layerRegister.getLinks();
 
             graphInfoArray.push({name: executor.name, nodes, links});
-
-            console.log(this.layerRegister.depthWiseIndex);
         }
 
         return graphInfoArray;

@@ -18,8 +18,12 @@ export const calcPercentage = (arr, index, nDigits) => {
     return roundDownNDigits(ratio, nDigits);
 };
 
-export const range = (start, end) => {
-    return [...Array(end).keys()].slice(start, end + 1);
+export const range = (start, end, isReverse=false) => {
+    let ret = [...Array(end).keys()].slice(start, end + 1);
+
+    if (isReverse) return ret.reverse();
+
+    return ret;
 };
 
 export const transpose2D = (arr) => {
