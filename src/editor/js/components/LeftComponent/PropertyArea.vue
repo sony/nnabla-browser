@@ -16,7 +16,7 @@
                 <div v-if="isLayerSelected">
                     <layer-type :defaultProps="defaultProps" />
                     <layer-properties class="app-row app-scroll-x app-scroll-y" style="top: 88px; bottom: 0;"
-                        :defaultParams="defaultProps.arguments"
+                        :defaultParams="{...defaultProps.inputs, ...defaultProps.arguments}"
                         :layerParams="layerParams"
                     />
             </div>`,
@@ -33,7 +33,7 @@
             layerParams: function () {
                 const paramKey = this.selectedLayer.type.toLowerCase() + "Param";
                 return this.selectedLayer[paramKey] || {};
-            }
+            },
         },
         components: {
             'layer-type': {
@@ -66,7 +66,7 @@
                 props: ["defaultParams", "layerParams"],
                 template: `
                     <div>
-                        <div class="property" v-for="value, key in defaultParams">
+                        <div class="property" v-for="value, key in defaultParams" v-if="key !== 'outputs' && key !== 'n_outputs'">
                             <div class="content">
                                 <div class="name">{{ key }}</div>
                                 <component

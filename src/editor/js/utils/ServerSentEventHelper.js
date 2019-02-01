@@ -75,7 +75,7 @@ const SSEhelper = function () {
                     const minDepth = Math.min(...depthList);
 
                     for (let i of range(minDepth, maxDepth, true)) {
-                        let slice = depthList.filter(x => x < i).length + 1;
+                        let slice = depthList.filter(x => x - 1 < i).length;
                         if (depth2layers.hasOwnProperty(i)) depth2layers[i].needSlice += slice;
                         else depth2layers[i] = {needSlice: slice, layers: []};
                     }
