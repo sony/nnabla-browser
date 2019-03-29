@@ -159,6 +159,8 @@ const SSEhelper = function () {
             const network = networks.find(x => x.name === executor.networkName);
 
             if (typeof network === "undefined") continue;
+            const variableMap = new Map();
+            network.variable.forEach(x => variableMap.set(x.name, x));
 
             const inputVariables = executor.dataVariable; //list
             const outputVariables = executor.outputVariable; //list
@@ -195,6 +197,14 @@ const SSEhelper = function () {
             }
 
             nodes.sort((a, b) => a.index > b.index ? 1 : -1);
+            nodes.forEach(a => {
+                a.outputShape = {};
+                const b = a.type === "OutputVariable" ? a.input : a.output;
+                for (let x of b) {
+                    const name =  a.type === "OutputVariable" ? a.name : x;
+                    a.outputShape[`${name}_output_shape`] = variableMap.get(x).shape.dim;
+                }  
+            });
 
             const links = this.layerRegister.getLinks();
 
