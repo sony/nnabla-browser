@@ -17,8 +17,9 @@
                     <layer-type :defaultProps="defaultProps" />
                     <layer-properties class="app-row app-scroll-x app-scroll-y" style="top: 88px; bottom: 0;"
                         :defaultParams="{...defaultProps.inputs, ...defaultProps.arguments}"
-                        :layerParams="layerParams"
+                        :layerParams="layerParams" :ioInfos="ioInfos"
                     />
+                </div>
             </div>`,
         computed: {
             ...mapGetters({
@@ -34,6 +35,12 @@
                 const paramKey = this.selectedLayer.type.toLowerCase() + "Param";
                 return this.selectedLayer[paramKey] || {};
             },
+            ioInfos: function() {
+                // return input/output related info,ie. shapes etc.
+                return {
+                    outputShape: this.selectedLayer.outputShape
+                }
+            }
         },
         components: {
             'layer-type': {
@@ -63,7 +70,7 @@
                 }
             },
             'layer-properties': {
-                props: ["defaultParams", "layerParams"],
+                props: ["defaultParams", "layerParams", "ioInfos"],
                 template: `
                     <div>
                         <div class="property" v-for="value, key in defaultParams" v-if="key !== 'outputs' && key !== 'n_outputs'">
@@ -76,6 +83,12 @@
                                 :class="'value' + (value.error ? ' warning' : '')"
                                 :title="value.error"
                                 />
+                            </div>
+                        </div>
+                        <div class="property" v-for="value, key in ioInfos.outputShape">
+                            <div class="content">
+                                <div class="name">{{ key }}</div>
+                                <component :is="'prop-text'" :defaultParam="[]" :layerParam="'['+value.join(', ')+']'" :class="'value'" />
                             </div>
                         </div>
                     </div>`,
@@ -98,7 +111,7 @@
                         template: `
                             <div @click="onclick">
                                 <label>
-                                    <input type="checkbox" ref="check" :checked="checked" @change="onchange" />
+                                    <input type="checkbox" ref="check" :checked="checked" />
                                     <span />
                                 </label>
                             </div>`,
