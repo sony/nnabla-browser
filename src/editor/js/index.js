@@ -8,6 +8,9 @@ import LoadingVue from './components/Shared/Loading.vue';
 import ModalLoadingVue from './components/Shared/ModalLoading.vue';
 import ZoomBoxVue from './components/Shared/ZoomBox.vue';
 import ContextMenuVue from './components/Shared/ContextMenu.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 import store from "./store/index.js";
 

@@ -70,7 +70,7 @@ const StyleHelperCtor = function () {
 
     this.createLinkLineStyle = () => {
         return {
-            stroke: "var(--color-gray5)",
+            stroke: "#262626",
             "stroke-width": "1.5",
             fill: "none"
         }
