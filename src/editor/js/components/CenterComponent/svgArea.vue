@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="network-container">
         <svg id="network-editor" tabindex="0">
             <keep-alive>
             <g class="assist-dots" id="svg-assist-dots" :style="getAssistDotsStyle()" v-if="isDragging">
@@ -38,9 +38,12 @@
 
             <g class="links" id="svg-links" style="opacity: 0">
                 <path v-for="(link, index) in activeGraph.links"
-                      :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
-                      :id="'link-' + index"
-                      :style="getLinkLineStyle()" :d="createLinkLineContext(link)" ></path>
+                    :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
+                    :id="'link-' + index"
+                    :stroke="linkLineStyleAttrs.stroke"
+                    :stroke-width="linkLineStyleAttrs['stroke-width']"
+                    :fill="linkLineStyleAttrs['fill']"
+                    :d="createLinkLineContext(link)" ></path>
             </g>
         </svg>
     </div>
@@ -66,7 +69,8 @@
             },
             assistAreaY: function() {
                 return d3.range(0, this.assistAreaSize.y, svgAreaOperator.grid)
-            }
+            },
+            linkLineStyleAttrs: StyleHelper.createLinkLineStyle
         },
         updated: function () {
 
@@ -117,7 +121,6 @@
             getTextComponentStyle: () => StyleHelper.createTextComponentStyle(),
             getTextAttr: () => StyleHelper.createTextAttr(),
             getTextStyle: () => StyleHelper.createTextStyle(),
-            getLinkLineStyle: () => StyleHelper.createLinkLineStyle(),
             createLinkLineContext: link => {
                 const source = svgAreaOperator.getLinkerPosition(link.source, true);
                 const destination = svgAreaOperator.getLinkerPosition(link.destination, false);
@@ -129,5 +132,7 @@
 </script>
 
 <style>
-
+    div#network-container {
+        width: max-content;
+    }
 </style>

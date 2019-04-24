@@ -3,6 +3,11 @@
         <network-tabs
                 @history="command => $emit('history', command)"
         />
+        <div v-if="activeFileTag" class="tool-icon-container" @click="capSwitch">
+            <font-awesome-icon v-show="!snapshotLoding" icon="camera" class="func-icon" />
+            <font-awesome-icon v-show="snapshotLoding" icon="spinner" class="fa-spin func-icon" />
+            <snap-shot :capElement="snapshotSwitch" containerId="network-container" :imageName="activeFileTag" @snapshot-finish="snapshotLoding=!$event"/>
+        </div>
         <div class="tab-content network-editor-scroller">
             <svg-area/>
         </div>
@@ -14,6 +19,10 @@
     import clipboard from '../../editor/clipboard';
     import svgArea from "./svgArea";
     import Definitions from '../../misc/Definitions';
+    import snapShot from '../Utils/snapShot.vue';
+    import { library } from '@fortawesome/fontawesome-svg-core';
+    import { faSpinner, faCamera } from '@fortawesome/free-solid-svg-icons';
+    library.add(faSpinner, faCamera);
 
     const networkAction = {
         props: {historyInfo: Object},
@@ -71,7 +80,23 @@
                 layerTextClipId: Definitions.EDIT.LAYER.CLIP_PATH.ID,
                 layerTextClipWidth: Definitions.EDIT.LAYER.CLIP_PATH.WIDTH,
                 layerTextClipHeight: Definitions.EDIT.LAYER.CLIP_PATH.HEIGHT,
+                snapshotSwitch: undefined,
+                snapshotLoding: undefined,
             };
+        },
+        computed: {
+            activeFileTag: function() {
+                return this.$store.state.directoryInfo.activeFile.replace(/[\/.]/g, '-')
+            }
+        },
+        methods: {
+            capSwitch() {
+                if (this.snapshotLoding) {
+                    return;
+                }
+                this.snapshotLoding = true;
+                this.snapshotSwitch = !this.snapshotSwitch;
+            }
         },
         components: {
             'network-tabs': {
@@ -127,7 +152,8 @@
                     },
                 },
             },
-            'svg-area': svgArea
+            'svg-area': svgArea,
+            'snap-shot': snapShot
         },
     };
 </script>
@@ -220,5 +246,24 @@
         color: var(--color-gray4);
         float: left;
         width: 120px;
+    }
+
+    .tool-icon-container {
+        width: 4rem;
+        height: 4rem;
+        background-color: #1aaa55;
+        border-radius: 50%;
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        box-shadow: 0 0 10px #f00;
+    }
+
+    .tool-icon-container .func-icon{
+        font-size: 3rem;
+        color: white;
     }
 </style>
