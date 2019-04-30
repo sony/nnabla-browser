@@ -1,17 +1,41 @@
 <template>
-        <div class="monitoring-content-scroller">
-            <chart-block
-                    :chart="chart"
-                    :key="chart.name"
-                    v-for="chart in $store.state.chartInfo.charts"/>
+    <div class="monitoring-content-scroller" >
+        <div v-if="$store.state.chartInfo.charts.length" class="tool-icon-container" @click="capSwitch">
+            <font-awesome-icon v-show="!snapshotLoding" icon="camera" class="func-icon" />
+            <font-awesome-icon v-show="snapshotLoding" icon="spinner" class="fa-spin func-icon" />
+            <snap-shot :capElement="snapshotSwitch" containerId="monitor-content-container" imageName="monitor-charts" @snapshot-finish="snapshotLoding=!$event"/>
         </div>
+
+        <div id="monitor-content-container">
+            <chart-block
+                :chart="chart"
+                :key="chart.name"
+                v-for="chart in $store.state.chartInfo.charts"/>
+        </div>
+    </div>
 </template>
 
 <script>
     import Vue from 'vue/dist/vue.esm';
     import VueC3 from 'vue-c3/dist/vue-c3.esm';
+    import snapShot from '../Utils/snapShot.vue';
 
     export default {
+        data: function() {
+            return {
+                snapshotSwitch: undefined,
+                snapshotLoding: undefined,
+            }
+        },
+        methods: {
+            capSwitch() {
+                if (this.snapshotLoding) {
+                    return;
+                }
+                this.snapshotLoding = true;
+                this.snapshotSwitch = !this.snapshotSwitch;
+            }
+        },
         components: {
             'chart-block': {
                 // chart : {name: "", data: [{name: "", values: {t: [], v: []}}, ...]}
@@ -26,6 +50,11 @@
                     return {
                         handler: new Vue()
                     };
+                },
+                computed: {
+                    svgWidth: function() {
+                        return this.$el.clientWidth * 0.9;
+                    }
                 },
                 watch: {
                     "chart.data": {
@@ -77,7 +106,7 @@
                                 columns: columns
                             },
                             size: {
-                                width: (window.innerWidth - document.getElementById("leftContent").clientWidth) * 0.9 // dirty hack...
+                                width: this.svgWidth
                             },
                             axis: {
                                 x: {
@@ -93,6 +122,17 @@
                                     },
                                     label: "number of iteration"
                                 }
+                            },
+                            onrendered: () => {
+                                const plist = this.$el.querySelectorAll('path');
+                                plist.forEach(ele => {
+                                    ele.setAttribute('fill', window.getComputedStyle(ele).fill || 'none');
+                                    ele.setAttribute('stroke', window.getComputedStyle(ele).stroke || '#000');
+                                });
+                                const llist = this.$el.querySelectorAll('g.tick line');
+                                llist.forEach(ele => {
+                                    ele.setAttribute('stroke', window.getComputedStyle(ele).stroke || '#000');
+                                });
                             }
                         };
 
@@ -103,12 +143,13 @@
                     this.handler.$emit("init", options);
                 },
             },
+            'snap-shot': snapShot
         },
     }
 
 </script>
 
-<style>
+<style scoped>
     .monitoring-content-scroller {
         width: 100%;
         height: 100%;
@@ -119,4 +160,32 @@
         display: none;
     }
 
+    .tool-icon-container {
+        z-index: 99;
+        width: 4rem;
+        height: 4rem;
+        background-color: #1aaa55;
+        border-radius: 50%;
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        box-shadow: 0 0 10px #f00;
+    }
+
+    .tool-icon-container .func-icon{
+        font-size: 3rem;
+        color: white;
+    }
+
+    .chart-block path {
+        fill: none;
+        stroke: #000;
+    }
+
+    g.tick line{
+        stroke: #000;
+    }
 </style>
