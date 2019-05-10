@@ -4,6 +4,7 @@
         <main-content
                 :history-info="historyInfo"
                 @history="command => history.execute(command)"/>
+        <dialogue-mask/>
     </div>
 </template>
 
@@ -17,11 +18,13 @@
     import jqueryUiCustom from './../misc/jquery-ui-custom';
     import SSEhelper from "../utils/ServerSentEventHelper";
     import pathOperator from "../utils/pathOperator";
+    import dialogueMask from "./Utils/dialogueMask.vue";
 
     export default {
         components: {
             'editor-application-bar': EditorApplicationBar,
             'main-content': MainContent,
+            'dialogue-mask': dialogueMask,
         },
         data: function () {
             return {

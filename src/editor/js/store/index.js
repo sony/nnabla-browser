@@ -6,6 +6,7 @@ import directoryInfo from "./modules/DirectoryInfo";
 import graphInfo from "./modules/graphInfo";
 import chartInfo from "./modules/chartInfo";
 import csvInfo from "./modules/csvInfo";
+import dialogueInfo from "./modules/dialogueInfo";
 
 // for debug
 Vue.config.devtools = true;
@@ -18,6 +19,7 @@ export default new Vuex.Store({
         directoryInfo,
         graphInfo,
         chartInfo,
-        csvInfo
+        csvInfo,
+        dialogueInfo
     }
 });
