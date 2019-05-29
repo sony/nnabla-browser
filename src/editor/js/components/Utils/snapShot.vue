@@ -71,8 +71,8 @@
                             scale: this.scale,
                             width: this.canvasStep,
                             height: this.canvasStep,
-                            x: j * this.canvasStep - ele.parentNode.scrollLeft,
-                            y: i * this.canvasStep - ele.parentNode.scrollTop,
+                            x: j * this.canvasStep - ele.parentNode.scrollLeft + ele.offsetLeft,
+                            y: i * this.canvasStep - ele.parentNode.scrollTop + ele.offsetTop,
                             logging: false,
                         }).then((canvas) => {
                             this.mixCanvas.getContext("2d").drawImage(canvas, j * this.canvasStep * this.scale, i * this.canvasStep * this.scale);
