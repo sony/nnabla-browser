@@ -86,7 +86,8 @@
         },
         computed: {
             activeFileTag: function() {
-                return this.$store.state.directoryInfo.activeFile.replace(/[\/.]/g, '-')
+                const tag = this.$store.state.directoryInfo.activeFile.replace(/[\/.]/g, '-');
+                return tag.replace(/^-*/,'');
             }
         },
         methods: {

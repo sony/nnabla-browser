@@ -23,16 +23,20 @@
         watch: {
             capElement: {
                 handler: function(val, oldval) {
-                            if (val != oldval) {
-                                this.$emit('snapshot-finish', false);
-                                const ele = document.querySelector(`#${this.containerId}`);
-                                const rect = ele.getBoundingClientRect();
-                                this.canvasStep = this.calculateStep(rect);
-                                this.scale = Math.log10(rect.width * rect.height) > 7 ? 1 : 2;
-                                setTimeout(()=>{ 
-                                    this.convert2Canvas(ele);
-                                }, 0);
-                            }
+                    if (val != oldval) {
+                        this.$emit('snapshot-finish', false);
+                        this.$store.commit('changeMaskStatus', true);
+                        let nameString = `${this.imageName}_${(new Date()).toISOString().replace(/[TZ:,\. ]/g,'-')}`;
+                        nameString = nameString.substring(0, nameString.length-1);
+                        this.$store.commit('setDefaultStr', nameString);
+                        const ele = document.querySelector(`#${this.containerId}`);
+                        const rect = ele.getBoundingClientRect();
+                        this.canvasStep = this.calculateStep(rect);
+                        this.scale = Math.log10(rect.width * rect.height) > 7 ? 1 : 2;
+                        setTimeout(()=>{ 
+                            this.convert2Canvas(ele);
+                        }, 0);
+                    }
                 }
             }
         },
@@ -57,7 +61,6 @@
                 return a % b - b / 10;
             },
             convert2Canvas(ele) {
-                const name = this.imageName;
                 this.mixCanvas = document.createElement('canvas');
                 const rect = ele.getBoundingClientRect();
                 const col = Math.ceil(rect.width / this.canvasStep);
@@ -80,12 +83,16 @@
                         }).finally(()=> {
                             count += 1;
                             if(count == col * row) {
-                                this.mixCanvas.toBlob(function(blob) {
-                                    let nameString = `${name}_${(new Date()).toISOString().replace(/[TZ:,\. ]/g,'-')}`;
-                                    nameString = `${nameString.substring(1, nameString.length-1)}.jpeg`;
-                                    saveAs(blob, nameString);
-                                }, 'image/jpeg');
-                                this.mixCanvas = null;
+                                this.$store.getters.inputStrDef.then(name => {
+                                    if (name) {
+                                        this.mixCanvas.toBlob(function(blob) {
+                                            saveAs(blob, `${name}.jpeg`);
+                                        }, 'image/jpeg');
+                                    }
+                                    this.mixCanvas = null;
+                                    this.$store.commit('resetInputDef');
+                                    this.$store.commit('changeMaskStatus', false);
+                                });
                             }
                             this.$emit('snapshot-finish', true);
                         })
