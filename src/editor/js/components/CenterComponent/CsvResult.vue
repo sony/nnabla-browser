@@ -123,45 +123,64 @@
                 } else {
                     return value;
                 }
+            },
+            drawTable: function () {
+                const table = d3.select(".csv-result-table")
+                    .append("table")
+                    .style("font-size", "18px")
+                    .attr("class", "table table-bordered table-hover");
+
+                table.append("thead")
+                    .append("tr")
+                    .selectAll("th")
+                    .data(this.columns).enter()
+                    .append("th")
+                    .attr("scope", "col")
+                    .style("text-align", "center")
+                    .text(d => this.capitalize(d))
+                    .on("click", (d, i) => {
+                        if (this.columns[i].toLowerCase() === "correctness"){
+                            console.log("click");
+                        }
+                    });
+
+                table.append("tbody")
+                    .selectAll("tr")
+                    .data(this.values).enter()
+                    .append("tr")
+                    .attr("id", (d, i) => "result-" + String(i))
+                    .selectAll("td")
+                    .data(row => row).enter()
+                    .append("td")
+                    .attr("class", (d, i) => "col-" + i)
+                    .style("text-align", "center")
+                    .text(this.getCellText)
+                    .attr("value", d => d);
+
+                d3.select("tbody").selectAll("td.col-0")
+                    .on("mouseenter", previewImage)
+                    .on("mouseleave", deletePreviewImage)
             }
         },
         mounted: function () {
-            const table = d3.select(".csv-result-table")
-                .append("table")
-                .style("font-size", "18px")
-                .attr("class", "table table-bordered table-hover");
+            this.drawTable();
+        },
+        watch: {
+            csvResult: {
+                handler: function () {
+                    d3.select(".csv-result-table").style("opacity", 0);
 
-            table.append("thead")
-                .append("tr")
-                .selectAll("th")
-                .data(this.columns).enter()
-                .append("th")
-                .attr("scope", "col")
-                .style("text-align", "center")
-                .text(d => this.capitalize(d))
-                .on("click", (d, i) => {
-                    if (this.columns[i].toLowerCase() === "correctness"){
-                        console.log("click");
-                    }
-                });
+                    d3.select(".csv-result-table").select("table")
+                        .transition().duration(200).remove();
 
-            table.append("tbody")
-                .selectAll("tr")
-                .data(this.values).enter()
-                .append("tr")
-                .attr("id", (d, i) => "result-" + String(i))
-                .selectAll("td")
-                .data(row => row).enter()
-                .append("td")
-                .attr("class", (d, i) => "col-" + i)
-                .style("text-align", "center")
-                .text(this.getCellText)
-                .attr("value", d => d);
+                    //fade in
+                    d3.select(".csv-result-table")
+                        .transition().ease(d3.easeCubicIn).duration(600).style("opacity", 1);
 
-            d3.select("tbody").selectAll("td.col-0")
-                .on("mouseenter", previewImage)
-                .on("mouseleave", deletePreviewImage)
-
+                    this.drawTable();
+                },
+                deep: true
+            }
         }
 
     };
