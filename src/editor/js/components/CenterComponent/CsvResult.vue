@@ -5,14 +5,20 @@
                 :showDataLength="showDataLength"
                 :showFrom="showFrom"/>
 
-        <viewer-selection-tab
+        <template v-if="csvResult.data.type ==='validation'">
+            <viewer-selection-tab
                 :viewerMode="viewerMode"
                 @changeViewerMode="changeViewerMode"/>
 
-        <viewer v-if="csvResult.length > 0"
+            <viewer v-if="csvResult.data.values.length"
                 :viewerMode="viewerMode"
                 :showDataLength="showDataLength"
                 :showFrom="showFrom"/>
+        </template>
+
+        <template v-if="csvResult.data.type ==='profile'">
+            <profile-csv :profileData="csvResult.data" />
+        </template>
     </div>
 </template>
 
@@ -26,6 +32,7 @@
         accuracyFromConfusionMatrix2D,
         average1D
     } from "../../utils/arrayOperator";
+    import profileCsv from './CsvCategory/profleCsv.vue';
 
     const informationTab = {
         props: ["showDataLength", "showFrom", "viewerMode"],
@@ -34,17 +41,27 @@
 
             DataLengthString: function () {
                 let ret;
+                const resultLength = this.csvResult.data.values? this.csvResult.data.values.length : 0;
                 if (this.viewerMode === "confusionMatrix") {
-                    ret = this.csvResult.length;
+                    ret = resultLength;
                 } else if (this.viewerMode === "simpleViewer") {
-                    if (this.csvResult.length === 0) {
-                        ret = "0 / " + this.csvResult.length;
+                    if (resultLength === 0) {
+                        ret = "0 / " + resultLength;
                     } else {
-                        ret = this.showFrom + " - " + this.showDataLength + " / " + this.csvResult.length;
+                        ret = this.showFrom + " - " + this.showDataLength + " / " + resultLength;
                     }
                 }
 
                 return ret;
+            },
+
+            timeScale: function() {
+                const scaleList = {
+                    m: 'mili sec',
+                    u: 'micro sec',
+                    n: 'nano sec',
+                }
+                return scaleList[this.csvResult.data['time scale']];
             }
         },
         template: `
@@ -55,8 +72,14 @@
                 </div>
 
                 <div class="result-information-tab" style="width: 30%">
-                    <div class="category-name"> Data Length:  </div>
-                    <div class="category-value"> {{ DataLengthString }}</div>
+                    <template v-if="csvResult.data.type === 'validation'">
+                        <div class="category-name"> Data Length:  </div>
+                        <div class="category-value"> {{ DataLengthString }}</div>
+                    </template>
+                    <template v-if="csvResult.data.type === 'profile'">
+                        <div class="category-name"> Time scale:  </div>
+                        <div class="category-value"> {{ timeScale }}</div>
+                    </template>
                 </div>
 
              </div>
@@ -337,6 +360,7 @@
                     confusionMatrix
                 }
             },
+            profileCsv,
         },
         methods: {
             changeViewerMode: function (mode) {
@@ -394,3 +418,4 @@
     }
 
 </style>
+

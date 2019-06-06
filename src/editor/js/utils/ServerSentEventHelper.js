@@ -1,6 +1,8 @@
 import Definition from "./../misc/Definitions"
 import {range} from "./arrayOperator"
 
+import CSV from 'comma-separated-values';
+
 const Path = require("path");
 
 const SSEhelper = function () {
@@ -229,18 +231,50 @@ const SSEhelper = function () {
     };
 
     this.getCsvResult = event => {
-        const split = event.data.split("\n");
-        const keys = [...split.splice(0, 1)[0].split(", "), "correctness"];
+        const filepath = event.lastEventId;
+        const csvType = filepath.split('/').pop().split('.')[0];
+        // validation.result.csv , profile.result.csv
+        switch(csvType) {
+            case 'validation':
+                return this.validationCsvData(event);
+            case 'profile':
+                return this.profileCsvData(event);
+            default:
+                console.error('file category not support yet!')
+        }
+    };
+    
+    this.validationCsvData = event => {
+        let csv = new CSV(event.data, {
+            cast: false
+        });
+        let split = csv.parse();
+        const keys = [...split.shift(), "correctness"];
 
         let values = [];
 
         for (let elm of split) {
-            let [path, pred, label] = elm.split(", ");
+            let [path, pred, label] = elm;
             values.push([path, parseInt(pred), parseInt(label), pred === label]);
         }
 
-        return {keys, values};
-    };
+        return {keys, values, type: 'validation'};
+    }
+
+    this.profileCsvData = event => {
+        const profile = {};
+        let csv = new CSV(event.data, {
+            cast: false
+        });
+        let csvArr = csv.parse();
+        //  in profile.result.csv, profile data starts at 6th row, and 12 rows contain profile attributes
+        const dataArr = csvArr.splice(6, csvArr.length - 12);
+        //  get data from profile.result.csv and store in an object
+        csvArr.filter(x => x != '').forEach(y => profile[y[0]] = y[1]);
+        profile.data = dataArr;
+        profile.type = 'profile';
+        return profile;
+    }
 
     this.deleteChartInfo = (rootDir, id, store) => {
         let o = {

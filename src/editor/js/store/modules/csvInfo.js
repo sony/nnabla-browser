@@ -1,14 +1,12 @@
 const state = {
     path: "",
     data: {}, // {values: [[path, predLabel, label]]}
-    length: 0
 };
 
 const mutations = {
     setCsvResult: function (state, {path, data}) {
         state.path = path;
         state.data = {...state.data, ...data};
-        state.length = data.values.length;
     }
 };
 
