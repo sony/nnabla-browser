@@ -19,6 +19,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.8.1",
     "@fortawesome/vue-fontawesome": "^0.1.6",
     "c3": "^0.6.8",
+    "comma-separated-values": "^3.6.4",
     "file-saver": "^2.0.1",
     "html2canvas": "^1.0.0-rc.0",
     "vue": "^2.5.17",

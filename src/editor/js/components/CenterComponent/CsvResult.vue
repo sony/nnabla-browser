@@ -5,14 +5,20 @@
                 :showDataLength="showDataLength"
                 :showFrom="showFrom"/>
 
-        <viewer-selection-tab
+        <template v-if="csvResult.data.type ==='validation'">
+            <viewer-selection-tab
                 :viewerMode="viewerMode"
                 @changeViewerMode="changeViewerMode"/>
 
-        <viewer v-if="csvResult.length > 0"
+            <viewer v-if="csvResult.data.values.length"
                 :viewerMode="viewerMode"
                 :showDataLength="showDataLength"
                 :showFrom="showFrom"/>
+        </template>
+
+        <template v-if="csvResult.data.type ==='profile'">
+            <profile-csv :profileData="csvResult.data" />
+        </template>
     </div>
 </template>
 
@@ -26,6 +32,7 @@
         accuracyFromConfusionMatrix2D,
         average1D
     } from "../../utils/arrayOperator";
+    import profileCsv from './CsvCategory/profleCsv.vue';
 
     const informationTab = {
         props: ["showDataLength", "showFrom", "viewerMode"],
@@ -34,17 +41,27 @@
 
             DataLengthString: function () {
                 let ret;
+                const resultLength = this.csvResult.data.values? this.csvResult.data.values.length : 0;
                 if (this.viewerMode === "confusionMatrix") {
-                    ret = this.csvResult.length;
+                    ret = resultLength;
                 } else if (this.viewerMode === "simpleViewer") {
-                    if (this.csvResult.length === 0) {
-                        ret = "0 / " + this.csvResult.length;
+                    if (resultLength === 0) {
+                        ret = "0 / " + resultLength;
                     } else {
-                        ret = this.showFrom + " - " + this.showDataLength + " / " + this.csvResult.length;
+                        ret = this.showFrom + " - " + this.showDataLength + " / " + resultLength;
                     }
                 }
 
                 return ret;
+            },
+
+            timeScale: function() {
+                const scaleList = {
+                    m: 'mili sec',
+                    u: 'micro sec',
+                    n: 'nano sec',
+                }
+                return scaleList[this.csvResult.data['time scale']];
             }
         },
         template: `
@@ -55,8 +72,14 @@
                 </div>
 
                 <div class="result-information-tab" style="width: 30%">
-                    <div class="category-name"> Data Length:  </div>
-                    <div class="category-value"> {{ DataLengthString }}</div>
+                    <template v-if="csvResult.data.type === 'validation'">
+                        <div class="category-name"> Data Length:  </div>
+                        <div class="category-value"> {{ DataLengthString }}</div>
+                    </template>
+                    <template v-if="csvResult.data.type === 'profile'">
+                        <div class="category-name"> Time scale:  </div>
+                        <div class="category-value"> {{ timeScale }}</div>
+                    </template>
                 </div>
 
              </div>
@@ -123,45 +146,64 @@
                 } else {
                     return value;
                 }
+            },
+            drawTable: function () {
+                const table = d3.select(".csv-result-table")
+                    .append("table")
+                    .style("font-size", "18px")
+                    .attr("class", "table table-bordered table-hover");
+
+                table.append("thead")
+                    .append("tr")
+                    .selectAll("th")
+                    .data(this.columns).enter()
+                    .append("th")
+                    .attr("scope", "col")
+                    .style("text-align", "center")
+                    .text(d => this.capitalize(d))
+                    .on("click", (d, i) => {
+                        if (this.columns[i].toLowerCase() === "correctness"){
+                            console.log("click");
+                        }
+                    });
+
+                table.append("tbody")
+                    .selectAll("tr")
+                    .data(this.values).enter()
+                    .append("tr")
+                    .attr("id", (d, i) => "result-" + String(i))
+                    .selectAll("td")
+                    .data(row => row).enter()
+                    .append("td")
+                    .attr("class", (d, i) => "col-" + i)
+                    .style("text-align", "center")
+                    .text(this.getCellText)
+                    .attr("value", d => d);
+
+                d3.select("tbody").selectAll("td.col-0")
+                    .on("mouseenter", previewImage)
+                    .on("mouseleave", deletePreviewImage)
             }
         },
         mounted: function () {
-            const table = d3.select(".csv-result-table")
-                .append("table")
-                .style("font-size", "18px")
-                .attr("class", "table table-bordered table-hover");
+            this.drawTable();
+        },
+        watch: {
+            csvResult: {
+                handler: function () {
+                    d3.select(".csv-result-table").style("opacity", 0);
 
-            table.append("thead")
-                .append("tr")
-                .selectAll("th")
-                .data(this.columns).enter()
-                .append("th")
-                .attr("scope", "col")
-                .style("text-align", "center")
-                .text(d => this.capitalize(d))
-                .on("click", (d, i) => {
-                    if (this.columns[i].toLowerCase() === "correctness"){
-                        console.log("click");
-                    }
-                });
+                    d3.select(".csv-result-table").select("table")
+                        .transition().duration(200).remove();
 
-            table.append("tbody")
-                .selectAll("tr")
-                .data(this.values).enter()
-                .append("tr")
-                .attr("id", (d, i) => "result-" + String(i))
-                .selectAll("td")
-                .data(row => row).enter()
-                .append("td")
-                .attr("class", (d, i) => "col-" + i)
-                .style("text-align", "center")
-                .text(this.getCellText)
-                .attr("value", d => d);
+                    //fade in
+                    d3.select(".csv-result-table")
+                        .transition().ease(d3.easeCubicIn).duration(600).style("opacity", 1);
 
-            d3.select("tbody").selectAll("td.col-0")
-                .on("mouseenter", previewImage)
-                .on("mouseleave", deletePreviewImage)
-
+                    this.drawTable();
+                },
+                deep: true
+            }
         }
 
     };
@@ -318,6 +360,7 @@
                     confusionMatrix
                 }
             },
+            profileCsv,
         },
         methods: {
             changeViewerMode: function (mode) {
@@ -375,3 +418,4 @@
     }
 
 </style>
+
