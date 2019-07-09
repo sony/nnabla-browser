@@ -5,6 +5,7 @@
 <script>
     import html2canvas from 'html2canvas';
     import { saveAs } from 'file-saver';
+    import Definition from "./../../misc/Definitions";
 
     export default {
         data: function() {
@@ -13,6 +14,12 @@
                 mixCanvas: null,
                 canvasStep: 800,
                 scale: 2,
+                GRID: Definition.EDIT.GRID.SIZE,
+            }
+        },
+        computed: {
+            originTransform: function() {
+                return `translate(${this.GRID * 2}, ${this.GRID * 2}) scale(1)`;
             }
         },
         props: {
@@ -34,7 +41,11 @@
                         this.canvasStep = this.calculateStep(rect);
                         this.scale = Math.log10(rect.width * rect.height) > 7 ? 1 : 2;
                         setTimeout(()=>{ 
-                            this.convert2Canvas(ele);
+                            if (this.containerId === "network-container") {
+                                this.svg2canvas(ele);
+                            } else {
+                                this.convert2Canvas(ele);
+                            }
                         }, 0);
                     }
                 }
@@ -59,6 +70,45 @@
             },
             gamma2(a, b) {
                 return a % b - b / 10;
+            },
+            svg2canvas(ele) {
+                let serializer = new XMLSerializer();
+                // related value calculation
+                const svg = ele.querySelector('#network-editor');
+                const graphDom = svg.querySelector('#graph-container');
+                let transform = graphDom.getAttribute('transform') || this.originTransform;
+                let scale = parseFloat(transform.split('scale(')[1]) || 1;
+                const imageWidth = graphDom.getBoundingClientRect().width / scale;
+                const imageHeight = graphDom.getBoundingClientRect().height / scale;
+                let canvasWidth = imageWidth + this.GRID * 4; //space around
+                let canvasHeight = imageHeight + this.GRID * 4;
+
+                let clone = svg.cloneNode(true);
+                clone.removeAttribute('width');
+                clone.removeAttribute('height');
+                let graph = clone.querySelector('#graph-container');
+                graph.removeAttribute('transform');
+                const source = '<?xml version="1.0" standalone="no"?>\r\n' + serializer.serializeToString(clone);
+                let image = new Image;
+                image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
+                let canvas = document.createElement('canvas');
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+                let context = canvas.getContext('2d');
+                context.fillStyle = '#fff';//image background  
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                // 2 * GRID space
+                image.onload = () => context.drawImage(image, this.GRID * 2, this.GRID * 2);
+                this.$store.getters.inputStrDef.then(name => {
+                    if (name) {
+                        canvas.toBlob(function(blob) {
+                            saveAs(blob, `${name}.jpeg`);
+                        }, 'image/jpeg');
+                    }
+                    this.$store.commit('resetInputDef');
+                    this.$store.commit('changeMaskStatus', false);
+                });
+                this.$emit('snapshot-finish', true); 
             },
             convert2Canvas(ele) {
                 this.mixCanvas = document.createElement('canvas');
