@@ -88,16 +88,19 @@
         height: 100%;
         min-width: 280px;
         background-color: var(--color-gray1);
-        float: left;
         border-right: solid 1px var(--color-gray2);
     }
 
     .center-content {
         width: 84%;
         height: 100%;
-        float: left;
         border-right: solid 1px var(--color-gray2);
         background-color: var(--color-gray0);
+    }
+
+
+    div.main-content {
+        display: flex;
     }
 
 </style>
