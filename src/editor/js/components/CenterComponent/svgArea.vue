@@ -1,17 +1,16 @@
 <template>
     <div id="network-container" v-zoom>
         <svg id="network-editor" tabindex="0">
-            <g id="graph-container" :transform="originTransform">
-                <keep-alive>
-                    <g class="assist-dots" id="svg-assist-dots" :style="getAssistDotsStyle()" v-if="isDragging">
-                        <g v-for="col in assistAreaX">
-                            <g v-for="row in assistAreaY">
-                                <circle :cx="col" :cy="row" r="1.0" style="fill: var(--color-brand)"></circle>
-                            </g>
+            <transition name="fade">
+                <g class="assist-dots" id="svg-assist-dots" v-show="isDragging && isLargeScale">
+                    <g v-for="col in assistAreaX">
+                        <g v-for="row in assistAreaY">
+                            <circle :cx="col" :cy="row" r="1.0" style="fill: var(--color-brand)"></circle>
                         </g>
                     </g>
-                </keep-alive>
-
+                </g>
+            </transition>
+            <g id="graph-container" :transform="originTransform">
                 <g class="layers" id="svg-layers" >
                     <g class="layer"
                     v-for="(node, index) in activeGraph.nodes"
@@ -55,11 +54,13 @@
     import {svgAreaOperator, StyleHelper} from "../../utils/svgAreaHelper";
     import {mapGetters, mapState} from "vuex";
     import Definition from "./../../misc/Definitions";
+    import Vue from 'vue/dist/vue.esm';
 
     export default {
         data: function() {
             return {
                 GRID: Definition.EDIT.GRID.SIZE,
+                isLargeScale: true,
             }
         },
         created: function () {
@@ -107,7 +108,7 @@
         },
         directives: {
             zoom: {
-                inserted: function (el) {
+                inserted: function (el, binding, vNode) {
                     const getTransformInfo = el => {
                         const graph = el.querySelector("#graph-container");
                         const transform = graph.getAttribute("transform") || this.originTransform;
@@ -117,6 +118,20 @@
 
                         return {graph, translateX, translateY, scale};
                     }
+
+                    const setAssistAreaTransform = function(el, vNode) {
+                        const {graph, translateX, translateY, scale} = getTransformInfo(el);
+                        const newGrid = scale * svgAreaOperator.grid;
+                        const tempX = translateX % newGrid;
+                        const tempY = translateY % newGrid;
+                        const transX = tempX > 0 ? tempX - newGrid : tempX;
+                        const transY = tempY > 0 ? tempY - newGrid : tempY;
+                        Vue.set(vNode.context, 'isLargeScale', scale >= 1);
+
+                        const assistAreaDom = el.querySelector('#svg-assist-dots');
+                        assistAreaDom.setAttribute('transform', `translate(${transX}, ${transY}) scale(${scale})`);
+                    }
+
                     el.onselectstart = () => false;
                     el.onmousedown = function(event) {
                         const {graph, translateX, translateY, scale} = getTransformInfo(el);
@@ -130,6 +145,7 @@
                         };
                         el.onmouseup = function(ev) {
                             el.onmousemove = null;
+                            setAssistAreaTransform(el, vNode);
                         };
                         el.onmouseleave = function(ev) {
                             el.onmousemove = null;
@@ -144,17 +160,21 @@
                         const svgClientX = svg.getBoundingClientRect().x;
                         const svgClientY = svg.getBoundingClientRect().y;
                         const {graph, translateX, translateY, scale} = getTransformInfo(el);
-                        let newScale = scale + event.deltaY * -0.002;
-                        let transX = translateX;
-                        let transY = translateY;
-                        // Restrict newScale
-                        newScale = Math.min(Math.max(0.05, newScale), 4);
-                        if (newScale !== scale) {
-                            // calculate new translate value of graph
-                            transX = pointerX - newScale / scale * (pointerX - translateX - svgClientX) - svgClientX;
-                            transY = pointerY - newScale / scale * (pointerY - translateY - svgClientY) - svgClientY;
+                        if (event.ctrlKey) {
+                            let newScale = scale + event.deltaY * -0.002;
+                            let transX = translateX;
+                            let transY = translateY;
+                            // Restrict newScale
+                            newScale = Math.min(Math.max(0.05, newScale), 4);
+                            if (newScale !== scale) {
+                                transX = pointerX - newScale / scale * (pointerX - translateX - svgClientX) - svgClientX;
+                                transY = pointerY - newScale / scale * (pointerY - translateY - svgClientY) - svgClientY;
+                            }
+                            graph.setAttribute("transform", `translate(${transX}, ${transY}) scale(${newScale})`);
+                        } else {
+                            graph.setAttribute("transform", `translate(${translateX}, ${translateY - event.deltaY}) scale(${scale})`);
                         }
-                        graph.setAttribute("transform", `translate(${transX}, ${transY}) scale(${newScale})`);
+                        setAssistAreaTransform(el, vNode);
                     }, true);
                 }
             }
@@ -207,5 +227,13 @@
 <style>
     div#network-container {
         width: max-content;
+    }
+
+    .fade-leave-active {
+        transition: opacity 0.1s;
+    }
+
+    .fade-leave-to {
+        opacity: 0;
     }
 </style>
