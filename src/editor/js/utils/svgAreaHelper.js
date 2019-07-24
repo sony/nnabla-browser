@@ -310,9 +310,6 @@ const svgAreaOperatorCtor = function () {
     };
 
     const layerDragEnd = function (v, layerIndex) {
-        // remove assist dots
-        d3.select("#svg-assist-dots").transition().duration(300).style("opacity", 0);
-
         let [x, y] = getTranslateCoordinate(this);
 
         // auto positioning

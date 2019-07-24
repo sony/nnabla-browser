@@ -211,7 +211,7 @@
     }
 
     .network-editor-scroller {
-        overflow: auto;
+        overflow: hidden;
         width: 100%;
     }
 

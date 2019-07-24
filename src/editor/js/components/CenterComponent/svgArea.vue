@@ -1,49 +1,50 @@
 <template>
-    <div id="network-container">
+    <div id="network-container" v-zoom>
         <svg id="network-editor" tabindex="0">
-            <keep-alive>
-            <g class="assist-dots" id="svg-assist-dots" :style="getAssistDotsStyle()" v-if="isDragging">
-                <g v-for="col in assistAreaX">
-                    <g v-for="row in assistAreaY">
-                        <circle :cx="col" :cy="row" r="1.0" style="fill: var(--color-brand)"></circle>
+            <transition name="fade">
+                <g class="assist-dots" id="svg-assist-dots" v-show="isDragging && isLargeScale">
+                    <g v-for="col in assistAreaX">
+                        <g v-for="row in assistAreaY">
+                            <circle :cx="col" :cy="row" r="1.0" style="fill: var(--color-brand)"></circle>
+                        </g>
                     </g>
                 </g>
-            </g>
-            </keep-alive>
-
-            <g class="layers" id="svg-layers" >
-                <g class="layer"
-                   v-for="(node, index) in activeGraph.nodes"
-                   :id="'layer-' + index"
-                   :key="$store.state.graphInfo.nntxtPath + '-layer-' + index"
-                   :transform="createTransform(node, index)"
-                   @mousedown="clickLayer(index)">
-                    <g class="link-circles top" v-if="node.type !== 'InputVariable'">
-                        <circle class="linker" cx="100" cy="0" r="3.5"></circle>
-                        <circle class="hide-linker top" cx="100" cy="0" r="9" opacity="0"></circle>
-                    </g>
-                    <g class="link-circles bottom" v-if="node.type !== 'OutputVariable'">
-                        <circle class="linker" cx="100" cy="40" r="3.5"></circle>
-                        <circle class="hide-linker bottom"
-                                cx="100" cy="40" r="9" opacity="0"
-                                @mousedown.stop="clickLayer(index)"></circle>
-                    </g>
-                    <rect class="layer-rect" v-bind="getNodeAttr()" :style="getNodeStyle(node)"></rect>
-                    <text :style="getCapitalStyle()" v-bind="getCapitalAttr()">{{ node.type.substring(0, 1) }}</text>
-                    <g class="text-component" v-bind="getTextComponentStyle()">
-                        <text :style="getTextStyle()" v-bind="getTextAttr()">{{node.name}}</text>
+            </transition>
+            <g id="graph-container" :transform="originTransform">
+                <g class="layers" id="svg-layers" >
+                    <g class="layer"
+                    v-for="(node, index) in activeGraph.nodes"
+                    :id="'layer-' + index"
+                    :key="$store.state.graphInfo.nntxtPath + '-layer-' + index"
+                    :transform="createTransform(node, index)"
+                    @mousedown="clickLayer(index)">
+                        <g class="link-circles top" v-if="node.type !== 'InputVariable'">
+                            <circle class="linker" cx="100" cy="0" r="3.5"></circle>
+                            <circle class="hide-linker top" cx="100" cy="0" r="9" opacity="0"></circle>
+                        </g>
+                        <g class="link-circles bottom" v-if="node.type !== 'OutputVariable'">
+                            <circle class="linker" cx="100" cy="40" r="3.5"></circle>
+                            <circle class="hide-linker bottom"
+                                    cx="100" cy="40" r="9" opacity="0"
+                                    @mousedown.stop="clickLayer(index)"></circle>
+                        </g>
+                        <rect class="layer-rect" v-bind="getNodeAttr()" :style="getNodeStyle(node)"></rect>
+                        <text :style="getCapitalStyle()" v-bind="getCapitalAttr()">{{ node.type.substring(0, 1) }}</text>
+                        <g class="text-component" v-bind="getTextComponentStyle()">
+                            <text :style="getTextStyle()" v-bind="getTextAttr()">{{node.name}}</text>
+                        </g>
                     </g>
                 </g>
-            </g>
 
-            <g class="links" id="svg-links" style="opacity: 0">
-                <path v-for="(link, index) in activeGraph.links"
-                    :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
-                    :id="'link-' + index"
-                    :stroke="linkLineStyleAttrs.stroke"
-                    :stroke-width="linkLineStyleAttrs['stroke-width']"
-                    :fill="linkLineStyleAttrs['fill']"
-                    :d="createLinkLineContext(link)" ></path>
+                <g class="links" id="svg-links" style="opacity: 0">
+                    <path v-for="(link, index) in activeGraph.links"
+                        :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
+                        :id="'link-' + index"
+                        :stroke="linkLineStyleAttrs.stroke"
+                        :stroke-width="linkLineStyleAttrs['stroke-width']"
+                        :fill="linkLineStyleAttrs['fill']"
+                        :d="createLinkLineContext(link)" ></path>
+                </g>
             </g>
         </svg>
     </div>
@@ -52,8 +53,16 @@
 <script>
     import {svgAreaOperator, StyleHelper} from "../../utils/svgAreaHelper";
     import {mapGetters, mapState} from "vuex";
+    import Definition from "./../../misc/Definitions";
+    import Vue from 'vue/dist/vue.esm';
 
     export default {
+        data: function() {
+            return {
+                GRID: Definition.EDIT.GRID.SIZE,
+                isLargeScale: true,
+            }
+        },
         created: function () {
             this.nextTransition = [];
         },
@@ -70,7 +79,10 @@
             assistAreaY: function() {
                 return d3.range(0, this.assistAreaSize.y, svgAreaOperator.grid)
             },
-            linkLineStyleAttrs: StyleHelper.createLinkLineStyle
+            linkLineStyleAttrs: StyleHelper.createLinkLineStyle,
+            originTransform: function() {
+                return `translate(${this.GRID * 2}, ${this.GRID * 2}) scale(1)`;
+            }
         },
         updated: function () {
 
@@ -85,6 +97,87 @@
 
             d3.select("#svg-links")
                 .transition().delay(500).duration(500).style("opacity", 1);
+        },
+        watch: {
+            activeGraph: function(val, oldVal) {
+                if (val !== oldVal) {
+                    let graphContainer = document.getElementById("graph-container");
+                    graphContainer.setAttribute("transform", this.originTransform);
+                }
+            }
+        },
+        directives: {
+            zoom: {
+                inserted: function (el, binding, vNode) {
+                    const getTransformInfo = el => {
+                        const graph = el.querySelector("#graph-container");
+                        const transform = graph.getAttribute("transform") || this.originTransform;
+                        const translateX = parseFloat(transform.split("translate(")[1].split(",")[0]) || 0;
+                        const translateY = parseFloat(transform.split("translate(")[1].split(",")[1]) || 0;
+                        const scale = parseFloat(transform.split("scale(")[1]) || 1;
+
+                        return {graph, translateX, translateY, scale};
+                    }
+
+                    const setAssistAreaTransform = function(el, vNode) {
+                        const {graph, translateX, translateY, scale} = getTransformInfo(el);
+                        const newGrid = scale * svgAreaOperator.grid;
+                        const tempX = translateX % newGrid;
+                        const tempY = translateY % newGrid;
+                        const transX = tempX > 0 ? tempX - newGrid : tempX;
+                        const transY = tempY > 0 ? tempY - newGrid : tempY;
+                        Vue.set(vNode.context, 'isLargeScale', scale >= 1);
+
+                        const assistAreaDom = el.querySelector('#svg-assist-dots');
+                        assistAreaDom.setAttribute('transform', `translate(${transX}, ${transY}) scale(${scale})`);
+                    }
+
+                    el.onselectstart = () => false;
+                    el.onmousedown = function(event) {
+                        const {graph, translateX, translateY, scale} = getTransformInfo(el);
+
+                        el.onmousemove = function(ev) {
+                            let a = ev.screenX- event.screenX;
+                            let b = ev.screenY - event.screenY;
+                            a = translateX + a;
+                            b = translateY + b;
+                            graph.setAttribute("transform", `translate(${a}, ${b}) scale(${scale})`);
+                        };
+                        el.onmouseup = function(ev) {
+                            el.onmousemove = null;
+                            setAssistAreaTransform(el, vNode);
+                        };
+                        el.onmouseleave = function(ev) {
+                            el.onmousemove = null;
+                        };
+                    };
+
+                    el.addEventListener("wheel", event => {
+                        event.preventDefault();
+                        const pointerX = event.clientX;
+                        const pointerY = event.clientY;
+                        const svg = el.querySelector("#network-editor");
+                        const svgClientX = svg.getBoundingClientRect().x;
+                        const svgClientY = svg.getBoundingClientRect().y;
+                        const {graph, translateX, translateY, scale} = getTransformInfo(el);
+                        if (event.ctrlKey) {
+                            let newScale = scale + event.deltaY * -0.002;
+                            let transX = translateX;
+                            let transY = translateY;
+                            // Restrict newScale
+                            newScale = Math.min(Math.max(0.05, newScale), 4);
+                            if (newScale !== scale) {
+                                transX = pointerX - newScale / scale * (pointerX - translateX - svgClientX) - svgClientX;
+                                transY = pointerY - newScale / scale * (pointerY - translateY - svgClientY) - svgClientY;
+                            }
+                            graph.setAttribute("transform", `translate(${transX}, ${transY}) scale(${newScale})`);
+                        } else {
+                            graph.setAttribute("transform", `translate(${translateX}, ${translateY - event.deltaY}) scale(${scale})`);
+                        }
+                        setAssistAreaTransform(el, vNode);
+                    }, true);
+                }
+            }
         },
         methods: {
             clickLayer: function (index) {
@@ -134,5 +227,13 @@
 <style>
     div#network-container {
         width: max-content;
+    }
+
+    .fade-leave-active {
+        transition: opacity 0.1s;
+    }
+
+    .fade-leave-to {
+        opacity: 0;
     }
 </style>
