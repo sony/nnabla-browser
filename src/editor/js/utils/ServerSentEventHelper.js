@@ -101,7 +101,7 @@ const SSEhelper = function () {
     this.layerRegister = new layerRegisterCtor();
 
     const getLayerPosition = (depth, needSlice) => {
-        return {x: GRID * (2 + needSlice * 15), y: GRID * (2 + depth * 4)}; // this calculation for x is bad
+        return {x: GRID * needSlice * 15, y: GRID * depth * 4}; // this calculation for x is bad
     };
 
     const setupGetNodeAndLinkRecursive = (functions, outputVariables) => {
