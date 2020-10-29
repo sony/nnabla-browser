@@ -12,7 +12,7 @@ python >=3.5, <=3.6.5
 
 - Pip install from git repository
     ```shell
-    $ pip install git+http://ml-git.ubiq.sony.co.jp/Akio.Hayakawa/nnabla-browser-editor.git
+    $ pip install git+http://github.com/nnabla/nnabla-browser.git
     ```
 
 - Building from source by yourself & install 
