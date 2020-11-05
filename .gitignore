@@ -11,3 +11,5 @@ build/
 !editor/dist/
 
 !Pipfile
+
+front/lib/js/nnablaCore.js

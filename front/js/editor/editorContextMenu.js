@@ -1,4 +1,4 @@
-import EditorUtils from './../EditorUtils';
+import EditorUtils from './../EditorUtils'
 
 /**
  * グラフ上で右クリックした際に表示されるコンテキストメニューの処理
@@ -114,6 +114,6 @@ import EditorUtils from './../EditorUtils';
 //     };
 // })();
 
-const contextMenu = {};
+const contextMenu = {}
 
-export default contextMenu;
+export default contextMenu

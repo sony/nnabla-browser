@@ -3,21 +3,21 @@
  * @type {Child|*}
  */
 const clipboard = (() => {
-    return {
-        /**
+  return {
+    /**
          * コピー処理（マウス操作）
          */
-        copy: () => document.execCommand('copy'),
-        _copy: function(e) {},
-        /**
+    copy: () => document.execCommand('copy'),
+    _copy: function (e) {},
+    /**
          * ペースト処理（マウス操作）
          */
-        paste: function(osData) {},
-        /**
+    paste: function (osData) {},
+    /**
          * カット処理（マウス操作）
          */
-        cut: () => document.execCommand('cut'),
-    };
-})();
+    cut: () => document.execCommand('cut')
+  }
+})()
 
-export default clipboard;
+export default clipboard

@@ -1,17 +1,17 @@
 
 const state = {
-    activeTabName: "graph"
-};
+  activeTabName: 'graph'
+}
 
 const mutations = {
-    changeActiveTab: function (state, tabName) {
-        state.activeTabName = tabName.toLowerCase();
-    }
-};
+  changeActiveTab: function (state, tabName) {
+    state.activeTabName = tabName.toLowerCase()
+  }
+}
 
 const editor = {
-    state,
-    mutations
-};
+  state,
+  mutations
+}
 
-export default editor;
+export default editor
