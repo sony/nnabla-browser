@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "",
   "scripts": {
-    "build": "parcel build src/editor/js/index.js -d src/editor/dist",
+    "build": "parcel build front/js/index.js -d front/dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

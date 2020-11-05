@@ -44,15 +44,9 @@ setup(
     ],
     # python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <=3.6.5",
     python_requires=">=3.5, <=3.6.5",
-    package_dir={
-        "nnabla_browser": "src",
-        "nnabla_browser/python_modules": "src/python_modules",
-        'nnabla_browser/editor': 'src/editor'},
-    packages=["nnabla_browser", "nnabla_browser/python_modules", "nnabla_browser/editor"],
-    package_data={
-        'nnabla_browser/editor': ['*', "dist/*", "image/*.svg", "lib/css/*.css", "lib/fonts/*", "lib/js/*.js"],
-        'nnabla_browser/python_modules': ["nnabla_core/*"]
-    },
+    package_dir={"nnabla_browser": "nnabla_browser"},
+    packages=["nnabla_browser"],
+    package_data={'nnabla_browser': ["nnabla_core/*"]}, # TODO: include built JS
     entry_points={
         "console_scripts": [
             "nnabla-browser = nnabla_browser.server:main"
