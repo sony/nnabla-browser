@@ -1,5 +1,7 @@
 # NNabla Browser
 
+![format check](https://github.com/nnabla/nnabla-browser/workflows/format%20check/badge.svg)
+
 NNabla browser is a browser base visualizer for Neural Network Libraries.
 
 
