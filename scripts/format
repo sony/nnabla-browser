@@ -1,0 +1,3 @@
+#!/bin/bash -eux
+
+yapf -r -vv -i nnabla_browser

@@ -21,7 +21,9 @@ from nnabla_browser.utils import sse_msg_encoding, str_to_bool
 # flask application
 # TODO: fix directory paths
 template_path = os.path.join(os.path.dirname(__file__), '..', 'front')
-app = Flask(__name__, template_folder=template_path, static_folder=template_path)
+app = Flask(__name__,
+            template_folder=template_path,
+            static_folder=template_path)
 
 # shared manager
 manager = Manager()
@@ -33,7 +35,10 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", "-p", default=8888, type=int)
     parser.add_argument("--logdir", "-d", default="./logdir", type=str)
-    parser.add_argument("--communication_interval", "-c", default=0.1, type=float)
+    parser.add_argument("--communication_interval",
+                        "-c",
+                        default=0.1,
+                        type=float)
     parser.add_argument("--build", "-b", default=False, type=str_to_bool)
 
     args = parser.parse_args()
@@ -44,7 +49,8 @@ def get_args():
 # TODO: remove this command since the distributed version shoule be already built
 def build():
     # create nnablaCore.js
-    output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', "front/lib/js/nnablaCore.js")
+    output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                               '..', "front/lib/js/nnablaCore.js")
     create_nnabla_core_js(output_path)
 
     # build
@@ -53,7 +59,10 @@ def build():
 
 def check_and_create_logdir(logdir):
     if not os.path.exists(logdir):
-        ans = str(input("{} dose not exist. Would you like to create new directory? [y/N]:".format(logdir)))
+        ans = str(
+            input(
+                "{} dose not exist. Would you like to create new directory? [y/N]:"
+                .format(logdir)))
         if ans.strip().lower() in ["y", "yes"]:
             os.makedirs(logdir)
         else:
@@ -65,7 +74,9 @@ def check_and_create_logdir(logdir):
 
 def create_supervise_process(logdir):
     def supervise(_send_manager, _directory_manager):
-        monitor = Monitor(logdir=logdir, send_manager=_send_manager, directory_manager=_directory_manager)
+        monitor = Monitor(logdir=logdir,
+                          send_manager=_send_manager,
+                          directory_manager=_directory_manager)
 
         observer = Observer()
         observer.schedule(monitor, monitor.logdir, recursive=True)
@@ -102,7 +113,8 @@ def create_subscribe_response(communication_interval, base_path):
             global send_manager
             with Lock():
                 idx = len(send_manager)
-                send_manager.insert(idx, initialize_send_queue(directory_manager, base_path))
+                send_manager.insert(
+                    idx, initialize_send_queue(directory_manager, base_path))
 
             try:
                 while True:
@@ -110,7 +122,9 @@ def create_subscribe_response(communication_interval, base_path):
                         with Lock():
                             info = send_manager[idx][0]
                             send_manager[idx] = send_manager[idx][1:]
-                            yield sse_msg_encoding(str(info["data"]), _id=str(info["path"]), _event=str(info["action"]))
+                            yield sse_msg_encoding(str(info["data"]),
+                                                   _id=str(info["path"]),
+                                                   _event=str(info["action"]))
 
                     gevent.sleep(communication_interval)
 
@@ -139,7 +153,8 @@ def main():
 
     with Pool(1) as p:
 
-        p.Process(target=create_supervise_process(logdir), args=[send_manager, directory_manager]).start()
+        p.Process(target=create_supervise_process(logdir),
+                  args=[send_manager, directory_manager]).start()
 
         create_subscribe_response(args.communication_interval, logdir)
 

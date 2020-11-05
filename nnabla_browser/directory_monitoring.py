@@ -57,7 +57,8 @@ def get_directory_tree_recursive(path):
 def get_file_content(path):
     if fnmatch.fnmatch(path, "*.nntxt") or fnmatch.fnmatch(path, "*.nnp"):
         return nnabla_proto_to_json(path)
-    elif fnmatch.fnmatch(path, "*.series.txt") or fnmatch.fnmatch(path, "*.result.csv"):
+    elif fnmatch.fnmatch(path, "*.series.txt") or fnmatch.fnmatch(
+            path, "*.result.csv"):
         with open(path, "r") as f:
             data = f.read()
 
@@ -70,9 +71,11 @@ def initialize_send_queue(path_list, base_path):
     ret = []
 
     for path in path_list:
-        send_info = {"path": os.path.relpath(path, base_path),
-                     "action": "add",
-                     "data": get_file_content(path)}
+        send_info = {
+            "path": os.path.relpath(path, base_path),
+            "action": "add",
+            "data": get_file_content(path)
+        }
         ret.append(send_info)
 
     return ret
@@ -95,18 +98,24 @@ class Monitor(FileSystemEventHandler):
         if data == "":
             return
 
-        send_info = {"path": os.path.relpath(abs_path, self.logdir),
-                     "action": action,
-                     "data": data}
+        send_info = {
+            "path": os.path.relpath(abs_path, self.logdir),
+            "action": action,
+            "data": data
+        }
 
         with Lock():
             num_access = len(self.send_manager)
             for i in range(num_access):
-                self.send_manager[i] = self.send_manager[i] + [send_info,]
+                self.send_manager[i] = self.send_manager[i] + [
+                    send_info,
+                ]
 
     def on_created(self, event):
         abs_path = os.path.abspath(event.src_path)
-        self.directory_manager += [abs_path, ]
+        self.directory_manager += [
+            abs_path,
+        ]
 
         self.set_send_queue(abs_path, "add")
 
@@ -119,7 +128,8 @@ class Monitor(FileSystemEventHandler):
 
         if abs_path in self.directory_manager:
             index = self.directory_manager.index(abs_path)
-            self.directory_manager = self.directory_manager[:index] + self.directory_manager[index+1:]
+            self.directory_manager = self.directory_manager[:
+                                                            index] + self.directory_manager[
+                                                                index + 1:]
 
         self.set_send_queue(abs_path, "delete")
-

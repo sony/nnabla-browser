@@ -10,7 +10,9 @@ import importlib
 
 # it`s too dirty...
 YAML_PATH = {
-    "functions": os.path.join(os.path.abspath(os.path.dirname(__file__)), "nnabla_core", "functions.yaml")
+    "functions":
+    os.path.join(os.path.abspath(os.path.dirname(__file__)), "nnabla_core",
+                 "functions.yaml")
 }
 
 
@@ -18,7 +20,10 @@ def get_activation_list():
     with open(YAML_PATH["functions"], "r") as f:
         yaml_obj = yaml.load(f)
 
-    activations = [x["snake_name"] for x in yaml_obj["Neural Network Activation Functions"].values()]
+    activations = [
+        x["snake_name"]
+        for x in yaml_obj["Neural Network Activation Functions"].values()
+    ]
 
     return activations
 
@@ -56,7 +61,10 @@ def get_color(layer_name, default_color):
     return default_color
 
 
-def get_all_function_api_definitions(module_name, default_color, api_type, ignores=None):
+def get_all_function_api_definitions(module_name,
+                                     default_color,
+                                     api_type,
+                                     ignores=None):
     module = importlib.import_module(module_name)
 
     def predicate(value):
@@ -87,9 +95,12 @@ def get_all_function_api_definitions(module_name, default_color, api_type, ignor
                 # inputs
                 inputs[param_name] = {"optional": False}
             else:
-                arguments[param_name] = {"default": "None" if param.default is None else param.default,
-                                         "type": type(param.default).__name__,
-                                         "optional": True}
+                arguments[param_name] = {
+                    "default":
+                    "None" if param.default is None else param.default,
+                    "type": type(param.default).__name__,
+                    "optional": True
+                }
 
         function_info = {
             "layer_name": layer_name,
@@ -107,15 +118,20 @@ def get_all_function_api_definitions(module_name, default_color, api_type, ignor
 
 def parse_function_APIs():
     # nnabla.parametric_functions
-    p_functions = get_all_function_api_definitions("nnabla.parametric_functions", "#6aa1bd",
-                                                   "parametric_functions",
-                                                   ignores=["parametric_function_api"])
+    p_functions = get_all_function_api_definitions(
+        "nnabla.parametric_functions",
+        "#6aa1bd",
+        "parametric_functions",
+        ignores=["parametric_function_api"])
 
     # nnabla.functions
-    functions = get_all_function_api_definitions("nnabla.function_bases", "#848484", "functions")
+    functions = get_all_function_api_definitions("nnabla.function_bases",
+                                                 "#848484", "functions")
 
     # remove deprecated (priority order is parametric_functions > functions > function_bases)
-    functions.update(get_all_function_api_definitions("nnabla.functions", "#d77b6a", "functions"))
+    functions.update(
+        get_all_function_api_definitions("nnabla.functions", "#d77b6a",
+                                         "functions"))
     keys = list(functions.keys())
     for key in keys:
         if key in p_functions:
@@ -146,10 +162,15 @@ def parse_all():
     p_functions, functions = parse_function_APIs()
     variables = create_variable_info()
 
-    return {"parametric_functions": p_functions, "functions": functions, "variables": variables}
+    return {
+        "parametric_functions": p_functions,
+        "functions": functions,
+        "variables": variables
+    }
 
 
 def create_nnabla_core_js(out_path):
     with open(out_path, "w") as f:
-        print("const nnablaCore = " + dumps(parse_all(), indent=2)
-              + ";\n export default nnablaCore;", file=f)
+        print("const nnablaCore = " + dumps(parse_all(), indent=2) +
+              ";\n export default nnablaCore;",
+              file=f)
