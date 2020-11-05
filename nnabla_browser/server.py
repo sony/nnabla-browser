@@ -1,4 +1,3 @@
-from __future__ import absolute_import, print_function
 import time
 import argparse
 import subprocess
@@ -15,18 +14,14 @@ from watchdog.observers import Observer
 
 from nnabla.logger import logger
 
-try:
-    from .python_modules.directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
-    from .python_modules.parse_nnabla_function import create_nnabla_core_js
-    from .python_modules.utils import sse_msg_encoding, str_to_bool
-
-except ImportError:
-    from python_modules.directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
-    from python_modules.parse_nnabla_function import create_nnabla_core_js
-    from python_modules.utils import sse_msg_encoding, str_to_bool
+from nnabla_browser.directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
+from nnabla_browser.parse_nnabla_function import create_nnabla_core_js
+from nnabla_browser.utils import sse_msg_encoding, str_to_bool
 
 # flask application
-app = Flask(__name__, template_folder="./editor", static_folder="./editor")
+# TODO: fix directory paths
+template_path = os.path.join(os.path.dirname(__file__), '..', 'front')
+app = Flask(__name__, template_folder=template_path, static_folder=template_path)
 
 # shared manager
 manager = Manager()
@@ -46,9 +41,10 @@ def get_args():
     return args
 
 
+# TODO: remove this command since the distributed version shoule be already built
 def build():
     # create nnablaCore.js
-    output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "editor/lib/js/nnablaCore.js")
+    output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', "front/lib/js/nnablaCore.js")
     create_nnabla_core_js(output_path)
 
     # build
