@@ -1,0 +1,7 @@
+gevent
+flask
+watchdog
+google
+protobuf
+numpy
+nnabla
