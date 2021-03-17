@@ -6,7 +6,7 @@ import os
 
 import gevent
 from gevent.pywsgi import WSGIServer
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import Flask, render_template, Response, send_file, jsonify
 
 from multiprocessing import Pool, Manager, Lock
@@ -20,7 +20,7 @@ from nnabla_browser.utils import sse_msg_encoding, str_to_bool
 
 # flask application
 # TODO: fix directory paths
-template_path = os.path.join(os.path.dirname(__file__), '..', 'front')
+template_path = os.path.join(os.path.dirname(__file__), 'front')
 app = Flask(__name__,
             template_folder=template_path,
             static_folder=template_path)
