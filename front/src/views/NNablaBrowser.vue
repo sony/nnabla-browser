@@ -9,9 +9,9 @@
 import Vue from 'vue'
 import Header from '@/components/Header.vue'
 import Main from '@/components/Main.vue'
-import EditorWindowSize from '@/components/utils/EditorWindowSize'
-import { SSE } from '@/components/utils/ServerSentEventHelper'
-import * as pathOperator from '@/components/utils/PathOperator'
+import EditorWindowSize from '@/utils/EditorWindowSize'
+import { SSE } from '@/utils/ServerSentEventHelper'
+import * as pathOperator from '@/utils/PathOperator'
 import $ from 'jquery'
 
 export default Vue.extend({

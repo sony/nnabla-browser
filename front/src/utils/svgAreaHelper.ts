@@ -1,9 +1,9 @@
-import { Definitions } from '@/components/utils/Definitions'
+import { Definitions } from '@/utils/Definitions'
 import store from '@/store'
 // import { allFunctions } from './nnablaApi'
 import * as d3 from 'd3'
 
-import { NodeInfo } from '@/components/utils/ServerSentEventHelper'
+import { NodeInfo } from '@/utils/ServerSentEventHelper'
 
 const layerDef = Definitions.EDIT.LAYER
 

@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import EditorWindowSize from '@/components/utils/EditorWindowSize'
+import EditorWindowSize from '@/utils/EditorWindowSize'
 import Vue from 'vue'
 
 export default Vue.extend({

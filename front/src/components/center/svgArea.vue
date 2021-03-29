@@ -51,13 +51,13 @@
 </template>
 
 <script lang="ts">
-import { svgAreaOperator, styleHelper, Vector2D } from '@/components/utils/svgAreaHelper'
-import { Definitions } from '@/components/utils/Definitions'
+import { svgAreaOperator, styleHelper, Vector2D } from '@/utils/svgAreaHelper'
+import { Definitions } from '@/utils/Definitions'
 import Vue, { VNode } from 'vue'
 import * as d3 from 'd3'
 
 import { Link, Graph, GraphInfoState } from '@/store/types'
-import { NodeInfo } from '@/components/utils/ServerSentEventHelper'
+import { NodeInfo } from '@/utils/ServerSentEventHelper'
 
 const grid: number = Definitions.EDIT.GRID.SIZE
 

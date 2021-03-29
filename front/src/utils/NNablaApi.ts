@@ -1,5 +1,5 @@
 
-import nnablaCore from '@/components/utils/nnablaCore'
+import nnablaCore from '@/utils/nnablaCore'
 
 const getAllFuncionsRecursive = (obj: any) => {
   let ret: any[] = []

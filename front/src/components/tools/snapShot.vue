@@ -2,7 +2,7 @@
 import Vue from 'vue'
 import html2canvas from 'html2canvas'
 import { saveAs } from 'file-saver'
-import { Definitions } from '@/components/utils/Definitions'
+import { Definitions } from '@/utils/Definitions'
 
 interface DataType {
   element: any;

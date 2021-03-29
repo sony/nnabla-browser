@@ -1,4 +1,4 @@
-import { Definitions } from '@/components/utils/Definitions'
+import { Definitions } from '@/utils/Definitions'
 import { range } from './ArrayOperator'
 import * as Path from 'path'
 // import CSV from 'comma-separated-values'

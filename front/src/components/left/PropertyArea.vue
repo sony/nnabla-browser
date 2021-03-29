@@ -6,8 +6,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { Definitions } from '@/components/utils/Definitions'
-import { allFunctions } from '@/components/utils/NNablaApi'
+import { Definitions } from '@/utils/Definitions'
+import { allFunctions } from '@/utils/NNablaApi'
 
 // type definition
 // todo: refactoring

@@ -18,7 +18,7 @@
 import Vue from 'vue'
 import svgArea from './svgArea.vue'
 import snapShot from '@/components/tools/snapShot.vue'
-import { Definitions } from '@/components/utils/Definitions'
+import { Definitions } from '@/utils/Definitions'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faSpinner, faCamera } from '@fortawesome/free-solid-svg-icons'
 import { Graph } from '@/store/types'
