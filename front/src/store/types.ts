@@ -1,5 +1,5 @@
 
-import { NodeInfo } from '@/utils/ServerSentEventHelper'
+import { NodeInfo } from '@/utils/serverSentEventHelper'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RootState {

@@ -1,5 +1,5 @@
-import { Definitions } from '@/utils/Definitions'
-import { range } from './ArrayOperator'
+import { Definitions } from '@/utils/definitions'
+import { range } from '@/utils/arrayOperator'
 import * as Path from 'path'
 // import CSV from 'comma-separated-values'
 

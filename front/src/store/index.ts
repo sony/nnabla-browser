@@ -3,7 +3,7 @@ import Vuex, { StoreOptions } from 'vuex'
 import { RootState } from './types'
 
 import { editor } from './modules/editor'
-import { directoryInfo } from './modules/DirectoryInfo'
+import { directoryInfo } from './modules/directoryInfo'
 import { graphInfo } from './modules/graphInfo'
 import { chartInfo } from './modules/chartInfo'
 import { csvInfo } from './modules/csvInfo'

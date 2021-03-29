@@ -2,7 +2,7 @@
 import { Module, MutationTree, ActionTree } from 'vuex'
 import { RootState, DirectoryNode, DirectoryInfoState } from '@/store/types'
 
-import * as pathOperator from '@/utils/PathOperator'
+import * as pathOperator from '@/utils/pathOperator'
 import * as d3 from 'd3'
 import * as Path from 'path'
 
