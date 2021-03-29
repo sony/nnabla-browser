@@ -1,8 +1,8 @@
+path = require("path");
 module.exports = {
   pages: {
     index: {
-      entry: 'src/main.ts',
-      // template: 'public/index.html',
+      entry: 'front/src/main.ts',
       filename: 'index.html',
       title: 'NNabla Browser',
       chunks: ['chunk-vendors', 'chunk-common', 'index']
@@ -26,7 +26,8 @@ module.exports = {
     },
     resolve: {
       alias: {
-        vue$: 'vue/dist/vue.esm.js'
+        vue$: 'vue/dist/vue.esm.js',
+        '@': path.resolve(__dirname, 'front/src/')
       }
     },
     plugins: []

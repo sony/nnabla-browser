@@ -10,7 +10,8 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "baseUrl": ".",
+    "baseUrl": "./front",
+    "outDir": "./front/dist",
     "types": [
       "webpack-env", "d3", "d3-selection", "node", "vue", "jquery",
       "html2canvas", "filesaver"
@@ -28,11 +29,11 @@
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "front/src/**/*.ts",
+    "front/src/**/*.tsx",
+    "front/src/**/*.vue",
+    "front/tests/**/*.ts",
+    "front/tests/**/*.tsx"
   ],
   "exclude": [
     "node_modules"
