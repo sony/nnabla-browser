@@ -1,4 +1,3 @@
-
 import { Module, MutationTree, GetterTree, ActionTree } from 'vuex'
 import { RootState, DialogueInfoState } from '@/store/types'
 

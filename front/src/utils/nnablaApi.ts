@@ -1,4 +1,3 @@
-
 import nnablaCore from '@/utils/nnablaCore'
 
 const getAllFuncionsRecursive = (obj: any) => {

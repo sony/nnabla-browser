@@ -1,10 +1,9 @@
-
 import { NodeInfo } from '@/utils/serverSentEventHelper'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RootState {
-    editor: any;
-    graphInfo: any;
+  editor: any;
+  graphInfo: any;
 }
 
 /***************************************
@@ -12,16 +11,16 @@ export interface RootState {
  ***************************************/
 
 export interface Link {
-    source: number;
-    destination: number;
+  source: number;
+  destination: number;
 }
 
 export interface Graph {
-    x?: number;
-    y?: number;
-    name?: string;
-    nodes: NodeInfo[];
-    links: Link[];
+  x?: number;
+  y?: number;
+  name?: string;
+  nodes: NodeInfo[];
+  links: Link[];
 }
 
 export interface GraphInfoState {
@@ -38,7 +37,7 @@ export interface GraphInfoState {
  ***************************************/
 
 export interface EditorState {
-    activeTabName: string;
+  activeTabName: string;
 }
 
 /***************************************
@@ -46,16 +45,16 @@ export interface EditorState {
  ***************************************/
 
 export interface DirectoryNode {
-    name: string;
-    children: DirectoryNode[];
-    nntxtFiles: Array<{name: string; data: any}>;
-    monitorFiles: Array<{name: string; data: any}>;
-    csvResultFiles: Array<{name: string; data: any}>;
+  name: string;
+  children: DirectoryNode[];
+  nntxtFiles: Array<{ name: string; data: any }>;
+  monitorFiles: Array<{ name: string; data: any }>;
+  csvResultFiles: Array<{ name: string; data: any }>;
 }
 
 export interface DirectoryInfoState {
-    data: DirectoryNode;
-    activeFile: string;
+  data: DirectoryNode;
+  activeFile: string;
 }
 
 /***************************************
@@ -63,15 +62,15 @@ export interface DirectoryInfoState {
  ***************************************/
 
 export interface DialogueInfoState {
-    data: {
-        windowWidth: number;
-        windowHeight: number;
-      };
-      isMaskActive: boolean;
-      dialogueType: string;
-      defaultStr: string;
-      inputStr: string;
-      inputDef: any; // after replace jquey by others, fix this.
+  data: {
+    windowWidth: number;
+    windowHeight: number;
+  };
+  isMaskActive: boolean;
+  dialogueType: string;
+  defaultStr: string;
+  inputStr: string;
+  inputDef: any; // after replace jquey by others, fix this.
 }
 
 /***************************************
@@ -79,8 +78,8 @@ export interface DialogueInfoState {
  ***************************************/
 
 export interface CsvInfoState {
-    path: string;
-    data: any;
+  path: string;
+  data: any;
 }
 
 /***************************************
@@ -88,5 +87,5 @@ export interface CsvInfoState {
  ***************************************/
 
 export interface ChartInfoState {
-    charts: any[];
+  charts: any[];
 }

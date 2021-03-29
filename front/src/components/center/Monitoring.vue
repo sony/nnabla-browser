@@ -9,7 +9,6 @@ import Vue from 'vue'
 // todo: improve monitoring viewer.
 
 export default Vue.extend({})
-
 </script>
 
 <style scoped>

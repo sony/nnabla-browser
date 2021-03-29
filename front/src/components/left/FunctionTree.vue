@@ -1,14 +1,14 @@
 <template>
-    <div>
-        <component-palette class="app-row"
-                           style="top: 0; bottom: 50%; border-bottom: 1px solid var(--color-gray2);"
-                           @history="command => $emit('history', command)"
-        />
-    </div>
+  <div>
+    <component-palette
+      class="app-row"
+      style="top: 0; bottom: 50%; border-bottom: 1px solid var(--color-gray2);"
+      @history="command => $emit('history', command)"
+    />
+  </div>
 </template>
 
 <script lang="ts">
-
 import Vue from 'vue'
 // import nnablaCore from '../../../lib/js/nnablaCore'
 
@@ -52,7 +52,6 @@ const baseFunctionComponent = Vue.extend({
     expandArrow: function (): string {
       return './editor/image/Arrow' + (this.expand ? 'Down' : '') + '.svg'
     }
-
   }
 })
 
@@ -110,9 +109,10 @@ export default Vue.extend<PalleteDataType, {}, {}, PalletePropsType>({
               return this.category === 'base_functions'
             },
             expandArrow: function (): string {
-              return './editor/image/Arrow' + (this.expand ? 'Down' : '') + '.svg'
+              return (
+                './editor/image/Arrow' + (this.expand ? 'Down' : '') + '.svg'
+              )
             }
-
           },
           components: {
             'base-function-component': baseFunctionComponent,
@@ -126,12 +126,12 @@ export default Vue.extend<PalleteDataType, {}, {}, PalletePropsType>({
 </script>
 
 <style>
-    .components .function {
-        margin-left: 10px;
-        cursor: pointer;
-    }
+.components .function {
+  margin-left: 10px;
+  cursor: pointer;
+}
 
-    .components .function:hover {
-        color: var(--color-brand);
-    }
+.components .function:hover {
+  color: var(--color-brand);
+}
 </style>

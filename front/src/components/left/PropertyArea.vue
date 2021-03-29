@@ -1,7 +1,7 @@
 <template>
-    <div>
-        <property-area class="app-row" style="height: 50%; bottom: 0;"/>
-    </div>
+  <div>
+    <property-area class="app-row" style="height: 50%; bottom: 0;" />
+  </div>
 </template>
 
 <script lang="ts">
@@ -57,10 +57,13 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
           return Object.keys(this.selectedLayer).length > 0
         },
         defaultProps: function () {
-          return allFunctions.find(x => x.layer_name === this.selectedLayer.type)
+          return allFunctions.find(
+            x => x.layer_name === this.selectedLayer.type
+          )
         },
         layerParams: function () {
-          const paramKey: string = this.selectedLayer.type.toLowerCase() + 'Param'
+          const paramKey: string =
+            this.selectedLayer.type.toLowerCase() + 'Param'
           return this.selectedLayer[paramKey] || {}
         },
         ioInfos: function () {
@@ -87,7 +90,10 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
             getDocUrl: function () {
               const APIDEF = Definitions.NNABLA_CORE_API
               let url
-              if ((this.defaultProps.api_type || '') === 'parametric_functions_api') {
+              if (
+                (this.defaultProps.api_type || '') ===
+                'parametric_functions_api'
+              ) {
                 url = APIDEF.PF_DOC_URL + '#nnabla.parametric_functions.'
               } else {
                 url = APIDEF.F_DOC_URL + '#nnabla.functions.'
@@ -172,12 +178,17 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
           },
           methods: {
             getLayerParam: function (key: string): string | null {
-              const name = key.replace(/_./g, (s: string) => s.charAt(1).toUpperCase())
+              const name = key.replace(/_./g, (s: string) =>
+                s.charAt(1).toUpperCase()
+              )
               const params = this.layerParams[name]
 
               if (typeof params === 'undefined') return null
 
-              if (typeof params === 'object' && Object.prototype.hasOwnProperty.call(params, 'dim')) {
+              if (
+                typeof params === 'object' &&
+                Object.prototype.hasOwnProperty.call(params, 'dim')
+              ) {
                 return '[' + Object.values(params.dim).join(', ') + ']'
               }
               return params
@@ -197,159 +208,158 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
     }
   }
 })
-
 </script>
 
 <style>
-    .property-area .title {
-        margin-top: 0;
-        padding-top: 12px;
-    }
+.property-area .title {
+  margin-top: 0;
+  padding-top: 12px;
+}
 
-    .property-area .layer {
-        font-family: "SSTUI-Medium";
-        margin-top: 8px;
-        font-size: 16px;
-        width: 100%;
-        height: 24px;
-    }
+.property-area .layer {
+  font-family: 'SSTUI-Medium';
+  margin-top: 8px;
+  font-size: 16px;
+  width: 100%;
+  height: 24px;
+}
 
-    .property-area .layer > .drop-cap {
-        position: absolute;
-        left: 16px;
+.property-area .layer > .drop-cap {
+  position: absolute;
+  left: 16px;
 
-        font-family: "SSTUI-Medium";
-        color: var(--color-gray0);
-        letter-spacing: 0;
-        text-align: center;
-        width: 24px;
-        height: 24px;
-        line-height: 24px;
-        background-color: var(--color-brand);
-    }
+  font-family: 'SSTUI-Medium';
+  color: var(--color-gray0);
+  letter-spacing: 0;
+  text-align: center;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  background-color: var(--color-brand);
+}
 
-    .property-area .layer > .name {
-        position: absolute;
-        left: 48px;
-        right: 40px;
-        line-height: 24px;
+.property-area .layer > .name {
+  position: absolute;
+  left: 48px;
+  right: 40px;
+  line-height: 24px;
 
-        overflow-x: hidden;
-    }
+  overflow-x: hidden;
+}
 
-    .property-area .layer > a {
-        position: absolute;
-        right: 16px;
-        width: 24px;
-        height: 24px;
-        display: inline-block;
-        background-position: right;
-        background-repeat: no-repeat;
-        background-size: 24px 24px;
-        filter: brightness(0);
-    }
+.property-area .layer > a {
+  position: absolute;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  background-position: right;
+  background-repeat: no-repeat;
+  background-size: 24px 24px;
+  filter: brightness(0);
+}
 
-    .property-area .property {
-        padding: 0;
-        margin: 0;
-        padding-left: 16px;
-        padding-right: 16px;
-    }
+.property-area .property {
+  padding: 0;
+  margin: 0;
+  padding-left: 16px;
+  padding-right: 16px;
+}
 
-    .property-area .property .content {
-        height: 25px;
-        border-bottom: solid 1px var(--color-gray2);
-        padding-top: 3px;
-    }
+.property-area .property .content {
+  height: 25px;
+  border-bottom: solid 1px var(--color-gray2);
+  padding-top: 3px;
+}
 
-    .property-area .property .name {
-        float: left;
-        overflow: hidden;
-        color: var(--color-gray4);
-        width: 50%;
-        padding-right: 4px;
-    }
+.property-area .property .name {
+  float: left;
+  overflow: hidden;
+  color: var(--color-gray4);
+  width: 50%;
+  padding-right: 4px;
+}
 
-    .property-area .property .value {
-        float: left;
-        overflow: hidden;
-        color: var(--color-gray5);
-        width: 50%;
-        padding-left: 4px;
-    }
+.property-area .property .value {
+  float: left;
+  overflow: hidden;
+  color: var(--color-gray5);
+  width: 50%;
+  padding-left: 4px;
+}
 
-    .property input[type="text"] {
-        width: 100%;
-    }
+.property input[type='text'] {
+  width: 100%;
+}
 
-    .property input[type="text"]:not(:focus) {
-        border-color: transparent;
-        outline-color: transparent;
-        background-color: transparent;
-    }
+.property input[type='text']:not(:focus) {
+  border-color: transparent;
+  outline-color: transparent;
+  background-color: transparent;
+}
 
-    /* cover 'hidden' input and span */
-    .property label {
-        cursor: pointer;
-        position: relative;
-        height: 16px;
-    }
+/* cover 'hidden' input and span */
+.property label {
+  cursor: pointer;
+  position: relative;
+  height: 16px;
+}
 
-    .property label > input[type="checkbox"] {
-        display: none;
-    }
+.property label > input[type='checkbox'] {
+  display: none;
+}
 
-    /* slider background which having round corner */
-    .property label > input[type="checkbox"] + span {
-        display: inline-block;
-        vertical-align: text-bottom;
-        width: 32px;
-        height: 13px;
-        border-radius: 13px;
-        background-color: var(--color-gray4);
-    }
+/* slider background which having round corner */
+.property label > input[type='checkbox'] + span {
+  display: inline-block;
+  vertical-align: text-bottom;
+  width: 32px;
+  height: 13px;
+  border-radius: 13px;
+  background-color: var(--color-gray4);
+}
 
-    /* background color changed to layer1's when checked */
-    .property label > input[type="checkbox"]:checked + span {
-        background-color: var(--color-brand);
-    }
+/* background color changed to layer1's when checked */
+.property label > input[type='checkbox']:checked + span {
+  background-color: var(--color-brand);
+}
 
-    /* draw round thumb on sllider */
-    .property label > input[type="checkbox"] + span::after {
-        display: inline-block;
-        content: "";
-        margin: 1px;
-        width: 11px;
-        height: 11px;
-        border-radius: 11px;
-        background-color: var(--color-gray1);
-        transition: margin .125s;
-    }
+/* draw round thumb on sllider */
+.property label > input[type='checkbox'] + span::after {
+  display: inline-block;
+  content: '';
+  margin: 1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 11px;
+  background-color: var(--color-gray1);
+  transition: margin 0.125s;
+}
 
-    /* thumb moved to left when checked */
-    .property label > input[type="checkbox"]:checked + span::after {
-        margin-left: 20px;
-    }
+/* thumb moved to left when checked */
+.property label > input[type='checkbox']:checked + span::after {
+  margin-left: 20px;
+}
 
-    .property select {
-        width: 100%;
-    }
+.property select {
+  width: 100%;
+}
 
-    .property select:not(:active) {
-        border-color: transparent;
-        outline-color: transparent;
-        background-color: transparent;
-    }
+.property select:not(:active) {
+  border-color: transparent;
+  outline-color: transparent;
+  background-color: transparent;
+}
 
-    /* warning icon in property panel */
-    .property .content .value.warning::after {
-        width: 16px;
-        height: 16px;
-        display: inline-block;
-        content: '';
-        position: absolute;
-        right: 16px;
+/* warning icon in property panel */
+.property .content .value.warning::after {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  content: '';
+  position: absolute;
+  right: 16px;
 
-        background-size: 16px 16px;
-    }
+  background-size: 16px 16px;
+}
 </style>

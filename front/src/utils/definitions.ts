@@ -3,7 +3,9 @@ const rgbColor = (() => {
   return (hex: string) => {
     const color = /#(..)(..)(..)/.exec(hex)
     if (color === null) return
-    return 'rgb(' + [from(color[1]), from(color[2]), from(color[3])].join(', ') + ')'
+    return (
+      'rgb(' + [from(color[1]), from(color[2]), from(color[3])].join(', ') + ')'
+    )
   }
 })()
 const color = {

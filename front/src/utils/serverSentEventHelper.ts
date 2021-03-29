@@ -29,10 +29,10 @@ export interface NodeInfo extends LayerInfo {
 
 /***************************************/
 class LayerRegister {
-  counter: number;
-  layers: {[key: string]: LayerInfo};
-  links: any[]; // todo
-  allParameters: any; // todo
+  counter: number
+  layers: { [key: string]: LayerInfo }
+  links: any[] // todo
+  allParameters: any // todo
 
   constructor (params?: any) {
     this.counter = 0
@@ -46,14 +46,17 @@ class LayerRegister {
   }
 
   addLayer (layer: any, depth: number): [LayerInfo, boolean] {
-    if (!Object.prototype.hasOwnProperty.call(this.layers, layer.name)) { // first visit
+    if (!Object.prototype.hasOwnProperty.call(this.layers, layer.name)) {
+      // first visit
       let visitCount = 1
       const parameters = []
       const buffers = []
 
       // collect all function parameters
       for (const _input of layer.input) {
-        const varIndex = this.allParameters.findIndex((x: {name: string}) => x.name === _input)
+        const varIndex = this.allParameters.findIndex(
+          (x: { name: string }) => x.name === _input
+        )
         if (varIndex > -1) {
           parameters.push(this.allParameters[varIndex])
         } else {
@@ -72,7 +75,8 @@ class LayerRegister {
         visitCount,
         parameters
       }
-    } else { // visit again
+    } else {
+      // visit again
       this.layers[layer.name].depth.push(depth)
       this.layers[layer.name].visitCount++
     }
@@ -87,7 +91,7 @@ class LayerRegister {
   }
 
   getDepthToLayers () {
-    const depth2layers: {[key: number]: any} = {}
+    const depth2layers: { [key: number]: any } = {}
     Object.values(this.layers).forEach(layer => {
       const depthList = layer.depth
       const maxDepth = Math.max(...depthList)
@@ -110,7 +114,12 @@ class LayerRegister {
           ...layer,
           depth: maxDepth
         })
-      } else depth2layers[maxDepth] = { needSlice: 0, layers: [{ ...layer, depth: maxDepth }] }
+      } else {
+        depth2layers[maxDepth] = {
+          needSlice: 0,
+          layers: [{ ...layer, depth: maxDepth }]
+        }
+      }
     })
 
     return depth2layers
@@ -118,7 +127,7 @@ class LayerRegister {
 }
 
 class SSEHelper {
-  layerRegister: LayerRegister;
+  layerRegister: LayerRegister
 
   constructor () {
     this.layerRegister = new LayerRegister()
@@ -152,11 +161,18 @@ class SSEHelper {
     const recursive = (sourceLayer: any, sourceDepthFromRoot: any) => {
       for (const sourceOutput of sourceLayer.output) {
         // find user define output
-        const outputVariableIndex = outputVariables.findIndex((v: any) => v.variableName === sourceOutput)
+        const outputVariableIndex = outputVariables.findIndex(
+          (v: any) => v.variableName === sourceOutput
+        )
         if (outputVariableIndex > -1) {
-          const tmpLayer = this.createDummyOutputLayer(outputVariables[outputVariableIndex])
+          const tmpLayer = this.createDummyOutputLayer(
+            outputVariables[outputVariableIndex]
+          )
 
-          const [layer, _] = this.layerRegister.addLayer(tmpLayer, sourceDepthFromRoot + 1)
+          const [layer, _] = this.layerRegister.addLayer(
+            tmpLayer,
+            sourceDepthFromRoot + 1
+          )
 
           const link = {
             source: sourceLayer.index,
@@ -166,7 +182,9 @@ class SSEHelper {
           this.layerRegister.addLink(link)
         }
 
-        const destLayers = functions.filter((f: any) => (f.input || []).find((name: string) => name === sourceOutput))
+        const destLayers = functions.filter((f: any) =>
+          (f.input || []).find((name: string) => name === sourceOutput)
+        )
 
         const depthIncrement = destLayers.length > 1 ? 2 : 1
 
@@ -175,7 +193,10 @@ class SSEHelper {
             ...destLayer
           }
 
-          const [layer, isVisitEnough] = this.layerRegister.addLayer(tmpLayer, sourceDepthFromRoot + depthIncrement)
+          const [layer, isVisitEnough] = this.layerRegister.addLayer(
+            tmpLayer,
+            sourceDepthFromRoot + depthIncrement
+          )
 
           const link = {
             source: sourceLayer.index,
@@ -216,15 +237,21 @@ class SSEHelper {
         else noInputFunctions.push({ ...f, input: [] })
       })
 
-      const allParameters = network.variable.filter((x: any) => x.type === 'Parameter')
+      const allParameters = network.variable.filter(
+        (x: any) => x.type === 'Parameter'
+      )
 
       this.layerRegister.initialize(allParameters)
 
-      const recursive = this.setupGetNodeAndLinkRecursive(functions, outputVariables)
+      const recursive = this.setupGetNodeAndLinkRecursive(
+        functions,
+        outputVariables
+      )
 
       // create input nodes
       const inputLayers = [
-        ...inputVariables.map(this.createDummyInputLayer), ...noInputFunctions
+        ...inputVariables.map(this.createDummyInputLayer),
+        ...noInputFunctions
       ]
 
       for (const inputLayer of inputLayers) {
@@ -236,12 +263,17 @@ class SSEHelper {
 
       const nodes = []
       for (let { needSlice, layers } of Object.values(depthToLayers)) {
-        for (const layer of layers.sort((a: number, b: number) => a > b ? 1 : -1)) {
-          nodes.push({ ...layer, ...this.getLayerPosition(layer.depth, needSlice++) })
+        for (const layer of layers.sort((a: number, b: number) =>
+          a > b ? 1 : -1
+        )) {
+          nodes.push({
+            ...layer,
+            ...this.getLayerPosition(layer.depth, needSlice++)
+          })
         }
       }
 
-      nodes.sort((a, b) => a.index > b.index ? 1 : -1)
+      nodes.sort((a, b) => (a.index > b.index ? 1 : -1))
       nodes.forEach(a => {
         a.outputShape = {}
         const b = a.type === 'OutputVariable' ? a.input : a.output
@@ -262,7 +294,8 @@ class SSEHelper {
   getMonitorInfo (event: any) {
     const split = event.data.split('\n')
 
-    const times = []; const values = []
+    const times = []
+    const values = []
 
     for (const elm of split) {
       const [t, v] = elm.split(' ')
@@ -275,7 +308,10 @@ class SSEHelper {
 
   getCsvResult (event: any) {
     const filepath = event.lastEventId
-    const csvType = filepath.split('/').pop().split('.')[0]
+    const csvType = filepath
+      .split('/')
+      .pop()
+      .split('.')[0]
     // validation.result.csv , profile.result.csv
     switch (csvType) {
       case 'validation':

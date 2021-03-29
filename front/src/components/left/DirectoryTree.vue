@@ -1,8 +1,10 @@
 <template>
-    <div>
-        <monitoring-list style="top: 0; bottom: 50%; border-bottom: 1px solid var(--color-gray2);"
-                         class="app-row"/>
-    </div>
+  <div>
+    <monitoring-list
+      style="top: 0; bottom: 50%; border-bottom: 1px solid var(--color-gray2);"
+      class="app-row"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -23,7 +25,7 @@ interface NNtxtCouputedType {
 }
 
 interface NNtxtPropsType {
-  nntxt: {data: object; name: string};
+  nntxt: { data: object; name: string };
   dirName: string;
 }
 
@@ -47,7 +49,9 @@ const nntxtsComponent = Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
       return this.dirName + '/' + this.nntxt.name
     },
     activeStyle: function () {
-      const isSelected = this.$store.state.directoryInfo.activeFile === this.nntxtPath && this.isActive
+      const isSelected =
+        this.$store.state.directoryInfo.activeFile === this.nntxtPath &&
+        this.isActive
       return { color: isSelected ? 'var(--color-brand)' : '' }
     },
     graphInfo: function () {
@@ -61,8 +65,12 @@ const nntxtsComponent = Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
           d3.select('#svg-links').style('opacity', 0)
 
           d3.select('#network-editor')
-            .transition().duration(200).attr('opacity', 0.3)
-            .transition().duration(1000).attr('opacity', 1)
+            .transition()
+            .duration(200)
+            .attr('opacity', 0.3)
+            .transition()
+            .duration(1000)
+            .attr('opacity', 1)
 
           this.$store.commit('setGraphs', this.nntxt.data)
           this.$store.commit('setNNtxtPath', this.nntxtPath)
@@ -118,10 +126,7 @@ const monitorsComponent = Vue.extend({
 
 const directoryComponent = Vue.extend({
   name: 'directory-component',
-  props: [
-    'info',
-    'dirName'
-  ],
+  props: ['info', 'dirName'],
   template: `
         <div class="branch" v-if="checkDisplay">
             <div class="branch-name" @click="expand = !expand;" v-if="info.name.length > 0">
@@ -167,7 +172,12 @@ const directoryComponent = Vue.extend({
       return `./editor/image/Arrow${this.expand ? 'Down' : ''}.svg`
     },
     checkDisplay: function (): boolean {
-      return this.info.children.length + this.info.nntxtFiles.length + this.info.monitorFiles.length > 0
+      return (
+        this.info.children.length +
+          this.info.nntxtFiles.length +
+          this.info.monitorFiles.length >
+        0
+      )
     }
   },
   data: function () {
@@ -200,21 +210,23 @@ export default Vue.extend({
     }
   }
 })
-
 </script>
 
 <style>
-    .nntxt, .csvResult {
-        opacity: 0.6;
-    }
+.nntxt,
+.csvResult {
+  opacity: 0.6;
+}
 
-    .nntxt.active, .csvResult.active {
-        opacity: 1.0;
-        font-weight: bold;
-        cursor: pointer;
-    }
+.nntxt.active,
+.csvResult.active {
+  opacity: 1;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    .nntxt.active:hover, .csvResult.active:hover {
-        color: var(--color-brand);
-    }
+.nntxt.active:hover,
+.csvResult.active:hover {
+  color: var(--color-brand);
+}
 </style>

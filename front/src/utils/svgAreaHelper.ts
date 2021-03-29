@@ -78,7 +78,10 @@ class StyleHelper {
 export const styleHelper = new StyleHelper()
 
 // SvgAreaOperator
-export interface Vector2D { x: number; y: number }
+export interface Vector2D {
+  x: number;
+  y: number;
+}
 
 interface DrawingLinkMemory {
   source: number;
@@ -88,12 +91,16 @@ interface DrawingLinkMemory {
 }
 
 class SvgAreaOperator {
-  drawingLinkMemory: DrawingLinkMemory;
-  connectedLinks: any[];
-  focusLayerRect: any;
+  drawingLinkMemory: DrawingLinkMemory
+  connectedLinks: any[]
+  focusLayerRect: any
 
   constructor () {
-    this.drawingLinkMemory = { source: -1, destination: -1, delta: { x: 0, y: 0 } }
+    this.drawingLinkMemory = {
+      source: -1,
+      destination: -1,
+      delta: { x: 0, y: 0 }
+    }
     this.connectedLinks = []
   }
 
@@ -109,10 +116,20 @@ class SvgAreaOperator {
       if (node2 != null) {
         const layersDOM = (node1 as Element).getClientRects()[0]
 
-        svg.attr('width',
-          Math.max((node2 as Element).clientWidth, layersDOM.width + layerDef.GRID * 4))
-        svg.attr('height',
-          Math.max((node2 as Element).clientHeight, layersDOM.height + layerDef.GRID * 4))
+        svg.attr(
+          'width',
+          Math.max(
+            (node2 as Element).clientWidth,
+            layersDOM.width + layerDef.GRID * 4
+          )
+        )
+        svg.attr(
+          'height',
+          Math.max(
+            (node2 as Element).clientHeight,
+            layersDOM.height + layerDef.GRID * 4
+          )
+        )
       }
     }
   }
@@ -184,7 +201,10 @@ class SvgAreaOperator {
   }
 
   layerDefocusing () {
-    this.focusLayerRect.transition().ease(d3.easeCircleOut).duration(300)
+    this.focusLayerRect
+      .transition()
+      .ease(d3.easeCircleOut)
+      .duration(300)
       .style('fill-opacity', 0.2)
       .style('stroke-opacity', 0)
       .attr('transform', 'translate(-10, -10) scale(1.1, 1.5)')
@@ -194,21 +214,31 @@ class SvgAreaOperator {
   layerFocusing (node: any) {
     if (typeof this.focusLayerRect !== 'undefined') {
       // if the same layer is clicked again, do nothing
-      if (d3.select(node).selectAll('rect').nodes().length > 1) return
+      if (
+        d3
+          .select(node)
+          .selectAll('rect')
+          .nodes().length > 1
+      ) {
+        return
+      }
 
       this.layerDefocusing()
     }
 
     this.focusLayerRect = d3.select(node).append('rect')
 
-    this.focusLayerRect.attr('width', layerDef.RECT_WIDTH)
+    this.focusLayerRect
+      .attr('width', layerDef.RECT_WIDTH)
       .attr('height', layerDef.RECT_HEIGHT)
       .attr('transform', 'translate(-10, -10) scale(1.1, 1.5)')
       .style('fill', 'black')
       .style('fill-opacity', 0.2)
       .style('stroke', 'black')
       .style('stroke-opacity', 0)
-      .transition().ease(d3.easeCircleOut).duration(500)
+      .transition()
+      .ease(d3.easeCircleOut)
+      .duration(500)
       .style('fill-opacity', 0.5)
       .style('stroke-opacity', 0.5)
       .attr('transform', 'translate(0, 0) scale(1, 1)')
@@ -227,7 +257,7 @@ class SvgAreaOperator {
 
     context.moveTo(x1, y1)
 
-    if ((y2 - y1) > offset * 2 && Math.abs(x1 - x2) > offset * 2) {
+    if (y2 - y1 > offset * 2 && Math.abs(x1 - x2) > offset * 2) {
       const halfY = (y1 + y2) / 2
       const sign = x1 < x2 ? 1 : -1
 
@@ -253,7 +283,9 @@ class SvgAreaOperator {
     }
 
     for (const point of points) {
-      point.length === 2 ? context.lineTo(point[0], point[1]) : context.quadraticCurveTo(point[0], point[1], point[2], point[3])
+      point.length === 2
+        ? context.lineTo(point[0], point[1])
+        : context.quadraticCurveTo(point[0], point[1], point[2], point[3])
     }
 
     context.lineTo(x2, y2)
@@ -262,7 +294,9 @@ class SvgAreaOperator {
   }
 
   // for layer event
-  getLayerDragStart (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>) {
+  getLayerDragStart (
+    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>
+  ) {
     return (event: any, d: any) => {
       const elem = event.currentTarget
       const index = selection.nodes().indexOf(elem)
@@ -283,7 +317,10 @@ class SvgAreaOperator {
             index: link.index,
             destination: this.getLinkerPosition(link.destination, false),
             update: function (v: Vector2D) {
-              elem.source = { x: v.x + layerDef.GRID * 5, y: v.y + layerDef.GRID * 2 }
+              elem.source = {
+                x: v.x + layerDef.GRID * 5,
+                y: v.y + layerDef.GRID * 2
+              }
             }
           }
         } else if (link.destination === index) {
@@ -302,35 +339,44 @@ class SvgAreaOperator {
     }
   }
 
-  getLayerDragging (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>) {
+  getLayerDragging (
+    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>
+  ) {
     return (event: any, d: any) => {
       const elem = event.currentTarget
       const index = selection.nodes().indexOf(elem)
 
       // remove auxiliary layer
-      d3.select('#svg-layers').select('rect#auxiliary-layer').remove()
+      d3.select('#svg-layers')
+        .select('rect#auxiliary-layer')
+        .remove()
 
       const [currentX, currentY] = this.getTranslateCoordinate(elem)
 
       const x = currentX + event.dx
       const y = currentY + event.dy
-      d3.select(elem)
-        .attr('transform', `translate(${x}, ${y})`)
+      d3.select(elem).attr('transform', `translate(${x}, ${y})`)
 
       // redraw all links
       for (const link of this.connectedLinks) {
         link.update({ x, y })
-        d3.select('path#link-' + link.index).attr('d', this.createLinkLineContext(link.source, link.destination))
+        d3.select('path#link-' + link.index).attr(
+          'd',
+          this.createLinkLineContext(link.source, link.destination)
+        )
       }
 
       // show end position
       const [endX, endY] = this.getCorrectPosition(x, y)
       const { width, height } = styleHelper.createNodeAttr()
 
-      d3.select('#svg-layers').append('rect')
+      d3.select('#svg-layers')
+        .append('rect')
         .attr('id', 'auxiliary-layer')
-        .attr('x', endX).attr('y', endY)
-        .attr('width', width).attr('height', height)
+        .attr('x', endX)
+        .attr('y', endY)
+        .attr('width', width)
+        .attr('height', height)
         .style('fill', 'none')
         .style('stroke', 'var(--color-brand)')
         .style('stroke-dasharray', 3)
@@ -339,7 +385,9 @@ class SvgAreaOperator {
     }
   }
 
-  getLayerDragEnd (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>) {
+  getLayerDragEnd (
+    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>
+  ) {
     return (event: any, d: any) => {
       const elem = event.currentTarget
       const index = selection.nodes().indexOf(elem)
@@ -348,9 +396,12 @@ class SvgAreaOperator {
 
       // auto positioning
       while (true) {
-        [x, y] = this.getCorrectPosition(x, y)
+        ;[x, y] = this.getCorrectPosition(x, y)
 
-        const overlapLayerPosition = this.getOverlapLayerPosition({ x, y }, index)
+        const overlapLayerPosition = this.getOverlapLayerPosition(
+          { x, y },
+          index
+        )
         if (!overlapLayerPosition) {
           break
         }
@@ -363,14 +414,18 @@ class SvgAreaOperator {
       for (const link of this.connectedLinks) {
         link.update({ x, y })
         d3.select('path#link-' + link.index)
-          .transition().ease(d3.easeCubicOut).duration(500)
+          .transition()
+          .ease(d3.easeCubicOut)
+          .duration(500)
           .attr('d', this.createLinkLineContext(link.source, link.destination))
       }
 
       this.connectedLinks = []
 
       d3.select(elem)
-        .transition().ease(d3.easeCubicOut).duration(500)
+        .transition()
+        .ease(d3.easeCubicOut)
+        .duration(500)
         .attr('transform', `translate(${x}, ${y})`)
         .on('end', () => {
           store.commit('setNodePosition', { index: index, x, y }) // layerIndex
@@ -379,8 +434,12 @@ class SvgAreaOperator {
         })
 
       // remove auxiliary layer
-      d3.select('#svg-layers').selectAll('rect#auxiliary-layer')
-        .transition().duration(300).attr('opacity', 0).remove()
+      d3.select('#svg-layers')
+        .selectAll('rect#auxiliary-layer')
+        .transition()
+        .duration(300)
+        .attr('opacity', 0)
+        .remove()
     }
   }
 
@@ -391,11 +450,15 @@ class SvgAreaOperator {
     }
   }
 
-  getLayerMouseOver (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>) {
+  getLayerMouseOver (
+    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>
+  ) {
     return (event: any, d: any) => {
       const elem = event.currentTarget
       const index = selection.nodes().indexOf(elem)
-      d3.select(elem).select('rect').attr('fill-opacity', '0.5')
+      d3.select(elem)
+        .select('rect')
+        .attr('fill-opacity', '0.5')
       this.drawingLinkMemory.destination = this.getLayerIndex(index) // todo: fix
     }
   }
@@ -403,22 +466,36 @@ class SvgAreaOperator {
   getLayerMouseOut () {
     return (event: any, d: any) => {
       const elem = event.currentTarget
-      d3.select(elem).select('rect').attr('fill-opacity', '1')
+      d3.select(elem)
+        .select('rect')
+        .attr('fill-opacity', '1')
       this.drawingLinkMemory.destination = -1
     }
   }
 
   // for link event
-  getLinkDragStart (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>) {
+  getLinkDragStart (
+    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>
+  ) {
     return (event: any, d: any) => {
       const elem = event.currentTarget
       const index = selection.nodes().indexOf(elem)
 
       this.layerFocusing(elem.parentNode.parentNode)
-      d3.select(elem.parentNode).select('.linker').style('fill', 'var(--color-system3)')
-      this.drawingLinkMemory.source = this.getLayerIndex(elem.parentNode.parentNode)
-      const lineIndex = d3.select('#svg-links').selectAll('path').nodes().length
-      this.drawingLinkMemory.tmpLine = d3.select('#svg-links').append('path').attr('id', 'link-' + lineIndex)
+      d3.select(elem.parentNode)
+        .select('.linker')
+        .style('fill', 'var(--color-system3)')
+      this.drawingLinkMemory.source = this.getLayerIndex(
+        elem.parentNode.parentNode
+      )
+      const lineIndex = d3
+        .select('#svg-links')
+        .selectAll('path')
+        .nodes().length
+      this.drawingLinkMemory.tmpLine = d3
+        .select('#svg-links')
+        .append('path')
+        .attr('id', 'link-' + lineIndex)
     }
   }
 
@@ -436,32 +513,50 @@ class SvgAreaOperator {
       x -= this.drawingLinkMemory.delta.x
       y -= this.drawingLinkMemory.delta.y
 
-      const context = this.createLinkLineContext(this.getLinkerPosition(this.drawingLinkMemory.source, true), { x, y })
+      const context = this.createLinkLineContext(
+        this.getLinkerPosition(this.drawingLinkMemory.source, true),
+        { x, y }
+      )
 
-      const line = this.drawingLinkMemory.tmpLine as d3.Selection<SVGPathElement, unknown, HTMLElement, any>
+      const line = this.drawingLinkMemory.tmpLine as d3.Selection<
+        SVGPathElement,
+        unknown,
+        HTMLElement,
+        any
+      >
 
-      line.attr('d', context)
+      line
+        .attr('d', context)
         .style('fill', 'none')
         .style('stroke', 'var(--color-system3)')
         .style('stroke-width', '1.5')
     }
   }
 
-  getLinkDragEnd (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>) {
+  getLinkDragEnd (
+    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>
+  ) {
     return (event: any, d: any) => {
       const elem = event.currentTarget
       const index = selection.nodes().indexOf(elem)
 
       const m = this.drawingLinkMemory
 
-      const line = m.tmpLine as d3.Selection<SVGPathElement, unknown, HTMLElement, any>
+      const line = m.tmpLine as d3.Selection<
+        SVGPathElement,
+        unknown,
+        HTMLElement,
+        any
+      >
 
       if (m.destination !== null) {
         const context = this.createLinkLineContext(
           this.getLinkerPosition(m.source, true),
-          this.getLinkerPosition(m.destination, false))
+          this.getLinkerPosition(m.destination, false)
+        )
 
-        line.attr('d', context)
+        line
+          .attr('d', context)
           .style('stroke', 'var(--color-gray5)')
           .style('stroke-width', '1.5')
           .style('stroke-opacity', null)
@@ -471,16 +566,24 @@ class SvgAreaOperator {
 
       line.remove()
 
-      this.drawingLinkMemory = { source: -1, destination: -1, delta: { x: 0, y: 0 } }
+      this.drawingLinkMemory = {
+        source: -1,
+        destination: -1,
+        delta: { x: 0, y: 0 }
+      }
 
-      d3.select(elem.parentNode).select('.linker').style('fill', null)
+      d3.select(elem.parentNode)
+        .select('.linker')
+        .style('fill', null)
     }
   }
 
   graphExchangeTransition = (transitionList: any[]) => {
     for (const elm of transitionList) {
       d3.select('#layer-' + elm.index)
-        .transition().duration(1000).ease(d3.easeCubicOut)
+        .transition()
+        .duration(1000)
+        .ease(d3.easeCubicOut)
         .attr('transform', elm.transform)
         .on('end', () => this.adjustSvgSize())
     }
@@ -491,10 +594,13 @@ class SvgAreaOperator {
 
     if (allLayers.nodes().length > 0) {
       // drag event
-      allLayers.call(d3.drag<any, any>()
-        .on('start', this.getLayerDragStart(allLayers))
-        .on('drag', this.getLayerDragging(allLayers))
-        .on('end', this.getLayerDragEnd(allLayers)))
+      allLayers.call(
+        d3
+          .drag<any, any>()
+          .on('start', this.getLayerDragStart(allLayers))
+          .on('drag', this.getLayerDragging(allLayers))
+          .on('end', this.getLayerDragEnd(allLayers))
+      )
 
       // click event
       allLayers.select('rect.layer-rect').on('click', this.getLayerClicked())
@@ -506,11 +612,13 @@ class SvgAreaOperator {
 
       // linker event
 
-      allLayers.selectAll('circle.hide-linker.bottom')
-        .call(d3.drag<any, any>()
+      allLayers.selectAll('circle.hide-linker.bottom').call(
+        d3
+          .drag<any, any>()
           .on('start', this.getLinkDragStart(allLayers))
           .on('drag', this.getLinkDragging())
-          .on('end', this.getLinkDragEnd(allLayers)))
+          .on('end', this.getLinkDragEnd(allLayers))
+      )
     }
   }
 }

@@ -1,4 +1,3 @@
-
 import * as Path from 'path'
 
 const getFileType = (path: string) => {
@@ -11,7 +10,7 @@ const getFileType = (path: string) => {
   } else if (subExt === '.series' && ext === '.txt') {
     // "XXX.series.txt"
     return 'monitorFiles'
-  } else if ((subExt === '.result' && ext === '.csv')) {
+  } else if (subExt === '.result' && ext === '.csv') {
     // " XXX.result.csv"
     return 'csvResultFiles'
   }

@@ -64,9 +64,7 @@ export const nnablaCore = {
       },
       arguments: {
         axes: {
-          default: [
-            1
-          ],
+          default: [1],
           type: 'list',
           optional: true
         },
@@ -76,7 +74,7 @@ export const nnablaCore = {
           optional: true
         },
         eps: {
-          default: 1e-05,
+          default: 1e-5,
           type: 'float',
           optional: true
         },
@@ -522,7 +520,7 @@ export const nnablaCore = {
           optional: true
         },
         stopping_criterion: {
-          default: 1e-05,
+          default: 1e-5,
           type: 'float',
           optional: true
         },
@@ -3230,10 +3228,7 @@ export const nnablaCore = {
           optional: true
         },
         pad: {
-          default: [
-            0,
-            0
-          ],
+          default: [0, 0],
           type: 'tuple',
           optional: true
         },

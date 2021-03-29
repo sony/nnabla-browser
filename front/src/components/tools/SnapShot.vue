@@ -38,7 +38,9 @@ export default Vue.extend({
         if (val !== oldval) {
           this.$emit('snapshot-finish', false)
           this.$store.commit('changeMaskStatus', true)
-          let nameString = `${this.imageName}_${(new Date()).toISOString().replace(/[TZ:,\\. ]/g, '-')}`
+          let nameString = `${
+            this.imageName
+          }_${new Date().toISOString().replace(/[TZ:,\\. ]/g, '-')}`
           nameString = nameString.substring(0, nameString.length - 1)
           this.$store.commit('setDefaultStr', nameString)
           const ele = document.querySelector(`#${this.containerId}`)
@@ -61,30 +63,44 @@ export default Vue.extend({
   },
   methods: {
     calculateStep (rect: any) {
-      const step = Math.floor(Math.min(rect.width, rect.height, 2500) / 500) || 1
+      const step =
+        Math.floor(Math.min(rect.width, rect.height, 2500) / 500) || 1
       let delta = 500 * step
-      let a = rect.width > delta ? this.gamma1(rect.width, delta) : this.gamma2(delta, rect.width)
-      let b = rect.height > delta ? this.gamma1(rect.height, delta) : this.gamma2(delta, rect.height)
+      let a =
+        rect.width > delta
+          ? this.gamma1(rect.width, delta)
+          : this.gamma2(delta, rect.width)
+      let b =
+        rect.height > delta
+          ? this.gamma1(rect.height, delta)
+          : this.gamma2(delta, rect.height)
       while (a < 0 || b < 0) {
         delta += step * 50
-        a = rect.width > delta ? this.gamma1(rect.width, delta) : this.gamma2(delta, rect.width)
-        b = rect.height > delta ? this.gamma1(rect.height, delta) : this.gamma2(delta, rect.height)
+        a =
+          rect.width > delta
+            ? this.gamma1(rect.width, delta)
+            : this.gamma2(delta, rect.width)
+        b =
+          rect.height > delta
+            ? this.gamma1(rect.height, delta)
+            : this.gamma2(delta, rect.height)
       }
 
       return delta
     },
     gamma1 (a: number, b: number) {
-      return a % b - b / 2
+      return (a % b) - b / 2
     },
     gamma2 (a: number, b: number) {
-      return a % b - b / 10
+      return (a % b) - b / 10
     },
     svg2canvas (ele: any) {
       const serializer = new XMLSerializer()
       // related value calculation
       const svg = ele.querySelector('#network-editor')
       const graphDom = svg.querySelector('#graph-container')
-      const transform = graphDom.getAttribute('transform') || this.originTransform
+      const transform =
+        graphDom.getAttribute('transform') || this.originTransform
       const scale = parseFloat(transform.split('scale(')[1]) || 1
       const imageWidth = graphDom.getBoundingClientRect().width / scale
       const imageHeight = graphDom.getBoundingClientRect().height / scale
@@ -96,9 +112,12 @@ export default Vue.extend({
       clone.removeAttribute('height')
       const graph = clone.querySelector('#graph-container')
       graph.removeAttribute('transform')
-      const source = '<?xml version="1.0" standalone="no"?>\r\n' + serializer.serializeToString(clone)
+      const source =
+        '<?xml version="1.0" standalone="no"?>\r\n' +
+        serializer.serializeToString(clone)
       const image = new Image()
-      image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source)
+      image.src =
+        'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source)
       const canvas = document.createElement('canvas')
       canvas.width = canvasWidth
       canvas.height = canvasHeight
@@ -106,10 +125,11 @@ export default Vue.extend({
 
       if (context === null) return
 
-      context.fillStyle = '#fff'// image background
+      context.fillStyle = '#fff' // image background
       context.fillRect(0, 0, canvas.width, canvas.height)
       // 2 * GRID space
-      image.onload = () => context.drawImage(image, this.GRID * 2, this.GRID * 2)
+      image.onload = () =>
+        context.drawImage(image, this.GRID * 2, this.GRID * 2)
       this.$store.getters.inputStrDef.then((name: string) => {
         if (name) {
           canvas.toBlob(function (blob: any) {
@@ -138,25 +158,33 @@ export default Vue.extend({
             x: j * this.canvasStep - ele.parentNode.scrollLeft + ele.offsetLeft,
             y: i * this.canvasStep - ele.parentNode.scrollTop + ele.offsetTop,
             logging: false
-          }).then((canvas: any) => {
-            this.mixCanvas.getContext('2d').drawImage(canvas, j * this.canvasStep * this.scale, i * this.canvasStep * this.scale)
-            canvas = null
-          }).finally(() => {
-            count += 1
-            if (count === col * row) {
-              this.$store.getters.inputStrDef.then((name: string) => {
-                if (name) {
-                  this.mixCanvas.toBlob(function (blob: any) {
-                    saveAs(blob, `${name}.jpeg`)
-                  }, 'image/jpeg')
-                }
-                this.mixCanvas = null
-                this.$store.commit('resetInputDef')
-                this.$store.commit('changeMaskStatus', false)
-              })
-            }
-            this.$emit('snapshot-finish', true)
           })
+            .then((canvas: any) => {
+              this.mixCanvas
+                .getContext('2d')
+                .drawImage(
+                  canvas,
+                  j * this.canvasStep * this.scale,
+                  i * this.canvasStep * this.scale
+                )
+              canvas = null
+            })
+            .finally(() => {
+              count += 1
+              if (count === col * row) {
+                this.$store.getters.inputStrDef.then((name: string) => {
+                  if (name) {
+                    this.mixCanvas.toBlob(function (blob: any) {
+                      saveAs(blob, `${name}.jpeg`)
+                    }, 'image/jpeg')
+                  }
+                  this.mixCanvas = null
+                  this.$store.commit('resetInputDef')
+                  this.$store.commit('changeMaskStatus', false)
+                })
+              }
+              this.$emit('snapshot-finish', true)
+            })
         }
       }
     }
@@ -164,6 +192,4 @@ export default Vue.extend({
 })
 </script>
 
-<style>
-
-</style>
+<style></style>

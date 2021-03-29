@@ -1,4 +1,3 @@
-
 import { Module, MutationTree } from 'vuex'
 import { RootState, EditorState } from '@/store/types'
 

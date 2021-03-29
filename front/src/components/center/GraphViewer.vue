@@ -1,17 +1,28 @@
 <template>
-    <div>
-        <network-tabs
-                @history="command => $emit('history', command)"
-        />
-        <div v-if="activeFileTag" class="tool-icon-container" @click="capSwitch">
-            <font-awesome-icon v-show="!snapshotLoding" icon="camera" class="func-icon" />
-            <font-awesome-icon v-show="snapshotLoding" icon="spinner" class="fa-spin func-icon" />
-            <snap-shot :capElement="snapshotSwitch" containerId="network-container" :imageName="activeFileTag" @snapshot-finish="snapshotLoding=!$event"/>
-        </div>
-        <div class="tab-content network-editor-scroller">
-            <svg-area/>
-        </div>
+  <div>
+    <network-tabs @history="command => $emit('history', command)" />
+    <div v-if="activeFileTag" class="tool-icon-container" @click="capSwitch">
+      <font-awesome-icon
+        v-show="!snapshotLoding"
+        icon="camera"
+        class="func-icon"
+      />
+      <font-awesome-icon
+        v-show="snapshotLoding"
+        icon="spinner"
+        class="fa-spin func-icon"
+      />
+      <snap-shot
+        :capElement="snapshotSwitch"
+        containerId="network-container"
+        :imageName="activeFileTag"
+        @snapshot-finish="snapshotLoding = !$event"
+      />
     </div>
+    <div class="tab-content network-editor-scroller">
+      <svg-area />
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -59,7 +70,10 @@ export default Vue.extend<DataType, {}, {}, {}>({
   },
   computed: {
     activeFileTag: function () {
-      const tag = this.$store.state.directoryInfo.activeFile.replace(/[\\/.]/g, '-')
+      const tag = this.$store.state.directoryInfo.activeFile.replace(
+        /[\\/.]/g,
+        '-'
+      )
       return tag.replace(/^-*/, '')
     }
   },
@@ -116,7 +130,7 @@ export default Vue.extend<DataType, {}, {}, {}>({
               switch (e.keyCode) {
                 case 27:
                 case 13:
-                  (e.target as HTMLElement).blur()
+                  ;(e.target as HTMLElement).blur()
                   break
                 default:
                   break
@@ -125,7 +139,8 @@ export default Vue.extend<DataType, {}, {}, {}>({
           }
         }),
         'graph-tab-append': {
-          template: '<div class="graphs-tab graph-add"><img class="graph-addnew-img" src="./editor/image/AddNew.svg"/></div>'
+          template:
+            '<div class="graphs-tab graph-add"><img class="graph-addnew-img" src="./editor/image/AddNew.svg"/></div>'
         }
       }
     },
@@ -136,111 +151,112 @@ export default Vue.extend<DataType, {}, {}, {}>({
 </script>
 
 <style>
-    .network-tabs {
-        width: 100%;
-        height: 41px;
-        border-bottom: solid 1px var(--color-gray2);
-        overflow: auto;
-    }
+.network-tabs {
+  width: 100%;
+  height: 41px;
+  border-bottom: solid 1px var(--color-gray2);
+  overflow: auto;
+}
 
-    .graphs-tab {
-        float: left;
-        height: 39px;
-        line-height: 39px;
-        padding-right: 8px;
-    }
+.graphs-tab {
+  float: left;
+  height: 39px;
+  line-height: 39px;
+  padding-right: 8px;
+}
 
-    .graphs-tab.active {
-        box-sizing: border-box;
-        border-bottom: solid 2px var(--color-brand);
-    }
+.graphs-tab.active {
+  box-sizing: border-box;
+  border-bottom: solid 2px var(--color-brand);
+}
 
-    .graphs-tab.active > span > .graph-name {
-        color: var(--color-brand);
-    }
+.graphs-tab.active > span > .graph-name {
+  color: var(--color-brand);
+}
 
-    .graphs-tab:hover {
-        background-color: var(--color-gray1);
-    }
+.graphs-tab:hover {
+  background-color: var(--color-gray1);
+}
 
-    .graph-name {
-        margin-left: 24px;
-        margin-right: 12px;
-        font-size: 13px;
-        color: var(--color-gray5);
-        line-height: 40px;
-    }
+.graph-name {
+  margin-left: 24px;
+  margin-right: 12px;
+  font-size: 13px;
+  color: var(--color-gray5);
+  line-height: 40px;
+}
 
-    .graph-remove-img, .graph-addnew-img {
-        width: 16px;
-        height: 16px;
-        margin: 8px 0 8px 0;
-        vertical-align: middle;
-    }
+.graph-remove-img,
+.graph-addnew-img {
+  width: 16px;
+  height: 16px;
+  margin: 8px 0 8px 0;
+  vertical-align: middle;
+}
 
-    .graph-add {
-        padding-left: 8px;
-    }
+.graph-add {
+  padding-left: 8px;
+}
 
-    #network-editor {
-        display: block;
-    }
+#network-editor {
+  display: block;
+}
 
-    .network-editor-scroller {
-        overflow: hidden;
-        width: 100%;
-    }
+.network-editor-scroller {
+  overflow: hidden;
+  width: 100%;
+}
 
-    .layer-properties-scroller {
-        overflow: auto;
-        width: 100%;
-    }
+.layer-properties-scroller {
+  overflow: auto;
+  width: 100%;
+}
 
-    .network-statistics-scroller {
-        overflow: auto;
-        width: 100%;
-    }
+.network-statistics-scroller {
+  overflow: auto;
+  width: 100%;
+}
 
-    .stat-line {
-        height: 25px;
-        line-height: 24px;
-        vertical-align: baseline;
-    }
+.stat-line {
+  height: 25px;
+  line-height: 24px;
+  vertical-align: baseline;
+}
 
-    .stat-line.active {
-        background-color: var(--color-gray2);
-    }
+.stat-line.active {
+  background-color: var(--color-gray2);
+}
 
-    .stat-line > .content {
-        margin-left: 16px;
-        margin-right: 16px;
-        border-bottom-color: var(--color-gray4);
-        border-bottom-width: 1px;
-        border-bottom-style: solid;
-    }
+.stat-line > .content {
+  margin-left: 16px;
+  margin-right: 16px;
+  border-bottom-color: var(--color-gray4);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
 
-    .stat-line > .content > .name {
-        color: var(--color-gray4);
-        float: left;
-        width: 120px;
-    }
+.stat-line > .content > .name {
+  color: var(--color-gray4);
+  float: left;
+  width: 120px;
+}
 
-    .tool-icon-container {
-        width: 4rem;
-        height: 4rem;
-        background-color: #1aaa55;
-        border-radius: 50%;
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        align-items: center;
-        display: flex;
-        justify-content: center;
-        box-shadow: 0 0 10px #f00;
-    }
+.tool-icon-container {
+  width: 4rem;
+  height: 4rem;
+  background-color: #1aaa55;
+  border-radius: 50%;
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  box-shadow: 0 0 10px #f00;
+}
 
-    .tool-icon-container .func-icon{
-        font-size: 3rem;
-        color: white;
-    }
+.tool-icon-container .func-icon {
+  font-size: 3rem;
+  color: white;
+}
 </style>

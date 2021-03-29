@@ -1,11 +1,11 @@
 <template>
-    <div class="main-content">
-        <LeftMenu/>
-        <center-content
-                :history-info="historyInfo"
-                @history="command => $emit('history', command)"
-        />
-    </div>
+  <div class="main-content">
+    <LeftMenu />
+    <center-content
+      :history-info="historyInfo"
+      @history="command => $emit('history', command)"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -58,24 +58,23 @@ export default Vue.extend({
 </script>
 
 <style>
-    .left-content {
-        position: relative;
-        width: 15%;
-        height: 100%;
-        min-width: 280px;
-        background-color: var(--color-gray1);
-        border-right: solid 1px var(--color-gray2);
-    }
+.left-content {
+  position: relative;
+  width: 15%;
+  height: 100%;
+  min-width: 280px;
+  background-color: var(--color-gray1);
+  border-right: solid 1px var(--color-gray2);
+}
 
-    .center-content {
-        width: 84%;
-        height: 100%;
-        border-right: solid 1px var(--color-gray2);
-        background-color: var(--color-gray0);
-    }
+.center-content {
+  width: 84%;
+  height: 100%;
+  border-right: solid 1px var(--color-gray2);
+  background-color: var(--color-gray0);
+}
 
-    div.main-content {
-        display: flex;
-    }
-
+div.main-content {
+  display: flex;
+}
 </style>

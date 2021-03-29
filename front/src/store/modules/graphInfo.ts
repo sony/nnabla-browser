@@ -61,7 +61,10 @@ const mutations: MutationTree<GraphInfoState> = {
     activeGraph.nodes[index].y = y
   },
 
-  addNewLink: function (state, { source, destination }: {source: number; destination: number}) {
+  addNewLink: function (
+    state,
+    { source, destination }: { source: number; destination: number }
+  ) {
     const activeGraph = getActiveGraph(state)
 
     activeGraph.links.push({ source, destination })

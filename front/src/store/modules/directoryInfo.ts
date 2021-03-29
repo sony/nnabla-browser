@@ -1,4 +1,3 @@
-
 import { Module, MutationTree, ActionTree } from 'vuex'
 import { RootState, DirectoryNode, DirectoryInfoState } from '@/store/types'
 
@@ -38,7 +37,10 @@ const createNewSubTree = (relPath: string, insertData: any) => {
   return subTree
 }
 
-const searchParent = (path: string, graph: DirectoryNode): [DirectoryNode, string] => {
+const searchParent = (
+  path: string,
+  graph: DirectoryNode
+): [DirectoryNode, string] => {
   const split = path.split('/')
 
   let currentNode = graph
@@ -58,29 +60,50 @@ const searchParent = (path: string, graph: DirectoryNode): [DirectoryNode, strin
   return [currentNode, split.slice(i, split.length).join('/')]
 }
 
-const findInsertIndex = (list: {[key: string]: any}, name: string) => {
-  let insertIndex = list.findIndex((x: any) => x.name.toLowerCase() > name.toLowerCase())
+const findInsertIndex = (list: { [key: string]: any }, name: string) => {
+  let insertIndex = list.findIndex(
+    (x: any) => x.name.toLowerCase() > name.toLowerCase()
+  )
   insertIndex = insertIndex > -1 ? insertIndex : list.length
 
   return insertIndex
 }
 
-const insertFile = (parent: DirectoryNode, fileName: string, insertData: any) => {
+const insertFile = (
+  parent: DirectoryNode,
+  fileName: string,
+  insertData: any
+) => {
   const fileType = pathOperator.getFileType(fileName)
 
   if (fileType) {
     const index = parent[fileType].findIndex(x => x.name === fileName)
     if (index > -1) {
-      parent[fileType][index].data = Object.assign({}, parent[fileType][index].data, insertData)
+      parent[fileType][index].data = Object.assign(
+        {},
+        parent[fileType][index].data,
+        insertData
+      )
     } else {
       const insertIndex = findInsertIndex(parent[fileType], fileName)
-      parent[fileType].splice(insertIndex, 0, { name: fileName, data: insertData })
+      parent[fileType].splice(insertIndex, 0, {
+        name: fileName,
+        data: insertData
+      })
     }
   }
 }
 
-const deleteDirectoryInfo = (parent: DirectoryNode, fileName: string, fileType: string) => {
-  if (fileType !== 'nntxtFiles' && fileType !== 'monitorFiles' && fileType !== 'csvResultFiles') {
+const deleteDirectoryInfo = (
+  parent: DirectoryNode,
+  fileName: string,
+  fileType: string
+) => {
+  if (
+    fileType !== 'nntxtFiles' &&
+    fileType !== 'monitorFiles' &&
+    fileType !== 'csvResultFiles'
+  ) {
     return false
   }
 
@@ -113,7 +136,10 @@ const mutations: MutationTree<DirectoryInfoState> = {
       insertFile(parent, relPath, data)
     } else {
       const subTree = createNewSubTree(relPath, data)
-      const insertIndex = findInsertIndex(parent.children, relPath.split('/')[0])
+      const insertIndex = findInsertIndex(
+        parent.children,
+        relPath.split('/')[0]
+      )
       parent.children.splice(insertIndex, 0, subTree)
     }
   },
@@ -133,12 +159,16 @@ const actions: ActionTree<DirectoryInfoState, RootState> = {
     if (!fileType) fileType = 'children'
 
     if (deleteDirectoryInfo(parent, dirName, fileType)) {
-      if (Path.relative(path, state.activeFile).length < state.activeFile.length) {
+      if (
+        Path.relative(path, state.activeFile).length < state.activeFile.length
+      ) {
         // active file is under deleted folder.
         // reset current display.
 
         d3.select('#network-editor')
-          .transition().duration(500).attr('opacity', 0)
+          .transition()
+          .duration(500)
+          .attr('opacity', 0)
           .on('end', () => {
             commit('resetActiveFile')
             commit('resetGraphs')
