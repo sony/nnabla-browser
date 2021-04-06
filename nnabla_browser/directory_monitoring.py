@@ -30,7 +30,7 @@ def nnabla_proto_to_json(file_path):
 
 
 def check_file_extension(filepath):
-    patterns = ["*.nntxt", "*.nnp", "*.series.txt", "*.result.csv"]
+    patterns = ["*.nntxt", "*.nnp", "*.series.txt"]
 
     for pattern in patterns:
         if fnmatch.fnmatch(filepath, pattern):
@@ -57,8 +57,7 @@ def get_directory_tree_recursive(path):
 def get_file_content(path):
     if fnmatch.fnmatch(path, "*.nntxt") or fnmatch.fnmatch(path, "*.nnp"):
         return nnabla_proto_to_json(path)
-    elif fnmatch.fnmatch(path, "*.series.txt") or fnmatch.fnmatch(
-            path, "*.result.csv"):
+    elif fnmatch.fnmatch(path, "*.series.txt"):
         with open(path, "r") as f:
             data = f.read()
 

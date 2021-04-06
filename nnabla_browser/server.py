@@ -6,7 +6,9 @@ import os
 
 import gevent
 from gevent.pywsgi import WSGIServer
+import werkzeug.serving
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.datastructures import Headers
 from flask import Flask, render_template, Response, send_file, jsonify
 
 from multiprocessing import Pool, Manager, Lock
@@ -14,22 +16,32 @@ from watchdog.observers import Observer
 
 from nnabla.logger import logger
 
-from nnabla_browser.directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
-from nnabla_browser.parse_nnabla_function import create_nnabla_core_js
-from nnabla_browser.utils import sse_msg_encoding, str_to_bool
+# need to make it beutiful
+from directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
+from parse_nnabla_function import create_nnabla_core_js
+from utils import sse_msg_encoding, str_to_bool
+# from nnabla_browser.directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
+# from nnabla_browser.parse_nnabla_function import create_nnabla_core_js
+# from nnabla_browser.utils import sse_msg_encoding, str_to_bool
 
 # flask application
 # TODO: fix directory paths
-template_path = os.path.join(os.path.dirname(__file__), 'front')
+root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+template_path = os.path.join(root_path, 'front/dist')
+static_path = os.path.join(root_path, 'front/dist/static')
 app = Flask(__name__,
             template_folder=template_path,
-            static_folder=template_path)
+            static_folder=static_path)
 
 # shared manager
 manager = Manager()
 send_manager = manager.list()
 directory_manager = manager.list()
 
+# @app.after_request
+# def after_request_func(response):
+#     print(response.headers)
+#     return response
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -87,14 +99,14 @@ def create_supervise_process(logdir):
                 time.sleep(10)
         except KeyboardInterrupt:
             observer.stop()
-
+        
         observer.join()
 
     return supervise
 
-
-@app.route("/")
-def index():
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def index(path):
     return render_template("index.html")
 
 
@@ -106,8 +118,8 @@ def get_image(path):
 
 
 def create_subscribe_response(communication_interval, base_path):
-    @app.route('/subscribe')
-    def subscribe():
+    @app.route('/sse')
+    def sse():
         def send():
             # init
             global send_manager
@@ -131,8 +143,47 @@ def create_subscribe_response(communication_interval, base_path):
             except GeneratorExit:
                 pass
 
-        return Response(send(), mimetype="text/event-stream")
+        res = Response(send(), mimetype="text/event-stream")
 
+        if app.env == "development":
+            # allow CORS access to enalbe SSE between npm and flask
+            res.headers['Access-Control-Allow-Origin'] = 'http://localhost:8000'
+            res.headers['Access-Control-Allow-Credentials'] = 'true'
+
+        return res
+
+
+def run_server(port):
+    # An implementation for hot reloading
+    # For only server it looks good, but server client connection especially SSE action is unstable.
+    # - Only one SSE connection is available. Once hot reloaded, sse connection is down and never recorvered.
+    # 
+    #  
+    # from werkzeug import run_simple
+
+    # use_reloader = False
+    # use_debugger = False
+    # if app.env == 'development':
+    #     app.debug = True
+    #     use_reloader = True
+    #     use_debugger = True
+
+    # app.wsgi_app = ProxyFix(app.wsgi_app)
+
+    # print("open server : {}".format(port))
+
+    # run_simple(
+    #     hostname="localhost",
+    #     port=int(port),
+    #     application=app,
+    #     use_reloader=use_reloader,
+    #     use_debugger=use_debugger,
+    # )
+
+    print("open server : {}".format(port))
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+    server = WSGIServer(("0.0.0.0", port), app)
+    server.serve_forever()
 
 def main():
     args = get_args()
@@ -151,17 +202,17 @@ def main():
 
     global send_manager
 
+    # Start ovserving directory 
     with Pool(1) as p:
-
         p.Process(target=create_supervise_process(logdir),
                   args=[send_manager, directory_manager]).start()
 
-        create_subscribe_response(args.communication_interval, logdir)
+    # Setup sse server
+    create_subscribe_response(args.communication_interval, logdir)
 
-        print("open server : {}".format(args.port))
-        app.wsgi_app = ProxyFix(app.wsgi_app)
-        server = WSGIServer(("0.0.0.0", args.port), app)
-        server.serve_forever()
+    # Launch
+    run_server(args.port)
+
 
 
 if __name__ == '__main__':
