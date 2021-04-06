@@ -1,35 +1,27 @@
-path = require("path");
+path = require("path")
 module.exports = {
   pages: {
     index: {
       entry: 'front/src/main.ts',
+      template: 'front/public/index.html.tmpl',
       filename: 'index.html',
-      title: 'NNabla Browser',
+      title: 'nnabla browser',
       chunks: ['chunk-vendors', 'chunk-common', 'index']
     }
   },
   filenameHashing: true,
   devServer: {
-    port: 8888,
+    port: 8000,
     host: 'localhost'
   },
-  css: {},
+  outputDir: 'front/dist',
+  assetsDir: 'static',
   configureWebpack: {
-    module: {
-      rules: [
-        {
-          test: /\.js$/,
-          loader: 'babel-loader',
-          exclude: /node_modules/
-        }
-      ]
-    },
     resolve: {
       alias: {
         vue$: 'vue/dist/vue.esm.js',
         '@': path.resolve(__dirname, 'front/src/')
       }
-    },
-    plugins: []
+    }
   }
 }

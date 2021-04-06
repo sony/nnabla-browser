@@ -19,7 +19,14 @@ export default Vue.extend({
   methods: {
     // Server sent event.
     setupSSE: function () {
-      const eventSrc = new EventSource('/subscribe')
+      let eventSrc: EventSource
+      if (process.env.NODE_ENV === 'development') {
+        eventSrc = new EventSource('http://localhost:8888/sse', {
+          withCredentials: true
+        })
+      } else {
+        eventSrc = new EventSource('sse')
+      }
 
       eventSrc.addEventListener(
         'add',

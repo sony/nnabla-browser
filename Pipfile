@@ -3,6 +3,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[scripts]
+dev = "sh ./scripts/start_dev_server.sh"
+
 [packages]
 gevent = "*"
 flask = "*"
@@ -16,4 +19,4 @@ nnabla = "*"
 wheel = "*"
 
 [requires]
-python_version = "3.6.5"
+python_version = "3.7"
