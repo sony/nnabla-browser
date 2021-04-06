@@ -34,7 +34,8 @@ export default Vue.extend({
           const filePath = (event as any).lastEventId
 
           const fileType = pathOperator.getFileType(filePath)
-          if (!fileType) return
+
+          if (fileType === null) return
 
           let data
           if (fileType === 'nntxtFiles') {

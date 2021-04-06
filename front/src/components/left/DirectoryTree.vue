@@ -18,6 +18,7 @@ import { RootState, GraphInfoState } from '@/store/types'
  ***************************************/
 
 interface NNtxtCouputedType {
+  classObject: { active: boolean };
   isActive: boolean;
   nntxtPath: string;
   activeStyle: object;
@@ -28,12 +29,11 @@ interface NNtxtPropsType {
   nntxt: { data: object; name: string };
   dirName: string;
 }
-
 /************************************/
 
 const nntxtsComponent = Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
   props: {
-    nntxt: {},
+    nntxt: Object,
     dirName: String
   },
   template: `
@@ -42,6 +42,11 @@ const nntxtsComponent = Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
             :style="activeStyle"
             @click="clickEvent"> {{nntxt.name}} </div>`,
   computed: {
+    classObject: function () {
+      return {
+        active: this.$store.state.editor.activeTabName === 'graph'
+      }
+    },
     isActive: function () {
       return (this.$store.state as RootState).editor.activeTabName === 'graph'
     },
@@ -138,27 +143,31 @@ const directoryComponent = Vue.extend({
                 <directory-component
                      :info="childInfo"
                      :dirName="dirName + '/' + childInfo.name"
-                     v-for="childInfo in info.children"
+                     v-for="(childInfo, key) in info.children"
+                     :key="dirName + ':' + key"
                     />
 
                 <nntxts-component
                     style="margin-left: 10px"
-                    v-for="nntxt in info.nntxtFiles"
+                    v-for="(nntxt, key) in info.nntxtFiles"
                     :nntxt="nntxt"
                     :dirName="dirName"
+                    :key="dirName + ':nntxt:' + key"
                      />
 
                 <monitors-component
                     style="margin-left: 10px"
-                    v-for="monitor in info.monitorFiles"
+                    v-for="(monitor, key) in info.monitorFiles"
                     :monitor="monitor"
                     :dirName="dirName"
+                    :key="dirName + ':monitor:' + key"
                     />
 
                 <csv-results-component
-                    v-for="csvResult in info.csvResultFiles"
+                    v-for="(csvResult, key) in info.csvResultFiles"
                     :csvResult="csvResult"
                     :dirName="dirName"
+                    :key="dirName + ':csv:' + key"
                     />
             </div>
         </div>

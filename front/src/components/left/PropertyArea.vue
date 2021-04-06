@@ -17,7 +17,7 @@ interface DefaultParam {
 
 interface PropertyProp {
   defaultParam: DefaultParam;
-  layerParam: object;
+  layerParam: string | boolean;
 }
 
 interface Selectedlayer {
@@ -126,7 +126,7 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
                         <div class="property" v-for="value, key in ioInfos.outputShape">
                             <div class="content">
                                 <div class="name">{{ key }}</div>
-                                <component :is="'prop-text'" :defaultParam="[]" :layerParam="'['+value.join(', ')+']'" :class="'value'" />
+                                <component :is="'prop-text'" :defaultParam="{}" :layerParam="'['+value.join(', ')+']'" :class="'value'" />
                             </div>
                         </div>
                     </div>`,
@@ -134,7 +134,7 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
             'prop-text': Vue.extend<{}, {}, {}, PropertyProp>({
               props: {
                 defaultParam: Object,
-                layerParam: Object
+                layerParam: String
               },
               template: `
                             <div>
@@ -150,7 +150,7 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
             'prop-bool': Vue.extend<{}, {}, {}, PropertyProp>({
               props: {
                 defaultParam: Object,
-                layerParam: Object
+                layerParam: Boolean
               },
               template: `
                             <div>

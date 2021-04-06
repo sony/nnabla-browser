@@ -5,6 +5,7 @@ import * as Path from 'path'
 
 import parse from 'csv-parse'
 import { Layer, layer } from '@fortawesome/fontawesome-svg-core'
+import { graphInfo } from '@/store/modules/graphInfo'
 
 const GRID = Definitions.EDIT.GRID.SIZE
 
@@ -29,20 +30,16 @@ export interface NodeInfo extends LayerInfo {
 
 /***************************************/
 class LayerRegister {
-  counter: number
-  layers: { [key: string]: LayerInfo }
-  links: any[] // todo
+  counter = 0
+  layers: { [key: string]: LayerInfo } = {}
+  links: any[] = [] // todo
   allParameters: any // todo
 
-  constructor (params?: any) {
+  initialize (params?: any) {
     this.counter = 0
     this.layers = {}
     this.links = []
     this.allParameters = params
-  }
-
-  initialize (params?: any) {
-    this.constructor(params)
   }
 
   addLayer (layer: any, depth: number): [LayerInfo, boolean] {

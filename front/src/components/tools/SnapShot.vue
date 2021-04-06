@@ -1,3 +1,7 @@
+<template>
+<div></div>
+</template>
+
 <script lang="ts">
 import Vue from 'vue'
 import html2canvas from 'html2canvas'

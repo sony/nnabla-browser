@@ -1,6 +1,9 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import NNablaBrowser from '@/views/NnablaBrowser.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.use(VueRouter)
 
@@ -8,7 +11,11 @@ const routes: Array<RouteConfig> = [
   {
     path: '/',
     name: 'NNablaBrowser',
-    component: NNablaBrowser
+    component: NNablaBrowser,
+    meta: {
+      title: 'nnabla browser',
+      desc: 'NNC-like visualizer for nnabla developers.'
+    }
   }
 ]
 
