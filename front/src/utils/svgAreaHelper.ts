@@ -1,6 +1,6 @@
 import { Definitions } from '@/utils/definitions'
 import store from '@/store'
-import { allFunctions } from './nnablaApi'
+import { nnablaCore } from './nnablaApi'
 import * as d3 from 'd3'
 
 import { NodeInfo } from '@/utils/serverSentEventHelper'
@@ -9,7 +9,9 @@ const layerDef = Definitions.EDIT.LAYER
 
 class StyleHelper {
   getDefaultComponent (type: string) {
-    return allFunctions.find((functionInfo: any) => functionInfo.layer_name === type)
+    return nnablaCore
+      .getAllFunctions()
+      .find((functionInfo: any) => functionInfo.layer_name === type)
   }
 
   getLayerColor (layerType: string) {

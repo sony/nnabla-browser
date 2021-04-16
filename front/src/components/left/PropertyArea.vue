@@ -7,7 +7,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Definitions } from '@/utils/definitions'
-import { allFunctions } from '@/utils/nnablaApi'
+import { nnablaCore } from '@/utils/nnablaApi'
 
 // type definition
 // todo: refactoring
@@ -57,9 +57,9 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
           return Object.keys(this.selectedLayer).length > 0
         },
         defaultProps: function () {
-          return allFunctions.find(
-            x => x.layer_name === this.selectedLayer.type
-          )
+          return nnablaCore
+            .getAllFunctions()
+            .find(x => x.layer_name === this.selectedLayer.type)
         },
         layerParams: function () {
           const paramKey: string =

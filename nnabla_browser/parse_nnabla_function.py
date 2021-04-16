@@ -18,7 +18,7 @@ YAML_PATH = {
 
 def get_activation_list():
     with open(YAML_PATH["functions"], "r") as f:
-        yaml_obj = yaml.load(f)
+        yaml_obj = yaml.load(f, Loader=yaml.FullLoader)
 
     activations = [
         x["snake_name"]
@@ -93,13 +93,13 @@ def get_all_function_api_definitions(module_name,
         for param_name, param in sig.parameters.items():
             if param.default == inspect.Parameter.empty:
                 # inputs
-                inputs[param_name] = {"optional": False}
+                inputs[param_name] = {"optional": "False"}
             else:
                 arguments[param_name] = {
                     "default":
-                    "None" if param.default is None else param.default,
+                    "None" if param.default is None else str(param.default),
                     "type": type(param.default).__name__,
-                    "optional": True
+                    "optional": "True"
                 }
 
         function_info = {
@@ -167,10 +167,3 @@ def parse_all():
         "functions": functions,
         "variables": variables
     }
-
-
-def create_nnabla_core_js(out_path):
-    with open(out_path, "w") as f:
-        print("const nnablaCore = " + dumps(parse_all(), indent=2) +
-              ";\n export default nnablaCore;",
-              file=f)

@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-// import nnablaCore from '../../../lib/js/nnablaCore'
+import { nnablaCore } from '@/utils/nnablaApi'
 
 interface PalleteDataType {
   expand: boolean;
@@ -71,8 +71,7 @@ export default Vue.extend<PalleteDataType, {}, {}, PalletePropsType>({
                 </div>
             </div>`,
       data: () => {
-        // return { nnablaFunctions: nnablaCore }
-        return { nnablaFunctions: {} }
+        return { nnablaFunctions: nnablaCore.getNnablaApi() }
       },
       components: {
         'component-category': {

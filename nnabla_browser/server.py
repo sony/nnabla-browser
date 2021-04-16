@@ -18,7 +18,7 @@ from nnabla.logger import logger
 
 # need to make it beutiful
 from directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
-from parse_nnabla_function import create_nnabla_core_js
+from parse_nnabla_function import parse_all
 from utils import sse_msg_encoding, str_to_bool
 # from nnabla_browser.directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
 # from nnabla_browser.parse_nnabla_function import create_nnabla_core_js
@@ -38,11 +38,6 @@ manager = Manager()
 send_manager = manager.list()
 directory_manager = manager.list()
 
-# @app.after_request
-# def after_request_func(response):
-#     print(response.headers)
-#     return response
-
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", "-p", default=8888, type=int)
@@ -51,22 +46,10 @@ def get_args():
                         "-c",
                         default=0.1,
                         type=float)
-    parser.add_argument("--build", "-b", default=False, type=str_to_bool)
 
     args = parser.parse_args()
 
     return args
-
-
-# TODO: remove this command since the distributed version shoule be already built
-def build():
-    # create nnablaCore.js
-    output_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                               '..', "front/lib/js/nnablaCore.js")
-    create_nnabla_core_js(output_path)
-
-    # build
-    subprocess.call("npm run --prefix ../ build ".split(" "))
 
 
 def check_and_create_logdir(logdir):
@@ -82,7 +65,6 @@ def check_and_create_logdir(logdir):
             return False
 
     return True
-
 
 def create_supervise_process(logdir):
     def supervise(_send_manager, _directory_manager):
@@ -104,6 +86,14 @@ def create_supervise_process(logdir):
 
     return supervise
 
+def allow_cors(response):
+    if app.env == "development":
+            # allow CORS access to enalbe SSE between npm and flask
+            response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8000'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+
+    return response
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def index(path):
@@ -116,6 +106,11 @@ def get_image(path):
 
     return send_file(file_path, mimetype='image/png')
 
+@app.route("/subscribe/nnabla-api")
+def get_nnabla_api():
+    response = jsonify(json.dumps(parse_all()))
+
+    return allow_cors(response)
 
 def create_subscribe_response(communication_interval, base_path):
     @app.route('/sse')
@@ -145,12 +140,7 @@ def create_subscribe_response(communication_interval, base_path):
 
         res = Response(send(), mimetype="text/event-stream")
 
-        if app.env == "development":
-            # allow CORS access to enalbe SSE between npm and flask
-            res.headers['Access-Control-Allow-Origin'] = 'http://localhost:8000'
-            res.headers['Access-Control-Allow-Credentials'] = 'true'
-
-        return res
+        return allow_cors(res)
 
 
 def run_server(port):
@@ -187,9 +177,6 @@ def run_server(port):
 
 def main():
     args = get_args()
-
-    if args.build:
-        build()
 
     # check if logdir exists
     logdir = os.path.abspath(args.logdir)
