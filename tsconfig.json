@@ -14,7 +14,7 @@
     "outDir": "./front/dist",
     "types": [
       "webpack-env", "d3", "d3-selection", "node", "vue", "jquery",
-      "html2canvas", "filesaver", "axios"
+      "html2canvas", "filesaver", "axios", "vue-chartjs", "chart.js"
     ],
     "paths": {
       "@/*": [

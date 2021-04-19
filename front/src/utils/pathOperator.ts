@@ -5,14 +5,11 @@ const getFileType = (path: string) => {
   const subExt = Path.extname(Path.basename(path, ext))
 
   if (ext === '.nntxt' || ext === '.nnp') {
-    // "XXX.nntxt"
+    // "*.nntxt"
     return 'nntxtFiles'
   } else if (subExt === '.series' && ext === '.txt') {
-    // "XXX.series.txt"
+    // "*.series.txt"
     return 'monitorFiles'
-  } else if (subExt === '.result' && ext === '.csv') {
-    // " XXX.result.csv"
-    return 'csvResultFiles'
   }
 
   // nothing is matched
