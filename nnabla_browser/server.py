@@ -17,12 +17,9 @@ from watchdog.observers import Observer
 from nnabla.logger import logger
 
 # need to make it beutiful
-from directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
-from parse_nnabla_function import parse_all
-from utils import sse_msg_encoding, str_to_bool
-# from nnabla_browser.directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
-# from nnabla_browser.parse_nnabla_function import create_nnabla_core_js
-# from nnabla_browser.utils import sse_msg_encoding, str_to_bool
+from .directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
+from .parse_nnabla_function import parse_all
+from .utils import sse_msg_encoding, str_to_bool
 
 # flask application
 # TODO: fix directory paths
