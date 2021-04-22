@@ -1,6 +1,8 @@
 <template>
   <div>
-    <series-chart :chart-data="dataCollection" :options="options"></series-chart>
+    <div v-for="metrics in dataCollection" v-bind:key="metrics.options.plugins.title.text">
+      <series-chart :chart-data="metrics.data" :options="metrics.options"><series-chart>
+    </div>
   </div>
 </template>
 
@@ -14,73 +16,56 @@ export default Vue.extend({
     dataCollection: function () {
       const charts = this.$store.state.chartInfo.charts
 
-      const ret = {
-        datasets: [],
-        labels: []
-      } as {datasets: any[]; labels: any[]}
-
-      const x = new Set()
+      const ret = []
       for (const i in charts) {
-        const v = charts[i].data[0].values
-        for (const t of v.t) x.add(t)
-        ret.datasets.push({
-          label: 'Data' + i.toString(),
-          // backgroundColor: '#f87979',
-          borderColor: '#FF6665',
-          fill: false,
-          data: v.v
+        const title = charts[i].name
+        const datasets = charts[i].data.map((d: any) => {
+          const data = []
+          for (let j = 0; j < d.values.t.length; ++j) {
+            data.push({ x: d.values.t[j], y: d.values.v[j] })
+          }
+          return {
+            label: d.name,
+            fill: false,
+            data: data
+          }
         })
+        const data = { datasets: datasets }
+        const options = {
+          plugins: { title: { display: true, text: title } },
+          scales: {
+            xAxes: [
+              {
+                axis: 'x',
+                ticks: {
+                  autoSkip: true,
+                  fontSize: 14
+                },
+                scaleLabel: {
+                  display: true,
+                  labelString: 'epoch'
+                }
+              }
+            ],
+            yAxes: [
+              {
+                axis: 'y',
+                ticks: {
+                  autoSkip: true,
+                  fontSize: 14
+                },
+                scaleLabel: {
+                  display: true,
+                  labelString: 'value'
+                }
+              }
+            ]
+          },
+          responsive: true,
+          maintainAspectRatio: false
+        }
+        ret.push({ data: data, options: options })
       }
-
-      ret.labels = Array.from(x)
-
-      return ret
-    },
-    options: function () {
-      const ret = {} as {[key: string]: any}
-
-      ret.responsive = true
-      ret.maintainAspectRatio = false
-
-      ret.plugins = {
-        title: { display: true, text: 'Monitor log' }
-      }
-
-      ret.scales = {
-        xAxes: [
-          {
-            // gridLines: {},
-            ticks: {
-              autoSkip: true,
-              // fontColor: FONT_COLOR,
-              fontSize: 14
-            },
-            scaleLabel: {
-              display: true,
-              // fontColor: FONT_COLOR,
-              labelString: 'epoch'
-            }
-          }
-        ],
-        yAxes: [
-          {
-            // gridLines: {},
-            ticks: {
-              autoSkip: true,
-              // fontColor: FONT_COLOR,
-              fontSize: 14
-            },
-            scaleLabel: {
-              display: true,
-              // fontColor: FONT_COLOR,
-              labelString: 'loss'
-            }
-          }
-        ]
-      }
-
-      console.log(ret)
-
       return ret
     }
   }
