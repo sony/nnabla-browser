@@ -11,7 +11,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.datastructures import Headers
 from flask import Flask, render_template, Response, send_file, jsonify
 
-from multiprocessing import Pool, Manager, Lock
+from multiprocessing import Manager, Lock, Process
 from watchdog.observers import Observer
 
 from nnabla.logger import logger
@@ -60,8 +60,8 @@ def check_and_create_logdir(logdir):
         else:
             logger.error("Directory dose not exist ({}).".format(logdir))
             return False
-
     return True
+
 
 def create_supervise_process(logdir):
     def supervise(_send_manager, _directory_manager):
@@ -78,17 +78,16 @@ def create_supervise_process(logdir):
                 time.sleep(10)
         except KeyboardInterrupt:
             observer.stop()
-        
         observer.join()
 
     return supervise
 
+
 def allow_cors(response):
     if app.env == "development":
-            # allow CORS access to enalbe SSE between npm and flask
-            response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8000'
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-
+        # allow CORS access to enalbe SSE between npm and flask
+        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8000'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
     return response
 
 @app.route('/', defaults={'path': ''})
@@ -100,14 +99,14 @@ def index(path):
 @app.route("/subscribe/image/<path:path>.png")
 def get_image(path):
     file_path = "/" + path + ".png"
-
     return send_file(file_path, mimetype='image/png')
+
 
 @app.route("/subscribe/nnabla-api")
 def get_nnabla_api():
     response = jsonify(json.dumps(parse_all()))
-
     return allow_cors(response)
+
 
 def create_subscribe_response(communication_interval, base_path):
     @app.route('/sse')
@@ -187,16 +186,15 @@ def main():
     global send_manager
 
     # Start ovserving directory 
-    with Pool(1) as p:
-        p.Process(target=create_supervise_process(logdir),
-                  args=[send_manager, directory_manager]).start()
+    p = Process(target=create_supervise_process(logdir),
+                args=[send_manager, directory_manager])
+    p.start()
 
     # Setup sse server
     create_subscribe_response(args.communication_interval, logdir)
 
     # Launch
     run_server(args.port)
-
 
 
 if __name__ == '__main__':
