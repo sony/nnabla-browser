@@ -187,7 +187,8 @@ def main():
 
     # Start ovserving directory 
     p = Process(target=create_supervise_process(logdir),
-                args=[send_manager, directory_manager])
+                args=[send_manager, directory_manager],
+                daemon=True)
     p.start()
 
     # Setup sse server
