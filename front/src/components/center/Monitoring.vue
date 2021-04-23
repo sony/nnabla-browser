@@ -32,34 +32,26 @@ export default Vue.extend({
         })
         const data = { datasets: datasets }
         const options = {
-          plugins: { title: { display: true, text: title } },
+          plugins: { title: { display: true, text: title }, tooltip: { enabled: true } },
           scales: {
-            xAxes: [
-              {
-                axis: 'x',
-                ticks: {
-                  autoSkip: true,
-                  fontSize: 14
-                },
-                scaleLabel: {
-                  display: true,
-                  labelString: 'epoch'
-                }
+            x: {
+              type: 'linear',
+              axis: 'x',
+              title: { display: true, text: 'epoch' },
+              ticks: {
+                autoSkip: true,
+                fontSize: 14
               }
-            ],
-            yAxes: [
-              {
-                axis: 'y',
-                ticks: {
-                  autoSkip: true,
-                  fontSize: 14
-                },
-                scaleLabel: {
-                  display: true,
-                  labelString: 'value'
-                }
+            },
+            y: {
+              type: 'linear',
+              axis: 'y',
+              title: { display: true, text: 'value' },
+              ticks: {
+                autoSkip: true,
+                fontSize: 14
               }
-            ]
+            }
           },
           responsive: true,
           maintainAspectRatio: false
