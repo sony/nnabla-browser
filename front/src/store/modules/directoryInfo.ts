@@ -5,8 +5,12 @@ import * as pathOperator from '@/utils/pathOperator'
 import * as d3 from 'd3'
 import * as Path from 'path'
 
+// monotonic incremental counter to assign unique id
+let nodeCounter = 0
+
 const createNewNode = (name: string): DirectoryNode => {
   return {
+    id: nodeCounter++,
     name: name,
     children: [],
     monitorFiles: [],
@@ -119,6 +123,7 @@ const deleteDirectoryInfo = (
 
 const state: DirectoryInfoState = {
   data: {
+    id: 0,
     children: [],
     name: '',
     nntxtFiles: [],

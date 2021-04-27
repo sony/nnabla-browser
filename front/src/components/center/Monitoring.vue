@@ -10,6 +10,19 @@
 import Vue from 'vue'
 import SeriesChart from '@/components/center/SeriesChart.vue'
 
+const COLORS = [
+  '#3498db',
+  '#e74c3c',
+  '#1abc9c',
+  '#e67e22',
+  '#f1c40f',
+  '#2980b9',
+  '#c0392b',
+  '#16a085',
+  '#d35400',
+  '#f39c12'
+]
+
 export default Vue.extend({
   components: { SeriesChart },
   computed: {
@@ -25,7 +38,8 @@ export default Vue.extend({
             data.push({ x: d.values.t[j], y: d.values.v[j] })
           }
           return {
-            label: d.name,
+            label: d.name[0] === '/' ? d.name.substr(1) : d.name,
+            borderColor: COLORS[d.id % COLORS.length],
             fill: false,
             data: data
           }

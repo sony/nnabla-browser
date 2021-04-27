@@ -87,7 +87,7 @@ const nntxtsComponent = Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
 })
 
 const monitorsComponent = Vue.extend({
-  props: ['monitor', 'dirName'],
+  props: ['monitor', 'dirName', 'dirId'],
   data: function () {
     return {
       checked: this.monitor.isView || false
@@ -101,6 +101,7 @@ const monitorsComponent = Vue.extend({
         const chartData = {
           chartTitle: this.monitor.name.split('.')[0],
           data: {
+            id: this.dirId,
             name: this.dirName,
             values: this.monitor.data
           }
@@ -160,6 +161,7 @@ const directoryComponent = Vue.extend({
                     v-for="(monitor, key) in info.monitorFiles"
                     :monitor="monitor"
                     :dirName="dirName"
+                    :dirId="info.id"
                     :key="dirName + ':monitor:' + key"
                     />
 

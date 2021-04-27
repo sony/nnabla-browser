@@ -45,6 +45,7 @@ export interface EditorState {
  ***************************************/
 
 export interface DirectoryNode {
+  id: number;
   name: string;
   children: DirectoryNode[];
   nntxtFiles: Array<{ name: string; data: any }>;
