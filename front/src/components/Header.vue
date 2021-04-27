@@ -5,9 +5,6 @@
       <appbar-tab tab-name="monitoring" />
     </div>
     <div class="editor-navbar-center"></div>
-    <div style="height: 100%; float: right;">
-      <button-expand />
-    </div>
   </div>
 </template>
 
@@ -31,23 +28,6 @@ export default Vue.extend({
           Vue.nextTick(function () {
             EditorWindowSize.init()
           })
-        }
-      }
-    },
-    'button-expand': {
-      template: `
-            <div class="nnc-invoker navbar-el" @click.prevent="onclick">
-            <img src="./editor/image/ExpandWhite.svg" class="navbar-img nnc-enabled" title="Full screen (F11)" />
-            </div>`,
-      methods: {
-        onclick: () => {
-          if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen()
-          } else {
-            if (document.exitFullscreen) {
-              document.exitFullscreen()
-            }
-          }
         }
       }
     }
