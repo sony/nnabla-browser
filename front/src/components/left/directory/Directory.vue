@@ -6,29 +6,41 @@
     </div>
 
     <div class="components" :style="{display: expand ? 'block' : 'none'}">
-      <directory-component
-        :info="childInfo"
-        :dirName="dirName + '/' + childInfo.name"
-        v-for="(childInfo, key) in info.children"
-        :key="dirName + ':' + key"
-      />
+      <ul>
+        <li v-for="(childInfo, key) in info.children" :key="dirName + ':' + key">
+          <directory-component
+            :info="childInfo"
+            :dirName="dirName + '/' + childInfo.name"
+          />
+        </li>
+      </ul>
 
-      <nntxts-component
-        style="margin-left: 10px"
-        v-for="(nntxt, key) in info.nntxtFiles"
-        :nntxt="nntxt"
-        :dirName="dirName"
-        :key="dirName + ':nntxt:' + key"
-      />
+      <ul>
+        <li
+          v-for="(nntxt, key) in info.nntxtFiles"
+          :key="dirName + ':nntxt:' + key"
+        >
+          <nntxts-component
+            style="margin-left: 10px"
+            :nntxt="nntxt"
+            :dirName="dirName"
+          />
+        </li>
+      </ul>
 
-      <csv-entry
-        style="margin-left: 10px"
-        v-for="(monitor, key) in info.monitorFiles"
-        :monitor="monitor"
-        :dirName="dirName"
-        :dirId="info.id"
-        :key="dirName + ':monitor:' + key"
-      />
+      <ul>
+        <li
+          v-for="(monitor, key) in info.monitorFiles"
+          :key="dirName + ':monitor:' + key"
+        >
+          <csv-entry
+            style="margin-left: 10px"
+            :monitor="monitor"
+            :dirName="dirName"
+            :dirId="info.id"
+          />
+        </li>
+      </ul>
 
     </div>
   </div>
@@ -68,5 +80,26 @@ export default Vue.extend({
 </script>
 
 <style>
+
+.branch {
+  font-size: 14px;
+}
+
+.branch-name {
+  padding-top: 3px;
+  height: 24px;
+  margin-top: 0;
+  margin-left: 0;
+  white-space: nowrap;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+ul {
+  list-style: none;
+  padding-left: 20px;
+  margin: 0;
+  text-align: left;
+}
 
 </style>

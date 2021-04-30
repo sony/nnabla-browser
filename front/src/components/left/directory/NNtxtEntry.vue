@@ -82,6 +82,7 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
 <style>
 .nntxt {
   opacity: 0.6;
+  cursor: pointer;
 }
 
 .nntxt.active  {

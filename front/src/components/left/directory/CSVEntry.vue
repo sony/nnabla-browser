@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="csv-entry">
     <input type="checkbox" :id="dirName + '/' + monitor.name" v-model="checked" @change="changeEvent">
     <label :for="dirName + '/' + monitor.name">{{ monitor.name }}</label>
   </div>
@@ -50,20 +50,7 @@ export default Vue.extend({
 </script>
 
 <style>
-.nntxt,
-.csvResult {
-  opacity: 0.6;
-}
-
-.nntxt.active,
-.csvResult.active {
-  opacity: 1;
-  font-weight: bold;
+.csv-entry, label {
   cursor: pointer;
-}
-
-.nntxt.active:hover,
-.csvResult.active:hover {
-  color: var(--color-brand);
 }
 </style>
