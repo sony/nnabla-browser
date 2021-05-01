@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [scripts]
-dev = "sh ./scripts/start_dev_server.sh"
+dev = "bash -c \"pip install -q -e . && nnabla-browser --port 8888\""
 
 [packages]
 gevent = "*"
