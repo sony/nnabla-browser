@@ -1,7 +1,7 @@
 <template>
-<div class="prop-text">
-  {{ getValue() }}
-</div>
+  <div class="prop-text">
+    {{ getValue() }}
+  </div>
 </template>
 
 <script lang="ts">
@@ -30,6 +30,4 @@ export default Vue.extend<{}, {}, {}, PropertyProp>({
 })
 </script>
 
-<style>
-
-</style>
+<style></style>

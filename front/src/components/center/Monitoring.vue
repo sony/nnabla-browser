@@ -1,7 +1,10 @@
 <template>
   <div>
-    <div v-for="metrics in dataCollection" v-bind:key="metrics.options.plugins.title.text">
-      <series-chart :chart-data="metrics.data" :options="metrics.options"><series-chart>
+    <div
+      v-for="metrics in dataCollection"
+      v-bind:key="metrics.options.plugins.title.text"
+    >
+      <series-chart :chart-data="metrics.data" :options="metrics.options" />
     </div>
   </div>
 </template>
@@ -46,7 +49,10 @@ export default Vue.extend({
         })
         const data = { datasets: datasets }
         const options = {
-          plugins: { title: { display: true, text: title }, tooltip: { enabled: true } },
+          plugins: {
+            title: { display: true, text: title },
+            tooltip: { enabled: true }
+          },
           scales: {
             x: {
               type: 'linear',
@@ -76,7 +82,6 @@ export default Vue.extend({
     }
   }
 })
-
 </script>
 
 <style scoped>

@@ -1,15 +1,14 @@
 <template>
-<div class="center-content" id="centerContent">
-  <keep-alive>
-    <graph
-      v-if="selectedEditTab"
-      :history-info="historyInfo"
-       @history="command => $emit('history', command)"
-    />
-    <monitoring v-else-if="selectedMonitoringTab" />
-  </keep-alive>
-</div>
-
+  <div class="center-content" id="centerContent">
+    <keep-alive>
+      <graph
+        v-if="selectedEditTab"
+        :history-info="historyInfo"
+        @history="command => $emit('history', command)"
+      />
+      <monitoring v-else-if="selectedMonitoringTab" />
+    </keep-alive>
+  </div>
 </template>
 
 <script lang="ts">

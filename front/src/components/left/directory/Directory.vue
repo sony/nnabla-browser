@@ -1,13 +1,20 @@
 <template>
   <div class="branch" v-if="checkDisplay">
-    <div class="branch-name" @click="expand = !expand;" v-if="info.name.length > 0">
-      <img class="icon-small" :src="expandArrow" >
+    <div
+      class="branch-name"
+      @click="expand = !expand"
+      v-if="info.name.length > 0"
+    >
+      <img class="icon-small" :src="expandArrow" />
       {{ info.name }}
     </div>
 
-    <div class="components" :style="{display: expand ? 'block' : 'none'}">
+    <div class="components" :style="{ display: expand ? 'block' : 'none' }">
       <ul>
-        <li v-for="(childInfo, key) in info.children" :key="dirName + ':' + key">
+        <li
+          v-for="(childInfo, key) in info.children"
+          :key="dirName + ':' + key"
+        >
           <directory-component
             :info="childInfo"
             :dirName="dirName + '/' + childInfo.name"
@@ -41,10 +48,8 @@
           />
         </li>
       </ul>
-
     </div>
   </div>
-
 </template>
 
 <script lang="ts">
@@ -76,11 +81,9 @@ export default Vue.extend({
     return { expand: true }
   }
 })
-
 </script>
 
 <style>
-
 .branch {
   font-size: 14px;
 }
@@ -101,5 +104,4 @@ ul {
   margin: 0;
   text-align: left;
 }
-
 </style>

@@ -3,8 +3,9 @@
     class="nntxt"
     :class="classObject"
     :style="activeStyle"
-    @click="clickEvent">
-    {{nntxt.name}}
+    @click="clickEvent"
+  >
+    {{ nntxt.name }}
   </div>
 </template>
 
@@ -76,7 +77,6 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
     }
   }
 })
-
 </script>
 
 <style>
@@ -85,7 +85,7 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
   cursor: pointer;
 }
 
-.nntxt.active  {
+.nntxt.active {
   opacity: 1;
   font-weight: bold;
   cursor: pointer;

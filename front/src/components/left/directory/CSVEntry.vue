@@ -1,6 +1,11 @@
 <template>
   <div class="csv-entry">
-    <input type="checkbox" :id="dirName + '/' + monitor.name" v-model="checked" @change="changeEvent">
+    <input
+      type="checkbox"
+      :id="dirName + '/' + monitor.name"
+      v-model="checked"
+      @change="changeEvent"
+    />
     <label :for="dirName + '/' + monitor.name">{{ monitor.name }}</label>
   </div>
 </template>
@@ -46,11 +51,11 @@ export default Vue.extend({
     }
   }
 })
-
 </script>
 
 <style>
-.csv-entry, label {
+.csv-entry,
+label {
   cursor: pointer;
 }
 </style>

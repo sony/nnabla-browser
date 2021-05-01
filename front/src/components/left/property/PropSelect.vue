@@ -1,13 +1,13 @@
 <template>
-<select :value="defaultParam.value">
-  <option
-    v-for="(value, index) in defaultParam.choice"
-    :checked="value === defaultParam.value"
-    :key="value + '-' + index"
-  >
-    {{ value }}
-  </option>
-</select>
+  <select :value="defaultParam.value">
+    <option
+      v-for="(value, index) in defaultParam.choice"
+      :checked="value === defaultParam.value"
+      :key="value + '-' + index"
+    >
+      {{ value }}
+    </option>
+  </select>
 </template>
 
 <script lang="ts">
@@ -30,5 +30,4 @@ export default Vue.extend<{}, {}, {}, PropertyProp>({
 })
 </script>
 
-<style>
-</style>
+<style></style>

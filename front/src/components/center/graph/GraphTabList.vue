@@ -1,14 +1,14 @@
 <template>
-<div class="graph-tab-list">
-  <graph-tab
-    v-for="(graph, index) in graphs"
-    :graph="graph"
-    :key="path + '-' + index"
-    :index="index"
-    :class="{'active': index === activeGraphIndex}"
-    @history="command => $emit('history', command)"
-  />
-</div>
+  <div class="graph-tab-list">
+    <graph-tab
+      v-for="(graph, index) in graphs"
+      :graph="graph"
+      :key="path + '-' + index"
+      :index="index"
+      :class="{ active: index === activeGraphIndex }"
+      @history="command => $emit('history', command)"
+    />
+  </div>
 </template>
 
 <script lang="ts">
