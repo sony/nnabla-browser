@@ -7,6 +7,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import * as d3 from 'd3'
+import { httpClient } from '@/utils/httpClient'
+import { serverEventHandler } from '@/utils/serverEventHandler'
 
 import { RootState, GraphInfoState } from '@/store/types'
 
@@ -19,16 +21,18 @@ interface NNtxtCouputedType {
 interface NNtxtPropsType {
   nntxt: { data: object; name: string };
   dirName: string;
+  level: number;
 }
 
 export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
   props: {
     nntxt: Object,
-    dirName: String
+    dirName: String,
+    level: Number
   },
   computed: {
     nntxtPath: function () {
-      return this.dirName + '/' + this.nntxt.name
+      return (this.level > 0 ? this.dirName + '/' : '') + this.nntxt.name
     },
     isSelected: function () {
       return this.$store.state.directoryInfo.activeFile === this.nntxtPath
@@ -40,19 +44,27 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
   methods: {
     clickEvent: function () {
       if (this.nntxtPath !== this.graphInfo.nntxtPath) {
-        d3.select('#svg-links').style('opacity', 0)
+        // get nntxt contents from server
+        httpClient.getFileContent(this.nntxtPath).then(res => {
+          // Sent data by http is already json. Don't have convert it explicitly.
+          const data = serverEventHandler.getGraphInfoFromNNtxt(res.data)
+          this.$store.commit('updateFileContent', { path: this.nntxtPath, data })
 
-        d3.select('#network-editor')
-          .transition()
-          .duration(200)
-          .attr('opacity', 0.3)
-          .transition()
-          .duration(1000)
-          .attr('opacity', 1)
+          d3.select('#svg-links').style('opacity', 0)
 
-        this.$store.commit('setGraphs', this.nntxt.data)
-        this.$store.commit('setNNtxtPath', this.nntxtPath)
-        this.$store.commit('updateActiveFile', this.nntxtPath)
+          d3.select('#network-editor')
+            .transition()
+            .duration(200)
+            .attr('opacity', 0.3)
+            .transition()
+            .duration(1000)
+            .attr('opacity', 1)
+
+          // this.$store.commit('setGraphs', this.nntxt.data)
+          this.$store.commit('setGraphs', data)
+          this.$store.commit('setNNtxtPath', this.nntxtPath)
+          this.$store.commit('updateActiveFile', this.nntxtPath)
+        })
       }
     }
   }

@@ -9,6 +9,7 @@
         v-if="typeof directoryInfo.name !== 'undefined'"
         :info="directoryInfo"
         :dir-name="directoryInfo.name"
+        :level="0"
       />
     </div>
   </div>

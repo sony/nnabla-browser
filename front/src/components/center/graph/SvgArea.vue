@@ -92,7 +92,7 @@ import Vue, { VNode } from 'vue'
 import * as d3 from 'd3'
 
 import { Link, Graph, GraphInfoState } from '@/store/types'
-import { NodeInfo } from '@/utils/serverSentEventHelper'
+import { NodeInfo } from '@/utils/serverEventHandler'
 
 const grid: number = Definitions.EDIT.GRID.SIZE
 
@@ -304,7 +304,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
         const prev = this.prevGraph.nodes.find(x => x.name === node.name)
 
         if (prev) {
-          this.nextTransition.push({ index, transform: ret })
+          // this.nextTransition.push({ index, transform: ret })
           ret = `translate(${prev.x}, ${prev.y})`
         }
       }

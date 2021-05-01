@@ -1,18 +1,11 @@
-import axios from 'axios'
+import { httpClient } from './httpClient'
 
 class NnablaCore {
   nnablaApi: object = {}
   allFunctions: any[] = []
 
   constructor () {
-    let url: string
-    if (process.env.NODE_ENV === 'development') {
-      url = 'http://localhost:8888/subscribe/nnabla-api'
-    } else {
-      url = 'subscribe/nnabla-api'
-    }
-
-    axios.get(url).then(res => {
+    httpClient.getNnablaApi().then(res => {
       this.nnablaApi = JSON.parse(res.data)
       this.allFunctions = this.getAllFuncionsRecursive(this.nnablaApi)
     })
@@ -40,5 +33,4 @@ class NnablaCore {
 }
 
 const nnablaCore = new NnablaCore()
-
 export { nnablaCore }

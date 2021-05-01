@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 import subprocess
 import time
@@ -7,30 +6,36 @@ from multiprocessing import Lock, Manager, Process
 
 import gevent
 import werkzeug.serving
-from flask import Flask, Response, jsonify, render_template, send_file
+from flask import Flask, Response, render_template, request, send_file
+from flask_cors import CORS
 from gevent.pywsgi import WSGIServer
-from nnabla.logger import logger
 from watchdog.observers import Observer
 from werkzeug.datastructures import Headers
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 # need to make it beutiful
 from .directory_monitoring import (Monitor, get_directory_tree_recursive,
-                                   initialize_send_queue)
+                                   get_file_content, initialize_send_queue)
 from .parse_nnabla_function import parse_all
-from .utils import sse_msg_encoding, str_to_bool
+from .utils import *
 
 # flask application
-# TODO: fix directory paths
 root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 template_path = os.path.join(root_path, 'front/dist')
 static_path = os.path.join(root_path, 'front/dist/static')
 app = Flask(__name__, template_folder=template_path, static_folder=static_path)
 
+if app.env == "development":
+    CORS(app)
+
 # shared manager
 manager = Manager()
 send_manager = manager.list()
 directory_manager = manager.list()
+sse_updates = manager.list()
+free_idx = manager.Queue()
+
+logdir = "./"
 
 
 def get_args():
@@ -47,25 +52,12 @@ def get_args():
     return args
 
 
-def check_and_create_logdir(logdir):
-    if not os.path.exists(logdir):
-        ans = str(
-            input(
-                "{} dose not exist. Would you like to create new directory? [y/N]:"
-                .format(logdir)))
-        if ans.strip().lower() in ["y", "yes"]:
-            os.makedirs(logdir)
-        else:
-            logger.error("Directory dose not exist ({}).".format(logdir))
-            return False
-    return True
-
-
 def create_supervise_process(logdir):
-    def supervise(_send_manager, _directory_manager):
+    def supervise(_send_manager, _directory_manager, _sse_updates):
         monitor = Monitor(logdir=logdir,
                           send_manager=_send_manager,
-                          directory_manager=_directory_manager)
+                          directory_manager=_directory_manager,
+                          sse_updates=_sse_updates)
 
         observer = Observer()
         observer.schedule(monitor, monitor.logdir, recursive=True)
@@ -81,15 +73,6 @@ def create_supervise_process(logdir):
     return supervise
 
 
-def allow_cors(response):
-    if app.env == "development":
-        # allow CORS access to enalbe SSE between npm and flask
-        response.headers[
-            'Access-Control-Allow-Origin'] = 'http://localhost:8000'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-    return response
-
-
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def index(path):
@@ -102,12 +85,53 @@ def get_image(path):
     return send_file(file_path, mimetype='image/png')
 
 
+# return nnabla APIs as json
 @app.route("/subscribe/nnabla-api")
 def get_nnabla_api():
-    response = jsonify(json.dumps(parse_all()))
-    return allow_cors(response)
+    response = dict_to_response(parse_all())
+    return allow_cors(app, response)
 
 
+# return content of the file as json
+@app.route("/subscribe/file-content", methods=["POST"])
+def file_content():
+    global logdir
+    path = os.path.join(logdir, request.json["path"])
+
+    return get_file_content(path)
+
+
+# set filepath to update in real-time
+@app.route("/subscribe/activate-subscribe", methods=["POST"])
+def activate_subscribe():
+    global logdir
+    global sse_updates
+    path = os.path.join(logdir, request.json["path"])
+    connection_id = request.json["connectionId"]
+
+    sse_updates[connection_id] = {**sse_updates[connection_id], path: True}
+
+    return jsonify(success=True)
+
+
+# unset filepath to update in real-time
+@app.route("/subscribe/deactivate-subscribe", methods=["POST"])
+def deactivate_subscribe():
+    global logdir
+    global sse_updates
+    path = os.path.join(logdir, request.json["path"])
+    connection_id = request.json["connectionId"]
+
+    tmp = sse_updates[connection_id]
+
+    if path in tmp:
+        del tmp[path]
+        sse_updates[connection_id] = tmp
+
+    return jsonify(success=True)
+
+
+# create SSE connection
 def create_subscribe_response(communication_interval, base_path):
     @app.route('/sse')
     def sse():
@@ -115,57 +139,57 @@ def create_subscribe_response(communication_interval, base_path):
             # init
             global send_manager
             with Lock():
-                idx = len(send_manager)
+                # Prioritize free idx.
+                if free_idx.empty():
+                    idx = len(send_manager)
+                else:
+                    idx = free_idx.get()
+
                 send_manager.insert(
                     idx, initialize_send_queue(directory_manager, base_path))
+                sse_updates.insert(idx, {})
+
+            # notify connection idx to browser
+            yield encode_msg(data=str(idx), event="uniqueId")
 
             try:
+                no_action_count = 0
                 while True:
                     if len(send_manager[idx]) > 0:
                         with Lock():
                             info = send_manager[idx][0]
                             send_manager[idx] = send_manager[idx][1:]
-                            yield sse_msg_encoding(str(info["data"]),
-                                                   _id=str(info["path"]),
-                                                   _event=str(info["action"]))
+                            yield encode_msg(data=str(info["data"]),
+                                             id=str(info["path"]),
+                                             event=str(info["event"]))
 
-                    gevent.sleep(communication_interval)
+                        # After sending a data, wait a short time to prevent too much transfers.
+                        gevent.sleep(communication_interval)
 
-            except GeneratorExit:
-                pass
+                    else:
+                        # If there is no data to send, wait a while.
+                        gevent.sleep(5)
+
+                        # If there is no send event for a while, check connection is still alive.
+                        no_action_count = (no_action_count + 1) % 12
+                        if no_action_count == 0:
+                            yield encode_msg(event="checkAlive", data="")
+            finally:
+                # Free queue for this connection
+                # Initialize with empty list to keep order.
+                send_manager[idx].insert(idx, [])
+                sse_updates.insert(idx, {})
+                free_idx.put(idx)
+
+                if app.env == "development":
+                    print(f"Close connection to {idx}.")
 
         res = Response(send(), mimetype="text/event-stream")
 
-        return allow_cors(res)
+        return allow_cors(app, res)
 
 
 def run_server(port):
-    # An implementation for hot reloading
-    # For only server it looks good, but server client connection especially SSE action is unstable.
-    # - Only one SSE connection is available. Once hot reloaded, sse connection is down and never recorvered.
-    #
-    #
-    # from werkzeug import run_simple
-
-    # use_reloader = False
-    # use_debugger = False
-    # if app.env == 'development':
-    #     app.debug = True
-    #     use_reloader = True
-    #     use_debugger = True
-
-    # app.wsgi_app = ProxyFix(app.wsgi_app)
-
-    # print("open server : {}".format(port))
-
-    # run_simple(
-    #     hostname="localhost",
-    #     port=int(port),
-    #     application=app,
-    #     use_reloader=use_reloader,
-    #     use_debugger=use_debugger,
-    # )
-
     print("open server : {}".format(port))
     app.wsgi_app = ProxyFix(app.wsgi_app)
     server = WSGIServer(("0.0.0.0", port), app)
@@ -176,6 +200,7 @@ def main():
     args = get_args()
 
     # check if logdir exists
+    global logdir
     logdir = os.path.abspath(args.logdir)
     if not check_and_create_logdir(logdir):
         return
@@ -188,7 +213,7 @@ def main():
 
     # Start ovserving directory
     p = Process(target=create_supervise_process(logdir),
-                args=[send_manager, directory_manager],
+                args=[send_manager, directory_manager, sse_updates],
                 daemon=True)
     p.start()
 

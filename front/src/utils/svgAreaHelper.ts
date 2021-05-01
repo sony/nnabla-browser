@@ -3,7 +3,7 @@ import store from '@/store'
 import { nnablaCore } from './nnablaApi'
 import * as d3 from 'd3'
 
-import { NodeInfo } from '@/utils/serverSentEventHelper'
+import { NodeInfo } from '@/utils/serverEventHandler'
 
 const layerDef = Definitions.EDIT.LAYER
 

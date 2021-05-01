@@ -10,16 +10,16 @@ import Vue from 'vue'
 import Header from '@/components/Header.vue'
 import Main from '@/components/Main.vue'
 import EditorWindowSize from '@/utils/editorWindowSize'
-import { SSE } from '@/utils/serverSentEventHelper'
-import * as pathOperator from '@/utils/pathOperator'
+import { serverEventHandler } from '@/utils/serverEventHandler'
 import $ from 'jquery'
+
+let eventSrc: EventSource
 
 export default Vue.extend({
   components: { Header, Main },
   methods: {
     // Server sent event.
     setupSSE: function () {
-      let eventSrc: EventSource
       if (process.env.NODE_ENV === 'development') {
         eventSrc = new EventSource('http://localhost:8888/sse', {
           withCredentials: true
@@ -29,25 +29,26 @@ export default Vue.extend({
       }
 
       eventSrc.addEventListener(
-        'add',
-        (event: Event) => {
-          const filePath = (event as any).lastEventId
+        'uniqueId',
+        serverEventHandler.createSSEConnectionIdListener(),
+        false
+      )
 
-          const fileType = pathOperator.getFileType(filePath)
+      eventSrc.addEventListener(
+        'directoryStructure',
+        serverEventHandler.directoryStructureEventListener,
+        false
+      )
 
-          if (fileType === null) return
+      eventSrc.addEventListener(
+        'fileContent',
+        serverEventHandler.createFileContentEventListener(),
+        false
+      )
 
-          let data
-          if (fileType === 'nntxtFiles') {
-            data = SSE.getGraphInfoFromNNtxt(event)
-          } else if (fileType === 'monitorFiles') {
-            data = SSE.getMonitorInfo(event)
-          } else if (fileType === 'csvResultFiles') {
-            data = SSE.getCsvResult(event)
-          }
-
-          this.$store.commit('addDirectoryInfo', { path: filePath, data })
-        },
+      eventSrc.addEventListener(
+        'checkAlive',
+        () => { /** do nothing **/ },
         false
       )
 

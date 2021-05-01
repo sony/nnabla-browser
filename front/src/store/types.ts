@@ -1,4 +1,4 @@
-import { NodeInfo } from '@/utils/serverSentEventHelper'
+import { NodeInfo } from '@/utils/serverEventHandler'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RootState {
@@ -56,6 +56,7 @@ export interface DirectoryNode {
 export interface DirectoryInfoState {
   data: DirectoryNode;
   activeFile: string;
+  subscribedList: string[];
 }
 
 /***************************************

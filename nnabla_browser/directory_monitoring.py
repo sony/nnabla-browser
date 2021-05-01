@@ -71,8 +71,8 @@ def initialize_send_queue(path_list, base_path):
     for path in path_list:
         send_info = {
             "path": os.path.relpath(path, base_path),
-            "action": "add",
-            "data": get_file_content(path)
+            "event": "directoryStructure",
+            "data": None
         }
         ret.append(send_info)
 
@@ -80,31 +80,37 @@ def initialize_send_queue(path_list, base_path):
 
 
 class Monitor(FileSystemEventHandler):
-    def __init__(self, logdir, send_manager, directory_manager):
+    def __init__(self, logdir, send_manager, directory_manager, sse_updates):
         super(Monitor, self).__init__()
         self.logdir = logdir
 
-        # {flag: boolean, targets: list of accessed browser indexes}
         self.send_manager = send_manager
-
         self.directory_manager = directory_manager
+        self.sse_updates = sse_updates
 
     def set_send_queue(self, abs_path, action):
 
-        data = get_file_content(abs_path) if action == "add" else None
+        data = get_file_content(abs_path) if action == "fileContent" else None
 
         if data == "":
             return
 
         send_info = {
             "path": os.path.relpath(abs_path, self.logdir),
-            "action": action,
+            "event": action,
             "data": data
         }
 
         with Lock():
             num_access = len(self.send_manager)
+            assert len(self.sse_updates) == num_access
+
             for i in range(num_access):
+                # check if the updated file is registerd as sse target.
+                if action == "fileContent" and not self.sse_updates[i].get(
+                        abs_path, False):
+                    continue
+
                 self.send_manager[i] = self.send_manager[i] + [
                     send_info,
                 ]
@@ -115,11 +121,16 @@ class Monitor(FileSystemEventHandler):
             abs_path,
         ]
 
-        self.set_send_queue(abs_path, "add")
+        # Send name only
+        self.set_send_queue(abs_path, "directoryStructure")
 
     def on_modified(self, event):
         abs_path = os.path.abspath(event.src_path)
-        self.set_send_queue(abs_path, "add")
+
+        # todo: detect rename
+
+        # Send name only
+        self.set_send_queue(abs_path, "fileContent")
 
     def on_deleted(self, event):
         abs_path = os.path.relpath(event.src_path)
