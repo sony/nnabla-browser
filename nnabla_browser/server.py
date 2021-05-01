@@ -1,23 +1,22 @@
-import time
 import argparse
-import subprocess
 import json
 import os
+import subprocess
+import time
+from multiprocessing import Lock, Manager, Process
 
 import gevent
-from gevent.pywsgi import WSGIServer
 import werkzeug.serving
-from werkzeug.middleware.proxy_fix import ProxyFix
-from werkzeug.datastructures import Headers
-from flask import Flask, render_template, Response, send_file, jsonify
-
-from multiprocessing import Manager, Lock, Process
-from watchdog.observers import Observer
-
+from flask import Flask, Response, jsonify, render_template, send_file
+from gevent.pywsgi import WSGIServer
 from nnabla.logger import logger
+from watchdog.observers import Observer
+from werkzeug.datastructures import Headers
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # need to make it beutiful
-from .directory_monitoring import Monitor, get_directory_tree_recursive, initialize_send_queue
+from .directory_monitoring import (Monitor, get_directory_tree_recursive,
+                                   initialize_send_queue)
 from .parse_nnabla_function import parse_all
 from .utils import sse_msg_encoding, str_to_bool
 
@@ -26,14 +25,13 @@ from .utils import sse_msg_encoding, str_to_bool
 root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 template_path = os.path.join(root_path, 'front/dist')
 static_path = os.path.join(root_path, 'front/dist/static')
-app = Flask(__name__,
-            template_folder=template_path,
-            static_folder=static_path)
+app = Flask(__name__, template_folder=template_path, static_folder=static_path)
 
 # shared manager
 manager = Manager()
 send_manager = manager.list()
 directory_manager = manager.list()
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -86,9 +84,11 @@ def create_supervise_process(logdir):
 def allow_cors(response):
     if app.env == "development":
         # allow CORS access to enalbe SSE between npm and flask
-        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8000'
+        response.headers[
+            'Access-Control-Allow-Origin'] = 'http://localhost:8000'
         response.headers['Access-Control-Allow-Credentials'] = 'true'
     return response
+
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -143,8 +143,8 @@ def run_server(port):
     # An implementation for hot reloading
     # For only server it looks good, but server client connection especially SSE action is unstable.
     # - Only one SSE connection is available. Once hot reloaded, sse connection is down and never recorvered.
-    # 
-    #  
+    #
+    #
     # from werkzeug import run_simple
 
     # use_reloader = False
@@ -171,6 +171,7 @@ def run_server(port):
     server = WSGIServer(("0.0.0.0", port), app)
     server.serve_forever()
 
+
 def main():
     args = get_args()
 
@@ -185,7 +186,7 @@ def main():
 
     global send_manager
 
-    # Start ovserving directory 
+    # Start ovserving directory
     p = Process(target=create_supervise_process(logdir),
                 args=[send_manager, directory_manager],
                 daemon=True)

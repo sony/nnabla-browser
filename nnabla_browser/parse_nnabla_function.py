@@ -1,12 +1,13 @@
 from __future__ import print_function
 
-import os
 import fnmatch
-import re
-import yaml
-from json import dumps
-import inspect
 import importlib
+import inspect
+import os
+import re
+from json import dumps
+
+import yaml
 
 # it`s too dirty...
 YAML_PATH = {
@@ -98,8 +99,10 @@ def get_all_function_api_definitions(module_name,
                 arguments[param_name] = {
                     "default":
                     "None" if param.default is None else str(param.default),
-                    "type": type(param.default).__name__,
-                    "optional": "True"
+                    "type":
+                    type(param.default).__name__,
+                    "optional":
+                    "True"
                 }
 
         function_info = {

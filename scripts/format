@@ -2,6 +2,7 @@
 
 # format Python
 yapf -r -vv -i nnabla_browser
+isort nnabla_browser
 
 # format JS
 npx standard front 'front/**/*.js' --fix

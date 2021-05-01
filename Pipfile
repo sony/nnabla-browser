@@ -17,6 +17,8 @@ nnabla = "*"
 
 [dev-packages]
 wheel = "*"
+yapf = "*"
+isort = "*"
 
 [requires]
 python_version = "3.7"

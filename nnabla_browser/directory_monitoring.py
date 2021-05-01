@@ -1,14 +1,13 @@
-import os
 import fnmatch
 import glob
+import os
 import zipfile
-
-from watchdog.events import FileSystemEventHandler
-from google.protobuf import text_format, json_format
-from nnabla.utils import nnabla_pb2
 from multiprocessing import Lock
 
+from google.protobuf import json_format, text_format
 from nnabla.logger import logger
+from nnabla.utils import nnabla_pb2
+from watchdog.events import FileSystemEventHandler
 
 
 def nnabla_proto_to_json(file_path):
