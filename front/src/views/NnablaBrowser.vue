@@ -42,8 +42,6 @@ export default Vue.extend({
             data = SSE.getGraphInfoFromNNtxt(event)
           } else if (fileType === 'monitorFiles') {
             data = SSE.getMonitorInfo(event)
-          } else if (fileType === 'csvResultFiles') {
-            data = SSE.getCsvResult(event)
           }
 
           this.$store.commit('addDirectoryInfo', { path: filePath, data })

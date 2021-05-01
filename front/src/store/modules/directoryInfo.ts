@@ -14,8 +14,7 @@ const createNewNode = (name: string): DirectoryNode => {
     name: name,
     children: [],
     monitorFiles: [],
-    nntxtFiles: [],
-    csvResultFiles: []
+    nntxtFiles: []
   }
 }
 
@@ -105,8 +104,7 @@ const deleteDirectoryInfo = (
 ) => {
   if (
     fileType !== 'nntxtFiles' &&
-    fileType !== 'monitorFiles' &&
-    fileType !== 'csvResultFiles'
+    fileType !== 'monitorFiles'
   ) {
     return false
   }
@@ -127,8 +125,7 @@ const state: DirectoryInfoState = {
     children: [],
     name: '',
     nntxtFiles: [],
-    monitorFiles: [],
-    csvResultFiles: []
+    monitorFiles: []
   },
   activeFile: ''
 }
