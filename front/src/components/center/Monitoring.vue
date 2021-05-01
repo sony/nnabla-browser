@@ -52,7 +52,11 @@ export default Vue.extend({
         const data = { datasets: datasets }
         const options = {
           plugins: {
-            title: { display: true, text: title, font: { size: 20, weight: 600 } },
+            title: {
+              display: true,
+              text: title,
+              font: { size: 20, weight: 600 }
+            },
             tooltip: { enabled: true }
           },
           interaction: {

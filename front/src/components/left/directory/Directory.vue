@@ -22,7 +22,7 @@
         </li>
       </ul>
 
-      <ul>
+      <ul v-if="activeTabName === 'graph'">
         <li
           v-for="(nntxt, key) in info.nntxtFiles"
           :key="dirName + ':nntxt:' + key"
@@ -35,7 +35,7 @@
         </li>
       </ul>
 
-      <ul>
+      <ul v-if="activeTabName === 'monitoring'">
         <li
           v-for="(monitor, key) in info.monitorFiles"
           :key="dirName + ':monitor:' + key"
@@ -75,6 +75,9 @@ export default Vue.extend({
           this.info.monitorFiles.length >
         0
       )
+    },
+    activeTabName: function (): string {
+      return this.$store.state.editor.activeTabName.toLowerCase()
     }
   },
   data: function () {
