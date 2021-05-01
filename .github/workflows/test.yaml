@@ -1,4 +1,4 @@
-name: format check
+name: test
 
 on: [push, pull_request]
 
@@ -34,5 +34,6 @@ jobs:
           yapf -r -vv nnabla_browser
       - name: Check TypeScript fomat
         run: |
+          npm run build
           npm run lint
           npm run format
