@@ -1,9 +1,6 @@
 <template>
-<div>
-  <label>
-    <input type="checkbox" ref="check" :checked="checked" />
-    <span />
-  </label>
+<div class="prop-bool">
+  {{ checked ? 'True' : 'False' }}
 </div>
 </template>
 

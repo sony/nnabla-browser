@@ -1,6 +1,6 @@
 <template>
-<div>
-  <input type="text" :value="getValue()" />
+<div class="prop-text">
+  {{ getValue() }}
 </div>
 </template>
 

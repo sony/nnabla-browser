@@ -108,7 +108,6 @@ export default Vue.extend({
   float: left;
   overflow: hidden;
   color: var(--color-gray4);
-  width: 50%;
   padding-right: 4px;
 }
 
@@ -116,18 +115,7 @@ export default Vue.extend({
   float: left;
   overflow: hidden;
   color: var(--color-gray5);
-  width: 50%;
   padding-left: 4px;
-}
-
-.property input[type='text'] {
-  width: 100%;
-}
-
-.property input[type='text']:not(:focus) {
-  border-color: transparent;
-  outline-color: transparent;
-  background-color: transparent;
 }
 
 /* cover 'hidden' input and span */
@@ -135,52 +123,6 @@ export default Vue.extend({
   cursor: pointer;
   position: relative;
   height: 16px;
-}
-
-.property label > input[type='checkbox'] {
-  display: none;
-}
-
-/* slider background which having round corner */
-.property label > input[type='checkbox'] + span {
-  display: inline-block;
-  vertical-align: text-bottom;
-  width: 32px;
-  height: 13px;
-  border-radius: 13px;
-  background-color: var(--color-gray4);
-}
-
-/* background color changed to layer1's when checked */
-.property label > input[type='checkbox']:checked + span {
-  background-color: var(--color-brand);
-}
-
-/* draw round thumb on sllider */
-.property label > input[type='checkbox'] + span::after {
-  display: inline-block;
-  content: '';
-  margin: 1px;
-  width: 11px;
-  height: 11px;
-  border-radius: 11px;
-  background-color: var(--color-gray1);
-  transition: margin 0.125s;
-}
-
-/* thumb moved to left when checked */
-.property label > input[type='checkbox']:checked + span::after {
-  margin-left: 20px;
-}
-
-.property select {
-  width: 100%;
-}
-
-.property select:not(:active) {
-  border-color: transparent;
-  outline-color: transparent;
-  background-color: transparent;
 }
 
 /* warning icon in property panel */
