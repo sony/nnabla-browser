@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-for="metrics in dataCollection" v-bind:key="metrics.options.plugins.title.text">
-      <series-chart :chart-data="metrics.data" :options="metrics.options"><series-chart>
+      <series-chart :chart-data="metrics.data" :options="metrics.options"></series-chart>
     </div>
   </div>
 </template>
