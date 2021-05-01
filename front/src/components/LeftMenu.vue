@@ -11,8 +11,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import DirectoryTree from './DirectoryTree.vue'
-import PropertyArea from './PropertyArea.vue'
+import DirectoryTree from '@/components/left/DirectoryTree.vue'
+import PropertyArea from '@/components/left/PropertyArea.vue'
 
 export default Vue.extend({
   components: {
@@ -31,6 +31,15 @@ export default Vue.extend({
 </script>
 
 <style>
+.left-content {
+  position: relative;
+  width: 15%;
+  height: 100%;
+  min-width: 280px;
+  background-color: var(--color-gray1);
+  border-right: solid 1px var(--color-gray2);
+}
+
 .left-component .icon-small {
   width: 16px;
   height: 16px;

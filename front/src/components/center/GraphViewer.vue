@@ -1,6 +1,6 @@
 <template>
   <div>
-    <network-tabs @history="command => $emit('history', command)" />
+    <graph-tab-list @history="command => $emit('history', command)" />
     <div v-if="activeFileTag" class="tool-icon-container" @click="capSwitch">
       <font-awesome-icon
         v-show="!snapshotLoding"
@@ -27,18 +27,14 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import svgArea from './SvgArea.vue'
+import svgArea from '@/components/center/graph/SvgArea.vue'
 import snapShot from '@/components/tools/SnapShot.vue'
 import { Definitions } from '@/utils/definitions'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faSpinner, faCamera } from '@fortawesome/free-solid-svg-icons'
-import { Graph } from '@/store/types'
+import GraphTabList from '@/components/center/graph/GraphTabList.vue'
 
 library.add(faSpinner, faCamera)
-
-/***************************************
- interface
- ***************************************/
 
 interface DataType {
   layerTextClipId: string;
@@ -47,13 +43,6 @@ interface DataType {
   snapshotSwitch: boolean | undefined;
   snapshotLoding: boolean | undefined;
 }
-
-interface GraphTabProps {
-  graph: Graph;
-  index: number;
-}
-
-/***************************************/
 
 export default Vue.extend<DataType, {}, {}, {}>({
   props: {
@@ -87,63 +76,7 @@ export default Vue.extend<DataType, {}, {}, {}>({
     }
   },
   components: {
-    'network-tabs': {
-      template: `
-                <div class="network-tabs">
-                    <graph-tab v-for="(graph, index) in $store.state.graphInfo.graphs"
-                        :graph="graph"
-                        :key="$store.state.graphInfo.nntxtPath + '-' + index"
-                        :index="index"
-                        :class="{'active': index===$store.state.graphInfo.activeGraphIndex}"
-                        @history="command => $emit('history', command)"
-                    />
-                    <graph-tab-append
-                        @history="command => $emit('history', command)"
-                    />
-                </div>
-            `,
-      components: {
-        'graph-tab': Vue.extend<{}, {}, {}, GraphTabProps>({
-          props: {
-            graph: Object,
-            index: Number
-          },
-          template: `
-                        <div class="graphs-tab nnc-invoker" @click="clicked">
-                            <span class="graph-name">{{ graph.name }}</span>
-                            <span>
-                                <span class="delete-mark" @click.stop.prevent="clickedDelete;">
-                                    <img class="graph-remove-img" src="./editor/image/Remove.svg"/>
-                                </span>
-                            </span>
-                        </div>
-                    `,
-          methods: {
-            clicked: function () {
-              this.$store.commit('setActiveGraphIndex', this.index)
-            },
-            clickedDelete: function () {
-              // set True to the argument of graphInfo named something like "isShow"
-              // and insert this operation into history to undo or redo
-            },
-            keydown: (e: KeyboardEvent) => {
-              switch (e.keyCode) {
-                case 27:
-                case 13:
-                  ;(e.target as HTMLElement).blur()
-                  break
-                default:
-                  break
-              }
-            }
-          }
-        }),
-        'graph-tab-append': {
-          template:
-            '<div class="graphs-tab graph-add"><img class="graph-addnew-img" src="./editor/image/AddNew.svg"/></div>'
-        }
-      }
-    },
+    'graph-tab-list': GraphTabList,
     'svg-area': svgArea,
     'snap-shot': snapShot
   }
@@ -151,53 +84,6 @@ export default Vue.extend<DataType, {}, {}, {}>({
 </script>
 
 <style>
-.network-tabs {
-  width: 100%;
-  height: 41px;
-  border-bottom: solid 1px var(--color-gray2);
-  overflow: auto;
-}
-
-.graphs-tab {
-  float: left;
-  height: 39px;
-  line-height: 39px;
-  padding-right: 8px;
-}
-
-.graphs-tab.active {
-  box-sizing: border-box;
-  border-bottom: solid 2px var(--color-brand);
-}
-
-.graphs-tab.active > span > .graph-name {
-  color: var(--color-brand);
-}
-
-.graphs-tab:hover {
-  background-color: var(--color-gray1);
-}
-
-.graph-name {
-  margin-left: 24px;
-  margin-right: 12px;
-  font-size: 13px;
-  color: var(--color-gray5);
-  line-height: 40px;
-}
-
-.graph-remove-img,
-.graph-addnew-img {
-  width: 16px;
-  height: 16px;
-  margin: 8px 0 8px 0;
-  vertical-align: middle;
-}
-
-.graph-add {
-  padding-left: 8px;
-}
-
 #network-editor {
   display: block;
 }

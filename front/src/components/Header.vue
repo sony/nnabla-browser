@@ -1,36 +1,20 @@
 <template>
   <div class="editor-navbar">
     <div style="margin-left: 30px;">
-      <appbar-tab tab-name="graph" />
-      <appbar-tab tab-name="monitoring" />
+      <nav-button tab-name="graph" />
+      <nav-button tab-name="monitoring" />
     </div>
     <div class="editor-navbar-center"></div>
   </div>
 </template>
 
 <script lang="ts">
-import EditorWindowSize from '@/utils/editorWindowSize'
+import NavButton from '@/components/header/NavButton.vue'
 import Vue from 'vue'
 
 export default Vue.extend({
   components: {
-    'appbar-tab': {
-      props: ['tabName'],
-      template: `
-                <div class="nnc-invoker" :class="['navbar-el', $store.state.editor.activeTabName === tabName ? 'active' : '']" @click="changeActiveTab(tabName)">
-                    <span class="navbar-tab">
-                        {{ tabName.toUpperCase() }}
-                    </span>
-                </div>`,
-      methods: {
-        changeActiveTab: function (tabName: string) {
-          this.$store.commit('changeActiveTab', tabName)
-          Vue.nextTick(function () {
-            EditorWindowSize.init()
-          })
-        }
-      }
-    }
+    'nav-button': NavButton
   }
 })
 </script>
