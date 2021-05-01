@@ -2,7 +2,7 @@
   <div>
     <directory-root
       class="app-row"
-      v-bind:class="{'graph': isGraph, monitoring: isMonitoring}"
+      v-bind:class="{ graph: isGraph, monitoring: isMonitoring }"
     />
   </div>
 </template>

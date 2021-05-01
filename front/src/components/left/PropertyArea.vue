@@ -1,19 +1,19 @@
 <template>
-<div class="app-row" style="height: 50%; bottom: 0;" >
-  <div class="property-area">
-    <div class="title">Layer Property</div>
-    <div v-if="isLayerSelected">
-      <layer-type :defaultProps="defaultProps" />
-      <layer-properties
-        class="app-row app-scroll-x app-scroll-y"
-        style="top: 88px; bottom: 0;"
-        :defaultParams="{...defaultProps.inputs, ...defaultProps.arguments}"
-        :layerParams="layerParams"
-        :ioInfos="ioInfos"
-      />
+  <div class="app-row" style="height: 50%; bottom: 0;">
+    <div class="property-area">
+      <div class="title">Layer Property</div>
+      <div v-if="isLayerSelected">
+        <layer-type :defaultProps="defaultProps" />
+        <layer-properties
+          class="app-row app-scroll-x app-scroll-y"
+          style="top: 88px; bottom: 0;"
+          :defaultParams="{ ...defaultProps.inputs, ...defaultProps.arguments }"
+          :layerParams="layerParams"
+          :ioInfos="ioInfos"
+        />
       </div>
     </div>
-</div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -57,8 +57,7 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
         .find(x => x.layer_name === this.selectedLayer.type)
     },
     layerParams: function () {
-      const paramKey: string =
-        this.selectedLayer.type.toLowerCase() + 'Param'
+      const paramKey: string = this.selectedLayer.type.toLowerCase() + 'Param'
       return this.selectedLayer[paramKey] || {}
     },
     ioInfos: function () {

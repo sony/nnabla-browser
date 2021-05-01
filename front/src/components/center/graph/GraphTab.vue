@@ -1,7 +1,7 @@
 <template>
-<div class="graphs-tab nnc-invoker" @click="clicked">
-  <span class="graph-name">{{ graph.name }}</span>
-</div>
+  <div class="graphs-tab nnc-invoker" @click="clicked">
+    <span class="graph-name">{{ graph.name }}</span>
+  </div>
 </template>
 
 <script lang="ts">

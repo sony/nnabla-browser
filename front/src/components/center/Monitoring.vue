@@ -1,7 +1,10 @@
 <template>
-  <div>
-    <div v-for="metrics in dataCollection" v-bind:key="metrics.options.plugins.title.text">
-      <series-chart :chart-data="metrics.data" :options="metrics.options"></series-chart>
+  <div class="monitoring">
+    <div
+      v-for="metrics in dataCollection"
+      v-bind:key="metrics.options.plugins.title.text"
+    >
+      <series-chart :chart-data="metrics.data" :options="metrics.options" />
     </div>
   </div>
 </template>
@@ -40,13 +43,26 @@ export default Vue.extend({
           return {
             label: d.name[0] === '/' ? d.name.substr(1) : d.name,
             borderColor: COLORS[d.id % COLORS.length],
+            pointBorderWidth: 0,
+            pointRadius: 0,
             fill: false,
             data: data
           }
         })
         const data = { datasets: datasets }
         const options = {
-          plugins: { title: { display: true, text: title }, tooltip: { enabled: true } },
+          plugins: {
+            title: {
+              display: true,
+              text: title,
+              font: { size: 20, weight: 600 }
+            },
+            tooltip: { enabled: true }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
           scales: {
             x: {
               type: 'linear',
@@ -76,46 +92,11 @@ export default Vue.extend({
     }
   }
 })
-
 </script>
 
 <style scoped>
-.monitoring-content-scroller {
-  width: 100%;
+.monitoring {
   height: 100%;
-  overflow: scroll;
-}
-
-.c3-circles {
-  display: none;
-}
-
-.tool-icon-container {
-  z-index: 99;
-  width: 4rem;
-  height: 4rem;
-  background-color: #1aaa55;
-  border-radius: 50%;
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  box-shadow: 0 0 10px #f00;
-}
-
-.tool-icon-container .func-icon {
-  font-size: 3rem;
-  color: white;
-}
-
-.chart-block path {
-  fill: none;
-  stroke: #000;
-}
-
-g.tick line {
-  stroke: #000;
+  overflow: auto;
 }
 </style>

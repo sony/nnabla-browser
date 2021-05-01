@@ -1,4 +1,4 @@
-name: format check
+name: test
 
 on: [push, pull_request]
 
@@ -32,6 +32,8 @@ jobs:
       - name: Check Python format
         run: |
           yapf -r -vv nnabla_browser
-      - name: Check JavaScript format
+      - name: Check TypeScript fomat
         run: |
-          npx standard front 'front/**/*.js'
+          npm run build
+          npm run lint
+          npm run format

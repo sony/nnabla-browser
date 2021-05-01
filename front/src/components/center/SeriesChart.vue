@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 import Vue, { VueConstructor } from 'vue'
 import { Line, mixins } from '../chart'
 import Chart from 'chart.js'
@@ -8,7 +8,10 @@ const { reactiveProp } = mixins
 // workaround
 type _Vue = VueConstructor<
   Vue & {
-    renderChart: (chartData: Chart.ChartData, options?: Chart.ChartOptions) => void;
+    renderChart: (
+      chartData: Chart.ChartData,
+      options?: Chart.ChartOptions
+    ) => void;
   }
 >
 
@@ -25,8 +28,6 @@ export default (Vue as _Vue).extend<{}, {}, {}, PropType>({
     this.renderChart(this.chartData, this.options)
   }
 })
-
 </script>
 
-<style>
-</style>
+<style></style>

@@ -1,16 +1,18 @@
 <template>
-<div class="layer">
-  <div class="drop-cap" :style="{'background-color': '#' + defaultProps.color.substring(2)}">
-    {{ defaultProps.layer_name.substring(0, 1) }}
-  </div>
-  <div class="name">
-    {{ defaultProps.layer_name }}
-  </div>
+  <div class="layer">
+    <div
+      class="drop-cap"
+      :style="{ 'background-color': '#' + defaultProps.color.substring(2) }"
+    >
+      {{ defaultProps.layer_name.substring(0, 1) }}
+    </div>
+    <div class="name">
+      {{ defaultProps.layer_name }}
+    </div>
     <a title="Refer documentation" :href="getDocUrl()" target="_blank">
       link
     </a>
-</div>
-
+  </div>
 </template>
 
 <script lang="ts">
@@ -23,10 +25,7 @@ export default Vue.extend({
     getDocUrl: function () {
       const APIDEF = Definitions.NNABLA_CORE_API
       let url
-      if (
-        (this.defaultProps.api_type || '') ===
-        'parametric_functions_api'
-      ) {
+      if ((this.defaultProps.api_type || '') === 'parametric_functions_api') {
         url = APIDEF.PF_DOC_URL + '#nnabla.parametric_functions.'
       } else {
         url = APIDEF.F_DOC_URL + '#nnabla.functions.'

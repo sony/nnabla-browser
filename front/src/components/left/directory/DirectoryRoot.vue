@@ -1,15 +1,17 @@
 <template>
-
-<div>
-  <div class="title">Directory Tree</div>
-  <div class="app-row app-scroll-x app-scroll-y" style="top: 40px; bottom: 0;">
-    <directory-component
-      v-if="typeof directoryInfo.name !== 'undefined'"
-      :info="directoryInfo"
-      :dir-name="directoryInfo.name" />
+  <div>
+    <div class="title">Directory Tree</div>
+    <div
+      class="app-row app-scroll-x app-scroll-y"
+      style="top: 40px; bottom: 0;"
+    >
+      <directory-component
+        v-if="typeof directoryInfo.name !== 'undefined'"
+        :info="directoryInfo"
+        :dir-name="directoryInfo.name"
+      />
+    </div>
   </div>
-</div>
-
 </template>
 
 <script lang="ts">
@@ -26,9 +28,6 @@ export default Vue.extend({
     }
   }
 })
-
 </script>
 
-<style>
-
-</style>
+<style></style>

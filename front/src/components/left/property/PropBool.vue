@@ -1,7 +1,7 @@
 <template>
-<div class="prop-bool">
-  {{ checked ? 'True' : 'False' }}
-</div>
+  <div class="prop-bool">
+    {{ checked ? 'True' : 'False' }}
+  </div>
 </template>
 
 <script lang="ts">
@@ -30,5 +30,4 @@ export default Vue.extend<{}, {}, {}, PropertyProp>({
 })
 </script>
 
-<style>
-</style>
+<style></style>

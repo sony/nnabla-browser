@@ -1,13 +1,13 @@
 <template>
-<div
-  class="nnc-invoker"
-  :class="['navbar-el',  activeTabName === tabName ? 'active' : '']"
-  @click="changeActiveTab(tabName)"
->
-  <span class="navbar-tab">
-    {{ tabName.toUpperCase() }}
-  </span>
-</div>
+  <div
+    class="nnc-invoker"
+    :class="['navbar-el', activeTabName === tabName ? 'active' : '']"
+    @click="changeActiveTab(tabName)"
+  >
+    <span class="navbar-tab">
+      {{ tabName.toUpperCase() }}
+    </span>
+  </div>
 </template>
 
 <script lang="ts">
@@ -32,5 +32,4 @@ export default Vue.extend({
 })
 </script>
 
-<style>
-</style>
+<style></style>

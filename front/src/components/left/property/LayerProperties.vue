@@ -1,24 +1,24 @@
 <template>
-<div>
-  <div
-    class="property"
-    v-for="value, key in filteredParams"
-    :key="value + '-' + key"
-  >
-    <div class="content">
-      <div class="name">{{ key }}</div>
-      <component
-        :is="selectComponent(value)"
-        :defaultParam="value"
-        :layerParam="getLayerParam(key)"
-        :class="'value' + (value.error ? ' warning' : '')"
-        :title="value.error"
-      />
-    </div>
-  </div>
+  <div>
     <div
       class="property"
-      v-for="value, key in ioInfos.outputShape"
+      v-for="(value, key) in filteredParams"
+      :key="value + '-' + key"
+    >
+      <div class="content">
+        <div class="name">{{ key }}</div>
+        <component
+          :is="selectComponent(value)"
+          :defaultParam="value"
+          :layerParam="getLayerParam(key)"
+          :class="'value' + (value.error ? ' warning' : '')"
+          :title="value.error"
+        />
+      </div>
+    </div>
+    <div
+      class="property"
+      v-for="(value, key) in ioInfos.outputShape"
       :key="value + '-' + key"
     >
       <div class="content">
@@ -26,12 +26,12 @@
         <component
           :is="'prop-text'"
           :defaultParam="{}"
-          :layerParam="'['+value.join(', ')+']'"
+          :layerParam="'[' + value.join(', ') + ']'"
           :class="'value'"
         />
       </div>
+    </div>
   </div>
-</div>
 </template>
 
 <script lang="ts">
@@ -51,9 +51,7 @@ export default Vue.extend({
   },
   methods: {
     getLayerParam: function (key: string): string | null {
-      const name = key.replace(/_./g, (s: string) =>
-        s.charAt(1).toUpperCase()
-      )
+      const name = key.replace(/_./g, (s: string) => s.charAt(1).toUpperCase())
       const params = this.layerParams[name]
 
       if (typeof params === 'undefined') return null
