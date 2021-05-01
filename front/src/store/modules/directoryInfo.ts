@@ -1,4 +1,4 @@
-import { Module, MutationTree, ActionTree } from 'vuex'
+import { Module, MutationTree, ActionTree, GetterTree } from 'vuex'
 import { RootState, DirectoryNode, DirectoryInfoState } from '@/store/types'
 
 import * as pathOperator from '@/utils/pathOperator'
@@ -40,7 +40,8 @@ const state: DirectoryInfoState = {
     monitorFiles: [],
     csvResultFiles: []
   },
-  activeFile: ''
+  activeFile: '',
+  subscribedList: []
 }
 
 function createNewNode (name: string): DirectoryNode {
@@ -163,6 +164,17 @@ const mutations: MutationTree<DirectoryInfoState> = {
   },
   resetActiveFile: function (state) {
     state.activeFile = ''
+  },
+  activateSubscribe: function (state, path) {
+    if (!state.subscribedList.includes(path)) {
+      state.subscribedList.push(path)
+    }
+  },
+  deactivateSubscribe: function (state, path) {
+    const index = state.subscribedList.indexOf(path)
+    if (index > -1) {
+      state.subscribedList.splice(index, 1)
+    }
   }
 }
 
@@ -194,8 +206,15 @@ const actions: ActionTree<DirectoryInfoState, RootState> = {
   }
 }
 
+const getters: GetterTree<DirectoryInfoState, RootState> = {
+  isSubscribe: (state, getters) => (path: string): boolean => {
+    return state.subscribedList.includes(path)
+  }
+}
+
 export const directoryInfo: Module<DirectoryInfoState, RootState> = {
   state,
   mutations,
-  actions
+  actions,
+  getters
 }

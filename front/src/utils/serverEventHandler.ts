@@ -366,6 +366,8 @@ class ServerEventHandler {
 
       if (fileType === null) return
 
+      if (!store.getters.isSubscribe(filePath)) return
+
       // Have to convert sent data by sse to json explicitly.
       let data
       if (fileType === 'nntxtFiles') {

@@ -56,6 +56,7 @@ export interface DirectoryNode {
 export interface DirectoryInfoState {
   data: DirectoryNode;
   activeFile: string;
+  subscribedList: string[];
 }
 
 /***************************************

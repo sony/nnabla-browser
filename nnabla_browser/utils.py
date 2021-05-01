@@ -1,8 +1,9 @@
-import os
 import json
-from flask import jsonify
+import os
 
+from flask import jsonify
 from nnabla.logger import logger
+
 
 def encode_msg(data=None, event=None, id=None):
     maps = [("event", event), ("id", id), ("data", data)]
