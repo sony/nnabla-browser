@@ -43,6 +43,8 @@ export default Vue.extend({
           return {
             label: d.name[0] === '/' ? d.name.substr(1) : d.name,
             borderColor: COLORS[d.id % COLORS.length],
+            pointBorderWidth: 0,
+            pointRadius: 0,
             fill: false,
             data: data
           }
@@ -50,8 +52,12 @@ export default Vue.extend({
         const data = { datasets: datasets }
         const options = {
           plugins: {
-            title: { display: true, text: title },
+            title: { display: true, text: title, font: { size: 20, weight: 600 } },
             tooltip: { enabled: true }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index'
           },
           scales: {
             x: {
