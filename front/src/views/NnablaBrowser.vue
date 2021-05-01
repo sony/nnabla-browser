@@ -10,15 +10,16 @@ import Vue from 'vue'
 import Header from '@/components/Header.vue'
 import Main from '@/components/Main.vue'
 import EditorWindowSize from '@/utils/editorWindowSize'
-import { SSE } from '@/utils/serverSentEventHelper'
+import { serverEventHandler } from '@/utils/serverEventHandler'
 import $ from 'jquery'
+
+let eventSrc: EventSource
 
 export default Vue.extend({
   components: { Header, Main },
   methods: {
     // Server sent event.
     setupSSE: function () {
-      let eventSrc: EventSource
       if (process.env.NODE_ENV === 'development') {
         eventSrc = new EventSource('http://localhost:8888/sse', {
           withCredentials: true
@@ -28,14 +29,20 @@ export default Vue.extend({
       }
 
       eventSrc.addEventListener(
+        'uniqueId',
+        serverEventHandler.createSSEConnectionIdListener(),
+        false
+      )
+
+      eventSrc.addEventListener(
         'directoryStructure',
-        SSE.directoryStructureEventListener,
+        serverEventHandler.directoryStructureEventListener,
         false
       )
 
       eventSrc.addEventListener(
         'fileContent',
-        SSE.fileContentEventListener,
+        serverEventHandler.createFileContentEventListener(),
         false
       )
 

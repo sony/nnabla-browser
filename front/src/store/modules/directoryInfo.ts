@@ -104,18 +104,22 @@ function findInsertIndex (list: { [key: string]: any }, name: string) {
   return insertIndex
 }
 
-function insertFile (parent: DirectoryNode, fileName: string, insertData: object) {
+function insertFile (parent: DirectoryNode, fileName: string, insertData: object, replace = false) {
   const fileType = pathOperator.getFileType(fileName)
 
   if (fileType) {
     const index = parent[fileType].findIndex(x => x.name === fileName)
     if (index > -1) {
       // Found. Update file contents.
-      parent[fileType][index].data = Object.assign(
-        {},
-        parent[fileType][index].data,
-        insertData
-      )
+      if (replace) {
+        parent[fileType][index].data = insertData
+      } else {
+        parent[fileType][index].data = Object.assign(
+          {},
+          parent[fileType][index].data,
+          insertData
+        )
+      }
     } else {
       // Not found. Insert new file.
       const insertIndex = findInsertIndex(parent[fileType], fileName)
@@ -127,11 +131,11 @@ function insertFile (parent: DirectoryNode, fileName: string, insertData: object
   }
 }
 
-function addDirectoryInfo (state: DirectoryInfoState, path: string, data: object) {
+function addDirectoryInfo (state: DirectoryInfoState, path: string, data: object, replace = false) {
   const [parent, relPath] = searchParent(path, state.data)
 
   if (relPath.split('/').length === 1) {
-    insertFile(parent, relPath, data)
+    insertFile(parent, relPath, data, replace)
   } else {
     const subTree = createNewSubTree(relPath, data)
     const insertIndex = findInsertIndex(
@@ -150,6 +154,9 @@ const mutations: MutationTree<DirectoryInfoState> = {
   updateFileContent: function (state, { path, data }) {
     // Register file path with file content
     addDirectoryInfo(state, path, data)
+  },
+  deleteFileContent: function (state, { path }) {
+    addDirectoryInfo(state, path, {}, true)
   },
   updateActiveFile: function (state, path) {
     state.activeFile = path

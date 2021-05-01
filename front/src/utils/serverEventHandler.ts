@@ -3,9 +3,7 @@ import store from '@/store'
 import { Definitions } from '@/utils/definitions'
 import { range } from '@/utils/arrayOperator'
 import * as PathOperator from '@/utils/pathOperator'
-import * as Path from 'path'
-
-import { graphInfo } from '@/store/modules/graphInfo'
+import { layer } from '@fortawesome/fontawesome-svg-core'
 
 const GRID = Definitions.EDIT.GRID.SIZE
 
@@ -28,7 +26,7 @@ export interface NodeInfo extends LayerInfo {
   type: string;
 }
 
-interface SSEEvent extends Event {
+interface ServerEvent extends Event {
   lastEventId: string;
   data: string;
   event: string;
@@ -129,11 +127,14 @@ class LayerRegister {
   }
 }
 
-class SSEHelper {
+const layerRegister = new LayerRegister()
+
+class ServerEventHandler {
   layerRegister: LayerRegister
+  SSEConnectionId = -1
 
   constructor () {
-    this.layerRegister = new LayerRegister()
+    this.layerRegister = layerRegister
   }
 
   createDummyInputLayer (variable: any) {
@@ -216,9 +217,7 @@ class SSEHelper {
     return recursive
   }
 
-  getGraphInfoFromNNtxt (event: any) {
-    const json = JSON.parse(event.data)
-
+  getGraphInfoFromNNtxt (json: any) {
     const graphInfoArray = []
     const networks = json.network || []
     const executors = json.executor || []
@@ -294,8 +293,8 @@ class SSEHelper {
     return graphInfoArray
   }
 
-  getMonitorInfo (event: any) {
-    const split = event.data.split('\n')
+  getMonitorInfo (data: any) {
+    const split = data.split('\n')
 
     const times = []
     const values = []
@@ -309,8 +308,7 @@ class SSEHelper {
     return { t: times, v: values }
   }
 
-  getCsvResult (event: any) {
-    const filepath = event.lastEventId
+  getCsvData (filepath: any, data: any) {
     const csvType = filepath
       .split('/')
       .pop()
@@ -318,14 +316,14 @@ class SSEHelper {
     switch (csvType) {
       case 'profile':
         // profile.result.csv
-        return this.profileCsvData(event)
+        return this.getProfileCsvData(data)
       default:
         console.error('file category not support yet!')
     }
   }
 
   // todo support outputs from nnabla.utils.GraphProfiler
-  profileCsvData (event: Event) {
+  getProfileCsvData (data: Event) {
     const profile: any = {}
 
     // todo: fix parser
@@ -346,47 +344,43 @@ class SSEHelper {
     return profile
   }
 
-  // unused method?
-  deleteChartInfo = (rootDir: string, id: string, store: any) => {
-    const o = {
-      chartTitle: Path.basename(id).split('.')[0],
-      data: {
-        name: Path.join(rootDir, Path.dirname(id))
-      }
+  /** SSE event listeners **/
+  createSSEConnectionIdListener () {
+    return (event: Event) => {
+      this.SSEConnectionId = parseInt((event as ServerEvent).data)
+      console.log(this.SSEConnectionId)
     }
-
-    store.commit('deleteChartData', o)
   }
 
-  /** SSE event listeners **/
   directoryStructureEventListener (event: Event) {
-    const filePath = (event as SSEEvent).lastEventId
-    console.log(event)
+    const filePath = (event as ServerEvent).lastEventId
 
     store.commit('updateDirectoryStructure', { path: filePath })
   }
 
-  fileContentEventListener (event: Event) {
-    const filePath = (event as SSEEvent).lastEventId
-    console.log(event)
+  createFileContentEventListener () {
+    return (event: Event) => {
+      const filePath = (event as ServerEvent).lastEventId
 
-    const fileType = PathOperator.getFileType(filePath)
+      const fileType = PathOperator.getFileType(filePath)
 
-    if (fileType === null) return
+      if (fileType === null) return
 
-    let data
-    if (fileType === 'nntxtFiles') {
-      data = this.getGraphInfoFromNNtxt(event)
-    } else if (fileType === 'monitorFiles') {
-      data = this.getMonitorInfo(event)
-    } else if (fileType === 'csvResultFiles') {
-      data = this.getCsvResult(event)
+      // Have to convert sent data by sse to json explicitly.
+      let data
+      if (fileType === 'nntxtFiles') {
+        const json = JSON.parse((event as ServerEvent).data)
+        data = this.getGraphInfoFromNNtxt(json)
+      } else if (fileType === 'monitorFiles') {
+        data = this.getMonitorInfo((event as ServerEvent).data)
+      } else if (fileType === 'csvResultFiles') {
+        data = this.getCsvData(filePath, (event as ServerEvent).data)
+      }
+
+      store.commit('updateFileContent', { path: filePath, data })
     }
-
-    store.commit('updateFileContent', { path: filePath, data })
   }
 }
 
-const SSE = new SSEHelper()
-
-export { SSE }
+const serverEventHandler = new ServerEventHandler()
+export { serverEventHandler }

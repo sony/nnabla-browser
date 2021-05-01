@@ -17,7 +17,8 @@
         >
           <directory-component
             :info="childInfo"
-            :dirName="dirName + '/' + childInfo.name"
+            :dirName="(level > 0 ? dirName + '/' : '') + childInfo.name"
+            :level="level + 1"
           />
         </li>
       </ul>
@@ -31,6 +32,7 @@
             style="margin-left: 10px"
             :nntxt="nntxt"
             :dirName="dirName"
+            :level="level"
           />
         </li>
       </ul>
@@ -45,6 +47,7 @@
             :monitor="monitor"
             :dirName="dirName"
             :dirId="info.id"
+            :level="level"
           />
         </li>
       </ul>
@@ -59,7 +62,7 @@ import NNtxtEntry from './NNtxtEntry.vue'
 
 export default Vue.extend({
   name: 'directory-component',
-  props: ['info', 'dirName'],
+  props: ['info', 'dirName', 'level'],
   components: {
     'nntxts-component': NNtxtEntry,
     'csv-entry': CSVEntry
