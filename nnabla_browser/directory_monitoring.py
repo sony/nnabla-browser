@@ -71,8 +71,8 @@ def initialize_send_queue(path_list, base_path):
     for path in path_list:
         send_info = {
             "path": os.path.relpath(path, base_path),
-            "action": "add",
-            "data": get_file_content(path)
+            "event": "directoryStructure",
+            "data": None
         }
         ret.append(send_info)
 
@@ -91,14 +91,14 @@ class Monitor(FileSystemEventHandler):
 
     def set_send_queue(self, abs_path, action):
 
-        data = get_file_content(abs_path) if action == "add" else None
+        data = get_file_content(abs_path) if action == "fileContent" else None
 
         if data == "":
             return
 
         send_info = {
             "path": os.path.relpath(abs_path, self.logdir),
-            "action": action,
+            "event": action,
             "data": data
         }
 
@@ -115,11 +115,11 @@ class Monitor(FileSystemEventHandler):
             abs_path,
         ]
 
-        self.set_send_queue(abs_path, "add")
+        self.set_send_queue(abs_path, "fileContent")
 
     def on_modified(self, event):
         abs_path = os.path.abspath(event.src_path)
-        self.set_send_queue(abs_path, "add")
+        self.set_send_queue(abs_path, "fileContent")
 
     def on_deleted(self, event):
         abs_path = os.path.relpath(event.src_path)

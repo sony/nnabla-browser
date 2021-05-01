@@ -11,7 +11,6 @@ import Header from '@/components/Header.vue'
 import Main from '@/components/Main.vue'
 import EditorWindowSize from '@/utils/editorWindowSize'
 import { SSE } from '@/utils/serverSentEventHelper'
-import * as pathOperator from '@/utils/pathOperator'
 import $ from 'jquery'
 
 export default Vue.extend({
@@ -29,25 +28,14 @@ export default Vue.extend({
       }
 
       eventSrc.addEventListener(
-        'add',
-        (event: Event) => {
-          const filePath = (event as any).lastEventId
+        'directoryStructure',
+        SSE.directoryStructureEventListener,
+        false
+      )
 
-          const fileType = pathOperator.getFileType(filePath)
-
-          if (fileType === null) return
-
-          let data
-          if (fileType === 'nntxtFiles') {
-            data = SSE.getGraphInfoFromNNtxt(event)
-          } else if (fileType === 'monitorFiles') {
-            data = SSE.getMonitorInfo(event)
-          } else if (fileType === 'csvResultFiles') {
-            data = SSE.getCsvResult(event)
-          }
-
-          this.$store.commit('addDirectoryInfo', { path: filePath, data })
-        },
+      eventSrc.addEventListener(
+        'fileContent',
+        SSE.fileContentEventListener,
         false
       )
 

@@ -1,8 +1,5 @@
-def sse_msg_encoding(_data, _event=None, _id=None):
-    if not _data:
-        return ""
-
-    maps = [("event", _event), ("id", _id), ("data", _data)]
+def sse_msg_encoding(data=None, event=None, id=None):
+    maps = [("event", event), ("id", id), ("data", data)]
 
     ret = []
     for k, v in maps:

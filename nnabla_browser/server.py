@@ -125,11 +125,16 @@ def create_subscribe_response(communication_interval, base_path):
                         with Lock():
                             info = send_manager[idx][0]
                             send_manager[idx] = send_manager[idx][1:]
-                            yield sse_msg_encoding(str(info["data"]),
-                                                   _id=str(info["path"]),
-                                                   _event=str(info["action"]))
+                            yield sse_msg_encoding(data=str(info["data"]),
+                                                   id=str(info["path"]),
+                                                   event=str(info["event"]))
+                        
+                        # After sending a data, wait a short time to prevent too much transfers.
+                        gevent.sleep(communication_interval)
+                    else:
+                        # If there is no data to send, wait a while.
+                        gevent.sleep(5)
 
-                    gevent.sleep(communication_interval)
 
             except GeneratorExit:
                 pass
@@ -140,32 +145,6 @@ def create_subscribe_response(communication_interval, base_path):
 
 
 def run_server(port):
-    # An implementation for hot reloading
-    # For only server it looks good, but server client connection especially SSE action is unstable.
-    # - Only one SSE connection is available. Once hot reloaded, sse connection is down and never recorvered.
-    #
-    #
-    # from werkzeug import run_simple
-
-    # use_reloader = False
-    # use_debugger = False
-    # if app.env == 'development':
-    #     app.debug = True
-    #     use_reloader = True
-    #     use_debugger = True
-
-    # app.wsgi_app = ProxyFix(app.wsgi_app)
-
-    # print("open server : {}".format(port))
-
-    # run_simple(
-    #     hostname="localhost",
-    #     port=int(port),
-    #     application=app,
-    #     use_reloader=use_reloader,
-    #     use_debugger=use_debugger,
-    # )
-
     print("open server : {}".format(port))
     app.wsgi_app = ProxyFix(app.wsgi_app)
     server = WSGIServer(("0.0.0.0", port), app)

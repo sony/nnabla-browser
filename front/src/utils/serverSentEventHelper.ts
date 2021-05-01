@@ -1,10 +1,10 @@
+
+import store from '@/store'
 import { Definitions } from '@/utils/definitions'
 import { range } from '@/utils/arrayOperator'
+import * as PathOperator from '@/utils/pathOperator'
 import * as Path from 'path'
-// import CSV from 'comma-separated-values'
 
-import parse from 'csv-parse'
-import { Layer, layer } from '@fortawesome/fontawesome-svg-core'
 import { graphInfo } from '@/store/modules/graphInfo'
 
 const GRID = Definitions.EDIT.GRID.SIZE
@@ -26,6 +26,12 @@ export interface NodeInfo extends LayerInfo {
   y: number;
   name: string;
   type: string;
+}
+
+interface SSEEvent extends Event {
+  lastEventId: string;
+  data: string;
+  event: string;
 }
 
 /***************************************/
@@ -309,41 +315,17 @@ class SSEHelper {
       .split('/')
       .pop()
       .split('.')[0]
-    // validation.result.csv , profile.result.csv
     switch (csvType) {
-      case 'validation':
-        return this.validationCsvData(event)
       case 'profile':
+        // profile.result.csv
         return this.profileCsvData(event)
       default:
         console.error('file category not support yet!')
     }
   }
 
-  validationCsvData (event: any) {
-    let keys: any[] = []
-    const values: any[] = []
-
-    const parser: parse.Parser = parse({ delimiter: ',' })
-    parser.on('readable', () => {
-      let record
-
-      // first row contains keys
-      record = parser.read()
-      keys = [...record.shift(), 'correctness']
-
-      while (1) {
-        record = parser.read()
-        if (!record) break
-        const [path, pred, label] = record
-        values.push([path, parseInt(pred), parseInt(label), pred === label])
-      }
-    })
-
-    return { keys, values, type: 'validation' }
-  }
-
-  profileCsvData (event: any) {
+  // todo support outputs from nnabla.utils.GraphProfiler
+  profileCsvData (event: Event) {
     const profile: any = {}
 
     // todo: fix parser
@@ -374,6 +356,34 @@ class SSEHelper {
     }
 
     store.commit('deleteChartData', o)
+  }
+
+  /** SSE event listeners **/
+  directoryStructureEventListener (event: Event) {
+    const filePath = (event as SSEEvent).lastEventId
+    console.log(event)
+
+    store.commit('updateDirectoryStructure', { path: filePath })
+  }
+
+  fileContentEventListener (event: Event) {
+    const filePath = (event as SSEEvent).lastEventId
+    console.log(event)
+
+    const fileType = PathOperator.getFileType(filePath)
+
+    if (fileType === null) return
+
+    let data
+    if (fileType === 'nntxtFiles') {
+      data = this.getGraphInfoFromNNtxt(event)
+    } else if (fileType === 'monitorFiles') {
+      data = this.getMonitorInfo(event)
+    } else if (fileType === 'csvResultFiles') {
+      data = this.getCsvResult(event)
+    }
+
+    store.commit('updateFileContent', { path: filePath, data })
   }
 }
 
