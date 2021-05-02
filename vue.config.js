@@ -5,7 +5,7 @@ module.exports = {
       entry: 'front/src/main.ts',
       template: 'front/public/index.html.tmpl',
       filename: 'index.html',
-      title: 'nnabla browser',
+      title: 'NNabla Browser',
       chunks: ['chunk-vendors', 'chunk-common', 'index']
     }
   },
