@@ -95,6 +95,8 @@ import { Link, Graph, GraphInfoState } from '@/store/types'
 import { NodeInfo } from '@/utils/serverEventHandler'
 
 const grid: number = Definitions.EDIT.GRID.SIZE
+const originPosX = grid * 2
+const originPosY = grid * 2
 
 // define this variable outside Vue data to prevent infinite updates
 const nextTransition: any[] = []
@@ -151,7 +153,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
     },
     linkLineStyleAttrs: styleHelper.createLinkLineStyle,
     originTransform: function () {
-      return `translate(${grid * 2}, ${grid * 2}) scale(1)`
+      return `translate(${originPosX}, ${originPosY}) scale(1)`
     }
   },
   updated: function () {
@@ -253,6 +255,10 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
             if (!svg) return
             const svgClientX = svg.getBoundingClientRect().x
             const svgClientY = svg.getBoundingClientRect().y
+            const svgClientH = svg.clientHeight
+
+            let parentH = 0
+            if (el.parentElement) parentH = el.parentElement.clientHeight
 
             const { graph, translateX, translateY, scale } = getTransformInfo(
               el
@@ -260,6 +266,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
             if (!graph) return
 
             if (event.ctrlKey) {
+              // zoom action
               let newScale = scale + event.deltaY * -0.002
               let transX = translateX
               let transY = translateY
@@ -280,10 +287,14 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
                 `translate(${transX}, ${transY}) scale(${newScale})`
               )
             } else {
+              // scroll action
+              const nextY = Math.max(
+                Math.min(translateY - event.deltaY, originPosY),
+                -svgClientH + parentH
+              )
               graph.setAttribute(
                 'transform',
-                `translate(${translateX}, ${translateY -
-                  event.deltaY}) scale(${scale})`
+                `translate(${translateX}, ${nextY}) scale(${scale})`
               )
             }
             setAssistAreaTransform(el, vNode)
