@@ -5,7 +5,6 @@ import zipfile
 from multiprocessing import Lock
 
 from google.protobuf import json_format, text_format
-from nnabla.logger import logger
 from nnabla.utils import nnabla_pb2
 from watchdog.events import FileSystemEventHandler
 
@@ -72,7 +71,7 @@ def initialize_send_queue(path_list, base_path):
         send_info = {
             "path": os.path.relpath(path, base_path),
             "event": "directoryStructure",
-            "data": None
+            "data": None,
         }
         ret.append(send_info)
 
@@ -81,7 +80,7 @@ def initialize_send_queue(path_list, base_path):
 
 class Monitor(FileSystemEventHandler):
     def __init__(self, logdir, send_manager, directory_manager, sse_updates):
-        super(Monitor, self).__init__()
+        super().__init__()
         self.logdir = logdir
 
         self.send_manager = send_manager
@@ -98,7 +97,7 @@ class Monitor(FileSystemEventHandler):
         send_info = {
             "path": os.path.relpath(abs_path, self.logdir),
             "event": action,
-            "data": data
+            "data": data,
         }
 
         with Lock():
@@ -108,7 +107,8 @@ class Monitor(FileSystemEventHandler):
             for i in range(num_access):
                 # check if the updated file is registerd as sse target.
                 if action == "fileContent" and not self.sse_updates[i].get(
-                        abs_path, False):
+                    abs_path, False
+                ):
                     continue
 
                 self.send_manager[i] = self.send_manager[i] + [
@@ -137,8 +137,9 @@ class Monitor(FileSystemEventHandler):
 
         if abs_path in self.directory_manager:
             index = self.directory_manager.index(abs_path)
-            self.directory_manager = self.directory_manager[:
-                                                            index] + self.directory_manager[
-                                                                index + 1:]
+            self.directory_manager = (
+                self.directory_manager[:index]
+                + self.directory_manager[index + 1 :]
+            )
 
         self.set_send_queue(abs_path, "delete")

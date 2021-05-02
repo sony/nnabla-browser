@@ -48,7 +48,9 @@ export default Vue.extend({
 
       eventSrc.addEventListener(
         'checkAlive',
-        () => { /** do nothing **/ },
+        () => {
+          /** do nothing **/
+        },
         false
       )
 

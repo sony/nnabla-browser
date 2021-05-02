@@ -76,7 +76,10 @@ function createNewSubTree (relPath: string, insertData: any) {
   return subTree
 }
 
-function searchParent (path: string, graph: DirectoryNode): [DirectoryNode, string] {
+function searchParent (
+  path: string,
+  graph: DirectoryNode
+): [DirectoryNode, string] {
   const split = path.split('/')
 
   let currentNode = graph
@@ -104,7 +107,12 @@ function findInsertIndex (list: { [key: string]: any }, name: string) {
   return insertIndex
 }
 
-function insertFile (parent: DirectoryNode, fileName: string, insertData: object, replace = false) {
+function insertFile (
+  parent: DirectoryNode,
+  fileName: string,
+  insertData: object,
+  replace = false
+) {
   const fileType = pathOperator.getFileType(fileName)
 
   if (fileType) {
@@ -131,17 +139,19 @@ function insertFile (parent: DirectoryNode, fileName: string, insertData: object
   }
 }
 
-function addDirectoryInfo (state: DirectoryInfoState, path: string, data: object, replace = false) {
+function addDirectoryInfo (
+  state: DirectoryInfoState,
+  path: string,
+  data: object,
+  replace = false
+) {
   const [parent, relPath] = searchParent(path, state.data)
 
   if (relPath.split('/').length === 1) {
     insertFile(parent, relPath, data, replace)
   } else {
     const subTree = createNewSubTree(relPath, data)
-    const insertIndex = findInsertIndex(
-      parent.children,
-      relPath.split('/')[0]
-    )
+    const insertIndex = findInsertIndex(parent.children, relPath.split('/')[0])
     parent.children.splice(insertIndex, 0, subTree)
   }
 }

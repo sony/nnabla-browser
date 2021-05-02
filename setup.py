@@ -14,14 +14,13 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     install_requires=[
-        # todo: fix versions?
         "gevent",
         "flask",
+        "flask_cors",
         "watchdog",
         "google",
         "protobuf",
-        "numpy",
-        "nnabla"
+        "numpy"
     ],
     python_requires=">=3.5",
     package_dir={

@@ -1,4 +1,4 @@
-class ServerSentEvent(object):
+class ServerSentEvent:
     def __init__(self, _data, _event=None, _id=None):
         self.data = _data
         self.event = _event

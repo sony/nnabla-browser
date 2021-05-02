@@ -5,15 +5,16 @@ import importlib
 import inspect
 import os
 import re
-from json import dumps
 
 import yaml
 
 # it`s too dirty...
 YAML_PATH = {
-    "functions":
-    os.path.join(os.path.abspath(os.path.dirname(__file__)), "nnabla_core",
-                 "functions.yaml")
+    "functions": os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        "nnabla_core",
+        "functions.yaml",
+    )
 }
 
 
@@ -62,10 +63,9 @@ def get_color(layer_name, default_color):
     return default_color
 
 
-def get_all_function_api_definitions(module_name,
-                                     default_color,
-                                     api_type,
-                                     ignores=None):
+def get_all_function_api_definitions(
+    module_name, default_color, api_type, ignores=None
+):
     module = importlib.import_module(module_name)
 
     def predicate(value):
@@ -97,12 +97,11 @@ def get_all_function_api_definitions(module_name,
                 inputs[param_name] = {"optional": "False"}
             else:
                 arguments[param_name] = {
-                    "default":
-                    "None" if param.default is None else str(param.default),
-                    "type":
-                    type(param.default).__name__,
-                    "optional":
-                    "True"
+                    "default": "None"
+                    if param.default is None
+                    else str(param.default),
+                    "type": type(param.default).__name__,
+                    "optional": "True",
                 }
 
         function_info = {
@@ -111,7 +110,7 @@ def get_all_function_api_definitions(module_name,
             "color": get_color(layer_name, default_color),
             "api_type": "{}_api".format(api_type),
             "inputs": inputs,
-            "arguments": arguments
+            "arguments": arguments,
         }
 
         ret[layer_name] = function_info
@@ -125,16 +124,20 @@ def parse_function_APIs():
         "nnabla.parametric_functions",
         "#6aa1bd",
         "parametric_functions",
-        ignores=["parametric_function_api"])
+        ignores=["parametric_function_api"],
+    )
 
     # nnabla.functions
-    functions = get_all_function_api_definitions("nnabla.function_bases",
-                                                 "#848484", "functions")
+    functions = get_all_function_api_definitions(
+        "nnabla.function_bases", "#848484", "functions"
+    )
 
     # remove deprecated (priority order is parametric_functions > functions > function_bases)
     functions.update(
-        get_all_function_api_definitions("nnabla.functions", "#d77b6a",
-                                         "functions"))
+        get_all_function_api_definitions(
+            "nnabla.functions", "#d77b6a", "functions"
+        )
+    )
     keys = list(functions.keys())
     for key in keys:
         if key in p_functions:
@@ -150,14 +153,14 @@ def create_variable_info():
             "layer_name": "InputVariable",
             "snake_name": "input",
             "color": "#000000",
-            "arguments": {}
+            "arguments": {},
         },
         "output": {
             "layer_name": "OutputVariable",
             "snake_name": "output",
             "color": "#000000",
-            "arguments": {}
-        }
+            "arguments": {},
+        },
     }
 
 
@@ -168,5 +171,5 @@ def parse_all():
     return {
         "parametric_functions": p_functions,
         "functions": functions,
-        "variables": variables
+        "variables": variables,
     }

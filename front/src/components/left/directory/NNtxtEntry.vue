@@ -48,7 +48,10 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
         httpClient.getFileContent(this.nntxtPath).then(res => {
           // Sent data by http is already json. Don't have convert it explicitly.
           const data = serverEventHandler.getGraphInfoFromNNtxt(res.data)
-          this.$store.commit('updateFileContent', { path: this.nntxtPath, data })
+          this.$store.commit('updateFileContent', {
+            path: this.nntxtPath,
+            data
+          })
 
           d3.select('#svg-links').style('opacity', 0)
 

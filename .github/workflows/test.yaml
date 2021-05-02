@@ -27,13 +27,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          pip install yapf
+          pip install black isort pylint
           npm install
-      - name: Check Python format
+      - name: Check format
         run: |
-          yapf -r -vv nnabla_browser
-      - name: Check TypeScript fomat
+          scripts/format
+      - name: Execute code linters
         run: |
-          npm run build
-          npm run lint
-          npm run format
+          scripts/lint

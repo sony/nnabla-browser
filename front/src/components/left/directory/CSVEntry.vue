@@ -55,7 +55,10 @@ export default Vue.extend({
           this.updateChart()
 
           // Activate subscribe to update in real-time.
-          httpClient.activateSSESubscribe(this.filePath, serverEventHandler.SSEConnectionId)
+          httpClient.activateSSESubscribe(
+            this.filePath,
+            serverEventHandler.SSEConnectionId
+          )
           this.$store.commit('activateSubscribe', { path: this.filePath })
         })
       } else {
@@ -64,7 +67,10 @@ export default Vue.extend({
         this.$store.commit('deleteFileContent', { path: this.filePath })
 
         // Deactivate subscribe
-        httpClient.deactivateSSESubscribe(this.filePath, serverEventHandler.SSEConnectionId)
+        httpClient.deactivateSSESubscribe(
+          this.filePath,
+          serverEventHandler.SSEConnectionId
+        )
         this.$store.commit('deactivateSubscribe', { path: this.filePath })
       }
     }

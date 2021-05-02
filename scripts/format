@@ -1,8 +1,16 @@
-#!/bin/bash -eux
+#!/bin/bash -ex
+
+if [[ -z $CI ]]; then
+  ISORT_ARG=""
+  BLACK_ARG=""
+else
+  ISORT_ARG="--check --diff"
+  BLACK_ARG="--check"
+fi
 
 # format Python
-yapf -r -vv -i nnabla_browser
-isort nnabla_browser
+black -l 80 $BLACK_ARG nnabla_browser
+isort -l 80 --profile black $ISORT_ARG nnabla_browser
 
 # format JS
-npx standard front 'front/**/*.js' --fix
+npm run format

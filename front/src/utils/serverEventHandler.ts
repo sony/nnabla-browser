@@ -1,4 +1,3 @@
-
 import store from '@/store'
 import { Definitions } from '@/utils/definitions'
 import { range } from '@/utils/arrayOperator'

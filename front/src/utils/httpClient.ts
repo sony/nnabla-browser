@@ -20,12 +20,24 @@ class HttpClient {
     return axios.post(this.BaseURL + 'file-content', { path })
   }
 
-  activateSSESubscribe (path: string, connectionId: number): Promise<AxiosResponse> {
-    return axios.post(this.BaseURL + 'activate-subscribe', { path, connectionId })
+  activateSSESubscribe (
+    path: string,
+    connectionId: number
+  ): Promise<AxiosResponse> {
+    return axios.post(this.BaseURL + 'activate-subscribe', {
+      path,
+      connectionId
+    })
   }
 
-  deactivateSSESubscribe (path: string, connectionId: number): Promise<AxiosResponse> {
-    return axios.post(this.BaseURL + 'deactivate-subscribe', { path, connectionId })
+  deactivateSSESubscribe (
+    path: string,
+    connectionId: number
+  ): Promise<AxiosResponse> {
+    return axios.post(this.BaseURL + 'deactivate-subscribe', {
+      path,
+      connectionId
+    })
   }
 }
 

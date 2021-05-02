@@ -5,8 +5,8 @@ from flask import jsonify
 from nnabla.logger import logger
 
 
-def encode_msg(data=None, event=None, id=None):
-    maps = [("event", event), ("id", id), ("data", data)]
+def encode_msg(data=None, event=None, idx=None):
+    maps = [("event", event), ("id", idx), ("data", data)]
 
     ret = []
     for k, v in maps:
@@ -23,24 +23,28 @@ def allow_cors(app, response):
     if app.env == "development":
         # allow CORS access to enalbe SSE between npm and flask
         response.headers[
-            'Access-Control-Allow-Origin'] = 'http://localhost:8000'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
+            "Access-Control-Allow-Origin"
+        ] = "http://localhost:8000"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
 
-def dict_to_response(dict):
-    return jsonify(json.dumps(dict))
+def dict_to_response(obj):
+    return jsonify(json.dumps(obj))
 
 
 def check_and_create_logdir(logdir):
     if not os.path.exists(logdir):
         ans = str(
             input(
-                "{} dose not exist. Would you like to create new directory? [y/N]:"
-                .format(logdir)))
+                "{} dose not exist. Would you like to create new directory? [y/N]:".format(
+                    logdir
+                )
+            )
+        )
         if ans.strip().lower() in ["y", "yes"]:
             os.makedirs(logdir)
         else:
-            logger.error("Directory dose not exist ({}).".format(logdir))
+            logger.error("Directory dose not exist %s.", logdir)
             return False
     return True
