@@ -15,8 +15,7 @@ const deleteDirectoryInfo = (
 ) => {
   if (
     fileType !== 'nntxtFiles' &&
-    fileType !== 'monitorFiles' &&
-    fileType !== 'csvResultFiles'
+    fileType !== 'monitorFiles'
   ) {
     return false
   }
@@ -37,8 +36,7 @@ const state: DirectoryInfoState = {
     children: [],
     name: '',
     nntxtFiles: [],
-    monitorFiles: [],
-    csvResultFiles: []
+    monitorFiles: []
   },
   activeFile: '',
   subscribedList: []
