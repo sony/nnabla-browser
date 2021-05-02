@@ -34,8 +34,9 @@ class NnablaCore {
   findFunction (layerType: string) {
     // workaround for some incorrect cases
     const target = layerType.toLowerCase()
-    return this.getAllFunctions()
-      .find((functionInfo: any) => functionInfo.layer_name.toLowerCase() === target)
+    return this.getAllFunctions().find(
+      (functionInfo: any) => functionInfo.layer_name.toLowerCase() === target
+    )
   }
 }
 

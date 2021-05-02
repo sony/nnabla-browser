@@ -10,7 +10,7 @@
       {{ defaultProps.layer_name }}
     </div>
     <a title="Refer documentation" :href="getDocUrl()" target="_blank">
-      link
+      <font-awesome-icon icon="external-link-alt" />
     </a>
   </div>
 </template>
@@ -18,6 +18,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Definitions } from '@/utils/definitions'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faExternalLinkAlt)
 
 export default Vue.extend({
   props: { defaultProps: Object },

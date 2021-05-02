@@ -2,7 +2,7 @@
   <div
     class="graphs-tab nnc-invoker"
     @click="click"
-    :class="{active: selected}"
+    :class="{ active: selected }"
   >
     <span class="graph-name">{{ graph.name }}</span>
   </div>
