@@ -6,7 +6,6 @@ import { editor } from './modules/editor'
 import { directoryInfo } from './modules/directoryInfo'
 import { graphInfo } from './modules/graphInfo'
 import { chartInfo } from './modules/chartInfo'
-import { csvInfo } from './modules/csvInfo'
 import { dialogueInfo } from './modules/dialogueInfo'
 
 // for debug
@@ -20,7 +19,6 @@ const store: StoreOptions<RootState> = {
     directoryInfo,
     graphInfo,
     chartInfo,
-    csvInfo,
     dialogueInfo
   }
 }

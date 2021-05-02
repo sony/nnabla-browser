@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import NNablaBrowser from '@/views/NnablaBrowser.vue'
+import NNablaBrowser from '@/views/NNablaBrowser.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)

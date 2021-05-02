@@ -50,8 +50,7 @@ function createNewNode (name: string): DirectoryNode {
     name: name,
     children: [],
     monitorFiles: [],
-    nntxtFiles: [],
-    csvResultFiles: []
+    nntxtFiles: []
   }
 }
 

@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import svgArea from '@/components/center/graph/SvgArea.vue'
+import SvgArea from '@/components/center/graph/SvgArea.vue'
 import snapShot from '@/components/tools/SnapShot.vue'
 import { Definitions } from '@/utils/definitions'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -77,7 +77,7 @@ export default Vue.extend<DataType, {}, {}, {}>({
   },
   components: {
     'graph-tab-list': GraphTabList,
-    'svg-area': svgArea,
+    'svg-area': SvgArea,
     'snap-shot': snapShot
   }
 })

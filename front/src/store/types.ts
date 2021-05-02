@@ -50,7 +50,6 @@ export interface DirectoryNode {
   children: DirectoryNode[];
   nntxtFiles: Array<{ name: string; data: any }>;
   monitorFiles: Array<{ name: string; data: any }>;
-  csvResultFiles: Array<{ name: string; data: any }>;
 }
 
 export interface DirectoryInfoState {
@@ -73,15 +72,6 @@ export interface DialogueInfoState {
   defaultStr: string;
   inputStr: string;
   inputDef: any; // after replace jquey by others, fix this.
-}
-
-/***************************************
- csvInfo
- ***************************************/
-
-export interface CsvInfoState {
-  path: string;
-  data: any;
 }
 
 /***************************************
