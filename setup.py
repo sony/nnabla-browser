@@ -20,7 +20,8 @@ setup(
         "watchdog",
         "google",
         "protobuf",
-        "numpy"
+        "numpy",
+        "pyyaml",
     ],
     python_requires=">=3.5",
     package_dir={
