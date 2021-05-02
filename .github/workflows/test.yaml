@@ -29,6 +29,9 @@ jobs:
           pip install -e .
           pip install black isort pylint
           npm install
+      - name: Check build
+        run: |
+          npm run build
       - name: Check format
         run: |
           scripts/format
