@@ -1,5 +1,5 @@
 <template>
-  <div class="csv-entry">
+  <div class="csv-entry" :class="{ active: checked }">
     <input
       type="checkbox"
       :id="filePath"
@@ -89,6 +89,20 @@ export default Vue.extend({
 </script>
 
 <style>
+.csv-entry {
+  height: 30px;
+  line-height: 30px;
+}
+
+.csv-entry:hover {
+  background: var(--color-gray2);
+}
+
+.csv-entry.active {
+  font-weight: bold;
+  color: var(--color-brand);
+}
+
 .csv-entry,
 label {
   cursor: pointer;

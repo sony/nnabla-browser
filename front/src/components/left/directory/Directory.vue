@@ -5,9 +5,11 @@
       @click="expand = !expand"
       v-if="info.name.length > 0"
     >
-      <font-awesome-icon icon="angle-down" v-if="expand" />
-      <font-awesome-icon icon="angle-right" v-if="!expand" />
-      {{ info.name }}
+      <div :style="{ 'padding-left': 12 * level + 'px' }">
+        <font-awesome-icon icon="angle-down" v-if="expand" />
+        <font-awesome-icon icon="angle-right" v-if="!expand" />
+        {{ info.name }}
+      </div>
     </div>
 
     <div class="components" :style="{ display: expand ? 'block' : 'none' }">
@@ -30,7 +32,7 @@
           :key="dirName + ':nntxt:' + key"
         >
           <nntxts-component
-            style="margin-left: 10px"
+            :style="{ 'padding-left': 12 * (level + 1) + 'px' }"
             :nntxt="nntxt"
             :dirName="dirName"
             :level="level"
@@ -44,7 +46,7 @@
           :key="dirName + ':monitor:' + key"
         >
           <csv-entry
-            style="margin-left: 10px"
+            :style="{ 'padding-left': 12 * (level + 1) + 'px' }"
             :monitor="monitor"
             :dirName="dirName"
             :dirId="info.id"
@@ -94,25 +96,30 @@ export default Vue.extend({
 })
 </script>
 
-<style>
+<style scoped>
 .branch {
   font-size: 14px;
 }
 
 .branch-name {
-  padding-top: 3px;
-  height: 24px;
+  height: 30px;
+  line-height: 30px;
   margin-top: 0;
   margin-left: 0;
   white-space: nowrap;
   font-weight: 600;
   cursor: pointer;
   user-select: none;
+  border-bottom: solid 1px var(--color-gray2);
+}
+
+.branch-name:hover {
+  background: var(--color-gray2);
 }
 
 ul {
   list-style: none;
-  padding-left: 20px;
+  padding: 0;
   margin: 0;
   text-align: left;
 }

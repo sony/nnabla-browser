@@ -1,5 +1,5 @@
 <template>
-  <div class="nntxt" :class="{ active: isSelected }" @click="clickEvent">
+  <div class="nntxt-entry" :class="{ active: isSelected }" @click="clickEvent">
     {{ nntxt.name }}
   </div>
 </template>
@@ -75,18 +75,20 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
 </script>
 
 <style>
-.nntxt {
+.nntxt-entry {
   cursor: pointer;
   user-select: none;
+  height: 30px;
+  line-height: 30px;
 }
 
-.nntxt.active {
+.nntxt-entry.active {
   font-weight: bold;
   cursor: pointer;
   color: var(--color-brand);
 }
 
-.nntxt:hover {
-  color: var(--color-brand);
+.nntxt-entry:hover {
+  background: var(--color-gray2);
 }
 </style>
