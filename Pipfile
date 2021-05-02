@@ -20,6 +20,8 @@ wheel = "*"
 yapf = "*"
 isort = "*"
 flask-cors = "*"
+pylint = "*"
+black = "*"
 
 [requires]
 python_version = "3.7"

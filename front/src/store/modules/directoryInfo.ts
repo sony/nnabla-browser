@@ -13,10 +13,7 @@ const deleteDirectoryInfo = (
   fileName: string,
   fileType: string
 ) => {
-  if (
-    fileType !== 'nntxtFiles' &&
-    fileType !== 'monitorFiles'
-  ) {
+  if (fileType !== 'nntxtFiles' && fileType !== 'monitorFiles') {
     return false
   }
 
