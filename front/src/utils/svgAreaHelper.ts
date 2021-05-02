@@ -8,10 +8,8 @@ import { NodeInfo } from '@/utils/serverEventHandler'
 const layerDef = Definitions.EDIT.LAYER
 
 class StyleHelper {
-  getDefaultComponent (type: string) {
-    return nnablaCore
-      .getAllFunctions()
-      .find((functionInfo: any) => functionInfo.layer_name === type)
+  getDefaultComponent (layerType: string) {
+    return nnablaCore.findFunction(layerType)
   }
 
   getLayerColor (layerType: string) {

@@ -52,9 +52,7 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
       return Object.keys(this.selectedLayer).length > 0
     },
     defaultProps: function () {
-      return nnablaCore
-        .getAllFunctions()
-        .find(x => x.layer_name === this.selectedLayer.type)
+      return nnablaCore.findFunction(this.selectedLayer.type)
     },
     layerParams: function () {
       const paramKey: string = this.selectedLayer.type.toLowerCase() + 'Param'
