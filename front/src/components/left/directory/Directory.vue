@@ -6,8 +6,16 @@
       v-if="info.name.length > 0"
     >
       <div :style="{ 'padding-left': 12 * level + 'px' }">
-        <font-awesome-icon icon="angle-down" v-if="expand" />
-        <font-awesome-icon icon="angle-right" v-if="!expand" />
+        <font-awesome-icon
+          icon="angle-down"
+          style="width: 10px"
+          v-if="expand"
+        />
+        <font-awesome-icon
+          icon="angle-right"
+          style="width: 10px"
+          v-if="!expand"
+        />
         {{ info.name }}
       </div>
     </div>
