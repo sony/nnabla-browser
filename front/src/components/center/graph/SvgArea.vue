@@ -126,9 +126,6 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
       nextTransition: []
     }
   },
-  created: function () {
-    this.nextTransition = []
-  },
   computed: {
     graphState: function () {
       return this.$store.state.graphInfo
@@ -165,6 +162,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
     } else {
       svgAreaOperator.adjustSvgSize()
     }
+    svgAreaOperator.adjustSvgSize()
 
     d3.select('#svg-links')
       .transition()
@@ -299,10 +297,8 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
     },
     createTransform: function (node: NodeInfo, index: number) {
       let ret = `translate(${node.x}, ${node.y})`
-
       if (Object.prototype.hasOwnProperty.call(this.prevGraph, 'nodes')) {
         const prev = this.prevGraph.nodes.find(x => x.name === node.name)
-
         if (prev) {
           this.nextTransition.push({ index, transform: ret })
           ret = `translate(${prev.x}, ${prev.y})`

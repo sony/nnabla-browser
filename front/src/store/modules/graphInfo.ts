@@ -7,10 +7,6 @@ const getActiveGraph = (state: GraphInfoState) => {
   return state.graphs[state.activeIndex.Graph] || {}
 }
 
-const updatePrevGraph = (state: GraphInfoState) => {
-  Vue.set(state, 'prevGraph', state.graphs[state.activeIndex.Graph] || {})
-}
-
 const state: GraphInfoState = {
   prevGraph: { nodes: [], links: [] },
   graphs: [],
@@ -22,22 +18,19 @@ const state: GraphInfoState = {
 
 const mutations: MutationTree<GraphInfoState> = {
   setGraphs: function (state, graphs) {
-    updatePrevGraph(state)
-
-    Vue.set(state, 'graphs', graphs)
-
+    state.prevGraph = state.graphs[state.activeIndex.Graph] || {}
+    state.graphs = graphs
     state.activeIndex.Graph = 0
     state.activeIndex.Layer = -1
   },
 
   resetGraphs: function (state) {
-    Vue.set(state, 'graphs', [])
-    updatePrevGraph(state)
+    state.graphs = []
+    state.prevGraph = { nodes: [], links: [] }
   },
 
   setActiveGraphIndex: function (state, index) {
-    updatePrevGraph(state)
-
+    state.prevGraph = state.graphs[state.activeIndex.Graph] || {}
     state.activeIndex.Graph = index
     state.activeIndex.Layer = -1
   },
