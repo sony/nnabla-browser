@@ -14,7 +14,7 @@
                 :cy="row"
                 r="1.0"
                 style="fill: var(--color-brand)"
-              ></circle>
+              />
             </g>
           </g>
         </g>
@@ -37,7 +37,7 @@
                 cy="0"
                 r="9"
                 opacity="0"
-              ></circle>
+              />
             </g>
             <g
               class="link-circles bottom"
@@ -51,7 +51,7 @@
                 r="9"
                 opacity="0"
                 @mousedown.stop="clickLayer(index)"
-              ></circle>
+              />
             </g>
             <rect
               class="layer-rect"
@@ -78,7 +78,7 @@
             :stroke-width="linkLineStyleAttrs['stroke-width']"
             :fill="linkLineStyleAttrs['fill']"
             :d="createLinkLineContext(link)"
-          ></path>
+          />
         </g>
       </g>
     </svg>
@@ -96,13 +96,15 @@ import { NodeInfo } from '@/utils/serverEventHandler'
 
 const grid: number = Definitions.EDIT.GRID.SIZE
 
+// define this variable outside Vue data to prevent infinite updates
+const nextTransition: any[] = []
+
 /***************************************
  interface
  ***************************************/
 
 interface DataType {
   isLargeScale: boolean;
-  nextTransition: any[];
 }
 
 interface ComputedType {
@@ -122,8 +124,7 @@ interface ComputedType {
 export default Vue.extend<DataType, {}, ComputedType, {}>({
   data: function () {
     return {
-      isLargeScale: true,
-      nextTransition: []
+      isLargeScale: true
     }
   },
   computed: {
@@ -156,9 +157,10 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
   updated: function () {
     svgAreaOperator.registerMouseEvent()
 
-    if (this.nextTransition.length > 0) {
-      svgAreaOperator.graphExchangeTransition(this.nextTransition)
-      this.nextTransition = []
+    if (nextTransition.length > 0) {
+      svgAreaOperator.graphExchangeTransition(nextTransition)
+      // clear existing items
+      nextTransition.length = 0
     } else {
       svgAreaOperator.adjustSvgSize()
     }
@@ -300,7 +302,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
       if (Object.prototype.hasOwnProperty.call(this.prevGraph, 'nodes')) {
         const prev = this.prevGraph.nodes.find(x => x.name === node.name)
         if (prev) {
-          // this.nextTransition.push({ index, transform: ret })
+          nextTransition.push({ index, transform: ret })
           ret = `translate(${prev.x}, ${prev.y})`
         }
       }
