@@ -32,4 +32,8 @@ export default Vue.extend({
 })
 </script>
 
-<style></style>
+<style>
+.navbar-tab {
+  user-select: none;
+}
+</style>

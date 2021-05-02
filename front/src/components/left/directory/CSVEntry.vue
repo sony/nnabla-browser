@@ -92,5 +92,6 @@ export default Vue.extend({
 .csv-entry,
 label {
   cursor: pointer;
+  user-select: none;
 }
 </style>

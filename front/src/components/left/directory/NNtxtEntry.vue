@@ -77,11 +77,13 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
 <style>
 .nntxt {
   cursor: pointer;
+  user-select: none;
 }
 
 .nntxt.active {
   font-weight: bold;
   cursor: pointer;
+  color: var(--color-brand);
 }
 
 .nntxt:hover {

@@ -5,7 +5,8 @@
       @click="expand = !expand"
       v-if="info.name.length > 0"
     >
-      <img class="icon-small" :src="expandArrow" />
+      <font-awesome-icon icon="angle-down" v-if="expand" />
+      <font-awesome-icon icon="angle-right" v-if="!expand" />
       {{ info.name }}
     </div>
 
@@ -59,6 +60,10 @@
 import Vue from 'vue'
 import CSVEntry from './CSVEntry.vue'
 import NNtxtEntry from './NNtxtEntry.vue'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faAngleRight, faAngleDown } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faAngleRight, faAngleDown)
 
 export default Vue.extend({
   name: 'directory-component',
@@ -102,6 +107,7 @@ export default Vue.extend({
   white-space: nowrap;
   font-weight: 600;
   cursor: pointer;
+  user-select: none;
 }
 
 ul {
