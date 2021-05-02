@@ -1,5 +1,5 @@
 <template>
-  <div class="csv-entry" :class="{ active: checked }">
+  <div class="csv-entry" :class="{ active: checked }" v-on:click="clickArea">
     <input
       type="checkbox"
       :id="filePath"
@@ -42,6 +42,10 @@ export default Vue.extend({
 
         this.$store.commit(mutation, chartData)
       }
+    },
+    clickArea: function () {
+      this.checked = !this.checked
+      this.changeEvent()
     },
     changeEvent: function () {
       if (this.checked) {
