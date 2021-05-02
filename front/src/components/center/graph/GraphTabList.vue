@@ -5,7 +5,7 @@
       :graph="graph"
       :key="path + '-' + index"
       :index="index"
-      :class="{ active: index === activeGraphIndex }"
+      :selected="index === activeGraphIndex"
       @history="command => $emit('history', command)"
     />
   </div>
@@ -27,7 +27,7 @@ export default Vue.extend({
       return this.$store.state.graphInfo.nntxtPath
     },
     activeGraphIndex: function () {
-      return this.$store.state.graphInfo.activeGraphIndex
+      return this.$store.state.graphInfo.activeIndex.graph
     }
   }
 })

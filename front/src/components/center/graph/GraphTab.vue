@@ -1,5 +1,9 @@
 <template>
-  <div class="graphs-tab nnc-invoker" @click="clicked">
+  <div
+    class="graphs-tab nnc-invoker"
+    @click="click"
+    :class="{active: selected}"
+  >
     <span class="graph-name">{{ graph.name }}</span>
   </div>
 </template>
@@ -11,15 +15,17 @@ import Vue from 'vue'
 interface GraphTabProps {
   graph: Graph;
   index: number;
+  selected: boolean;
 }
 
 export default Vue.extend<{}, {}, {}, GraphTabProps>({
   props: {
     graph: Object,
-    index: Number
+    index: Number,
+    selected: Boolean
   },
   methods: {
-    clicked: function () {
+    click: function () {
       this.$store.commit('setActiveGraphIndex', this.index)
     },
     keydown: (e: KeyboardEvent) => {

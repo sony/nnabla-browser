@@ -27,7 +27,7 @@ export interface GraphInfoState {
   prevGraph: Graph;
   graphs: Graph[];
   nntxtPath: string;
-  activeIndex: { Graph: number; Layer: number };
+  activeIndex: { graph: number; layer: number };
   isDragging: boolean;
   assistAreaSize: { x: number; y: number };
 }

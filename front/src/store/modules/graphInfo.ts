@@ -1,27 +1,25 @@
-import Vue from 'vue'
 import { Module, MutationTree, GetterTree } from 'vuex'
-
 import { RootState, GraphInfoState } from '@/store/types'
 
 const getActiveGraph = (state: GraphInfoState) => {
-  return state.graphs[state.activeIndex.Graph] || {}
+  return state.graphs[state.activeIndex.graph] || {}
 }
 
 const state: GraphInfoState = {
   prevGraph: { nodes: [], links: [] },
   graphs: [],
   nntxtPath: '',
-  activeIndex: { Graph: -1, Layer: -1 },
+  activeIndex: { graph: -1, layer: -1 },
   isDragging: false,
   assistAreaSize: { x: 0, y: 0 }
 }
 
 const mutations: MutationTree<GraphInfoState> = {
   setGraphs: function (state, graphs) {
-    state.prevGraph = state.graphs[state.activeIndex.Graph] || {}
+    state.prevGraph = state.graphs[state.activeIndex.graph] || {}
     state.graphs = graphs
-    state.activeIndex.Graph = 0
-    state.activeIndex.Layer = -1
+    state.activeIndex.graph = 0
+    state.activeIndex.layer = -1
   },
 
   resetGraphs: function (state) {
@@ -30,9 +28,9 @@ const mutations: MutationTree<GraphInfoState> = {
   },
 
   setActiveGraphIndex: function (state, index) {
-    state.prevGraph = state.graphs[state.activeIndex.Graph] || {}
-    state.activeIndex.Graph = index
-    state.activeIndex.Layer = -1
+    state.prevGraph = state.graphs[state.activeIndex.graph] || {}
+    state.activeIndex.graph = index
+    state.activeIndex.layer = -1
   },
 
   setNNtxtPath: function (state, path) {
@@ -44,7 +42,7 @@ const mutations: MutationTree<GraphInfoState> = {
   },
 
   setActiveLayerIndex: function (state, index) {
-    state.activeIndex.Layer = index
+    state.activeIndex.layer = index
   },
 
   setNodePosition: function (state, { index, x, y }) {
@@ -82,7 +80,7 @@ const getters: GetterTree<GraphInfoState, RootState> = {
 
   activeLayer: (state, getters) => {
     if (Object.prototype.hasOwnProperty.call(getters.activeGraph, 'nodes')) {
-      return getters.activeGraph.nodes[state.activeIndex.Layer] || {}
+      return getters.activeGraph.nodes[state.activeIndex.layer] || {}
     } else {
       return {}
     }
