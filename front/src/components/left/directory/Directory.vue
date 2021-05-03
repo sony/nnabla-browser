@@ -1,26 +1,32 @@
 <template>
-  <div class="branch" v-if="checkDisplay">
+  <div
+    v-if="checkDisplay"
+    class="branch"
+  >
     <div
+      v-if="info.name.length > 0"
       class="branch-name"
       @click="expand = !expand"
-      v-if="info.name.length > 0"
     >
       <div :style="{ 'padding-left': 12 * level + 'px' }">
         <font-awesome-icon
+          v-if="expand"
           icon="angle-down"
           style="width: 10px"
-          v-if="expand"
         />
         <font-awesome-icon
+          v-if="!expand"
           icon="angle-right"
           style="width: 10px"
-          v-if="!expand"
         />
         {{ info.name }}
       </div>
     </div>
 
-    <div class="components" :style="{ display: expand ? 'block' : 'none' }">
+    <div
+      class="components"
+      :style="{ display: expand ? 'block' : 'none' }"
+    >
       <ul>
         <li
           v-for="(childInfo, key) in info.children"
@@ -28,7 +34,7 @@
         >
           <directory-component
             :info="childInfo"
-            :dirName="(level > 0 ? dirName + '/' : '') + childInfo.name"
+            :dir-name="(level > 0 ? dirName + '/' : '') + childInfo.name"
             :level="level + 1"
           />
         </li>
@@ -42,7 +48,7 @@
           <nntxts-component
             :style="{ 'padding-left': 12 * (level + 1) + 'px' }"
             :nntxt="nntxt"
-            :dirName="dirName"
+            :dir-name="dirName"
             :level="level"
           />
         </li>
@@ -56,8 +62,8 @@
           <csv-entry
             :style="{ 'padding-left': 12 * (level + 1) + 'px' }"
             :monitor="monitor"
-            :dirName="dirName"
-            :dirId="info.id"
+            :dir-name="dirName"
+            :dir-id="info.id"
             :level="level"
           />
         </li>
@@ -67,20 +73,23 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { faAngleDown, faAngleRight } from '@fortawesome/free-solid-svg-icons'
 import CSVEntry from './CSVEntry.vue'
 import NNtxtEntry from './NNtxtEntry.vue'
+import Vue from 'vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faAngleRight, faAngleDown } from '@fortawesome/free-solid-svg-icons'
 
 library.add(faAngleRight, faAngleDown)
 
 export default Vue.extend({
-  name: 'directory-component',
-  props: ['info', 'dirName', 'level'],
+  name: 'DirectoryComponent',
   components: {
     'nntxts-component': NNtxtEntry,
     'csv-entry': CSVEntry
+  },
+  props: ['info', 'dirName', 'level'],
+  data: function () {
+    return { expand: true }
   },
   computed: {
     expandArrow: function (): string {
@@ -97,9 +106,6 @@ export default Vue.extend({
     activeTabName: function (): string {
       return this.$store.state.editor.activeTabName.toLowerCase()
     }
-  },
-  data: function () {
-    return { expand: true }
   }
 })
 </script>

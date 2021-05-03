@@ -2,14 +2,14 @@
   <div>
     <directory-root
       class="app-row"
-      v-bind:class="{ graph: isGraph, monitoring: isMonitoring }"
+      :class="{ graph: isGraph, monitoring: isMonitoring }"
     />
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import DirectoryRoot from './directory/DirectoryRoot.vue'
+import Vue from 'vue'
 
 export default Vue.extend({
   components: {

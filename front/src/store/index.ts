@@ -1,12 +1,11 @@
-import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
 import { RootState } from './types'
-
-import { editor } from './modules/editor'
-import { directoryInfo } from './modules/directoryInfo'
-import { graphInfo } from './modules/graphInfo'
+import Vue from 'vue'
 import { chartInfo } from './modules/chartInfo'
 import { dialogueInfo } from './modules/dialogueInfo'
+import { directoryInfo } from './modules/directoryInfo'
+import { editor } from './modules/editor'
+import { graphInfo } from './modules/graphInfo'
 
 // for debug
 Vue.config.devtools = true

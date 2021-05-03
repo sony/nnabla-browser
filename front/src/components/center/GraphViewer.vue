@@ -1,7 +1,11 @@
 <template>
   <div>
     <graph-tab-list @history="command => $emit('history', command)" />
-    <div v-if="activeFileTag" class="tool-icon-container" @click="capSwitch">
+    <div
+      v-if="activeFileTag"
+      class="tool-icon-container"
+      @click="capSwitch"
+    >
       <font-awesome-icon
         v-show="!snapshotLoding"
         icon="camera"
@@ -13,9 +17,9 @@
         class="fa-spin func-icon"
       />
       <snap-shot
-        :capElement="snapshotSwitch"
-        containerId="network-container"
-        :imageName="activeFileTag"
+        :cap-element="snapshotSwitch"
+        container-id="network-container"
+        :image-name="activeFileTag"
         @snapshot-finish="snapshotLoding = !$event"
       />
     </div>
@@ -26,13 +30,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import SvgArea from '@/components/center/graph/SvgArea.vue'
-import snapShot from '@/components/tools/SnapShot.vue'
+import { faCamera, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { Definitions } from '@/utils/definitions'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faSpinner, faCamera } from '@fortawesome/free-solid-svg-icons'
 import GraphTabList from '@/components/center/graph/GraphTabList.vue'
+import SvgArea from '@/components/center/graph/SvgArea.vue'
+import Vue from 'vue'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import snapShot from '@/components/tools/SnapShot.vue'
 
 library.add(faSpinner, faCamera)
 
@@ -45,6 +49,11 @@ interface DataType {
 }
 
 export default Vue.extend<DataType, {}, {}, {}>({
+  components: {
+    'graph-tab-list': GraphTabList,
+    'svg-area': SvgArea,
+    'snap-shot': snapShot
+  },
   props: {
     historyInfo: Object
   },
@@ -74,11 +83,6 @@ export default Vue.extend<DataType, {}, {}, {}>({
       this.snapshotLoding = true
       this.snapshotSwitch = !this.snapshotSwitch
     }
-  },
-  components: {
-    'graph-tab-list': GraphTabList,
-    'svg-area': SvgArea,
-    'snap-shot': snapShot
   }
 })
 </script>

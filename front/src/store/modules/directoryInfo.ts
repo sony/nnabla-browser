@@ -1,9 +1,8 @@
-import { Module, MutationTree, ActionTree, GetterTree } from 'vuex'
-import { RootState, DirectoryNode, DirectoryInfoState } from '@/store/types'
-
-import * as pathOperator from '@/utils/pathOperator'
-import * as d3 from 'd3'
 import * as Path from 'path'
+import * as d3 from 'd3'
+import * as pathOperator from '@/utils/pathOperator'
+import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
+import { DirectoryInfoState, DirectoryNode, RootState } from '@/store/types'
 
 // monotonic incremental counter to assign unique id
 let nodeCounter = 0
@@ -211,7 +210,7 @@ const actions: ActionTree<DirectoryInfoState, RootState> = {
 }
 
 const getters: GetterTree<DirectoryInfoState, RootState> = {
-  isSubscribe: (state, getters) => (path: string): boolean => {
+  isSubscribe: (state) => (path: string): boolean => {
     return state.subscribedList.includes(path)
   }
 }

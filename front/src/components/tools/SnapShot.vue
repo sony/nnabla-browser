@@ -1,12 +1,12 @@
 <template>
-  <div></div>
+  <div />
 </template>
 
 <script lang="ts">
+import { Definitions } from '@/utils/definitions'
 import Vue from 'vue'
 import html2canvas from 'html2canvas'
 import { saveAs } from 'file-saver'
-import { Definitions } from '@/utils/definitions'
 
 interface DataType {
   element: any;
@@ -17,6 +17,11 @@ interface DataType {
 }
 
 export default Vue.extend({
+  props: {
+    capElement: Boolean,
+    containerId: String,
+    imageName: String
+  },
   data: function (): DataType {
     return {
       element: null,
@@ -30,11 +35,6 @@ export default Vue.extend({
     originTransform: function (): string {
       return `translate(${this.GRID * 2}, ${this.GRID * 2}) scale(1)`
     }
-  },
-  props: {
-    capElement: Boolean,
-    containerId: String,
-    imageName: String
   },
   watch: {
     capElement: {

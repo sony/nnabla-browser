@@ -1,16 +1,19 @@
 <template>
-  <div class="nntxt-entry" :class="{ active: isSelected }" @click="clickEvent">
+  <div
+    class="nntxt-entry"
+    :class="{ active: isSelected }"
+    @click="clickEvent"
+  >
     {{ nntxt.name }}
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import * as d3 from 'd3'
+import { GraphInfoState, RootState } from '@/store/types'
+import Vue from 'vue'
 import { httpClient } from '@/utils/httpClient'
 import { serverEventHandler } from '@/utils/serverEventHandler'
-
-import { RootState, GraphInfoState } from '@/store/types'
 
 interface NNtxtCouputedType {
   isSelected: boolean;

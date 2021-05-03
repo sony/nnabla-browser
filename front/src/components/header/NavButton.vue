@@ -16,17 +16,17 @@ import Vue from 'vue'
 
 export default Vue.extend({
   props: ['tabName'],
+  computed: {
+    activeTabName: function () {
+      return this.$store.state.editor.activeTabName
+    }
+  },
   methods: {
     changeActiveTab: function (tabName: string) {
       this.$store.commit('changeActiveTab', tabName)
       Vue.nextTick(function () {
         EditorWindowSize.init()
       })
-    }
-  },
-  computed: {
-    activeTabName: function () {
-      return this.$store.state.editor.activeTabName
     }
   }
 })

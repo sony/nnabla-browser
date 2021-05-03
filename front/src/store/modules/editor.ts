@@ -1,5 +1,5 @@
+import { EditorState, RootState } from '@/store/types'
 import { Module, MutationTree } from 'vuex'
-import { RootState, EditorState } from '@/store/types'
 
 const state: EditorState = {
   activeTabName: 'graph'

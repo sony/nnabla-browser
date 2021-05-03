@@ -9,18 +9,18 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import LeftMenu from '@/components/LeftMenu.vue'
 import CenterContent from '@/components/CenterContent.vue'
+import LeftMenu from '@/components/LeftMenu.vue'
+import Vue from 'vue'
 
 export default Vue.extend({
-  props: {
-    historyInfo: Object,
-    zoomInfo: Object
-  },
   components: {
     'left-menu': LeftMenu,
     'center-content': CenterContent
+  },
+  props: {
+    historyInfo: Object,
+    zoomInfo: Object
   }
 })
 </script>

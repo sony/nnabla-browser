@@ -1,32 +1,36 @@
 <template>
   <div>
     <div
-      class="property"
       v-for="(value, key) in filteredParams"
       :key="value + '-' + key"
+      class="property"
     >
       <div class="content">
-        <div class="name">{{ key }}</div>
+        <div class="name">
+          {{ key }}
+        </div>
         <component
           :is="selectComponent(value)"
-          :defaultParam="value"
-          :layerParam="getLayerParam(key)"
+          :default-param="value"
+          :layer-param="getLayerParam(key)"
           :class="'value' + (value.error ? ' warning' : '')"
           :title="value.error"
         />
       </div>
     </div>
     <div
-      class="property"
       v-for="(value, key) in ioInfos.outputShape"
       :key="value + '-' + key"
+      class="property"
     >
       <div class="content">
-        <div class="name">{{ key }}</div>
+        <div class="name">
+          {{ key }}
+        </div>
         <component
           :is="'prop-text'"
-          :defaultParam="{}"
-          :layerParam="'[' + value.join(', ') + ']'"
+          :default-param="{}"
+          :layer-param="'[' + value.join(', ') + ']'"
           :class="'value'"
         />
       </div>
@@ -35,19 +39,31 @@
 </template>
 
 <script lang="ts">
-import PropText from '@/components/left/property/PropText.vue'
 import PropBool from '@/components/left/property/PropBool.vue'
+import PropText from '@/components/left/property/PropText.vue'
 import Vue from 'vue'
 
 export default Vue.extend({
+  components: {
+    'prop-text': PropText,
+    'prop-bool': PropBool
+  },
   props: {
     defaultParams: Object,
     layerParams: Object,
     ioInfos: Object
   },
-  components: {
-    'prop-text': PropText,
-    'prop-bool': PropBool
+  computed: {
+    filteredParams: function () {
+      const values: any = {}
+      const keys = Object.keys(this.defaultParams)
+      for (let i = 0; i < keys.length; ++i) {
+        if (keys[i] !== 'outputs' && keys[i] !== 'n_outputs') {
+          values[keys[i]] = this.defaultParams[keys[i]]
+        }
+      }
+      return values
+    }
   },
   methods: {
     getLayerParam: function (key: string): string | null {
@@ -71,18 +87,6 @@ export default Vue.extend({
         }
       }
       return 'prop-text'
-    }
-  },
-  computed: {
-    filteredParams: function () {
-      const values: any = {}
-      const keys = Object.keys(this.defaultParams)
-      for (let i = 0; i < keys.length; ++i) {
-        if (keys[i] !== 'outputs' && keys[i] !== 'n_outputs') {
-          values[keys[i]] = this.defaultParams[keys[i]]
-        }
-      }
-      return values
     }
   }
 })

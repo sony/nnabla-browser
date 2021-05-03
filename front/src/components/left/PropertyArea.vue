@@ -1,15 +1,20 @@
 <template>
-  <div class="app-row" style="height: 50%; bottom: 0;">
+  <div
+    class="app-row"
+    style="height: 50%; bottom: 0;"
+  >
     <div class="property-area">
-      <div class="title">Layer Property</div>
+      <div class="title">
+        Layer Property
+      </div>
       <div v-if="isLayerSelected">
-        <layer-type :defaultProps="defaultProps" />
+        <layer-type :default-props="defaultProps" />
         <layer-properties
           class="app-row app-scroll-x app-scroll-y"
           style="top: 88px; bottom: 0;"
-          :defaultParams="{ ...defaultProps.inputs, ...defaultProps.arguments }"
-          :layerParams="layerParams"
-          :ioInfos="ioInfos"
+          :default-params="{ ...defaultProps.inputs, ...defaultProps.arguments }"
+          :layer-params="layerParams"
+          :io-infos="ioInfos"
         />
       </div>
     </div>
@@ -17,10 +22,10 @@
 </template>
 
 <script lang="ts">
+import LayerProperties from '@/components/left/property/LayerProperties.vue'
+import LayerType from '@/components/left/property/LayerType.vue'
 import Vue from 'vue'
 import { nnablaCore } from '@/utils/nnablaApi'
-import LayerType from '@/components/left/property/LayerType.vue'
-import LayerProperties from '@/components/left/property/LayerProperties.vue'
 
 // type definition
 // todo: refactoring
@@ -44,6 +49,10 @@ interface ComputedPropertyArea {
 }
 
 export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
+  components: {
+    'layer-type': LayerType,
+    'layer-properties': LayerProperties
+  },
   computed: {
     selectedLayer: function () {
       return this.$store.getters.activeLayer
@@ -64,10 +73,6 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
         outputShape: this.selectedLayer.outputShape
       }
     }
-  },
-  components: {
-    'layer-type': LayerType,
-    'layer-properties': LayerProperties
   }
 })
 </script>

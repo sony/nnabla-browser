@@ -1,13 +1,17 @@
 <template>
-  <div class="csv-entry" :class="{ active: checked }" v-on:click="clickArea">
+  <div
+    class="csv-entry"
+    :class="{ active: checked }"
+    @click="clickArea"
+  >
     <label :for="dirName + '/' + monitor.name">{{ monitor.name }}</label>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { serverEventHandler } from '@/utils/serverEventHandler'
 import { httpClient } from '@/utils/httpClient'
+import { serverEventHandler } from '@/utils/serverEventHandler'
 
 export default Vue.extend({
   props: ['monitor', 'dirName', 'dirId', 'level'],
@@ -16,6 +20,16 @@ export default Vue.extend({
       checked: this.monitor.isView || false,
       loaded: false,
       filePath: (this.level > 0 ? this.dirName + '/' : '') + this.monitor.name
+    }
+  },
+  watch: {
+    monitor: {
+      handler: function () {
+        if (this.checked) {
+          this.updateChart()
+        }
+      },
+      deep: true
     }
   },
   methods: {
@@ -71,16 +85,6 @@ export default Vue.extend({
         )
         this.$store.commit('deactivateSubscribe', { path: this.filePath })
       }
-    }
-  },
-  watch: {
-    monitor: {
-      handler: function () {
-        if (this.checked) {
-          this.updateChart()
-        }
-      },
-      deep: true
     }
   }
 })

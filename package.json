@@ -10,8 +10,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "eslint front/src --ext .vue,.ts,.js,.jsx",
-    "format": "prettier-eslint --jsx-bracket-same-line --write \"./front/**/*.{vue,ts,js,jsx,json}\""
+    "lint": "eslint front/src --ext .vue,.ts,.js,.jsx --config .eslintrc.js",
+    "format": "eslint front/src --ext .vue,.ts,.js,.jsx --config .eslintrc.js --fix"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
@@ -51,7 +51,7 @@
     "@vue/cli-service": "^4.1.1",
     "@vue/eslint-config-standard": "^5.1.2",
     "@vue/eslint-config-typescript": "^5.0.2",
-    "eslint": "^6.7.2",
+    "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",

@@ -1,16 +1,15 @@
 // todo:  must be refactored
 
+import $ from 'jquery'
 import store from '@/store'
 import { svgAreaOperator } from './svgAreaHelper'
-
-import $ from 'jquery'
 
 const EditorWindowSize = {
   init: function () {
     this.changeSize()
   },
   bind: function () {
-    $(window).resize(e => {
+    $(window).resize(() => {
       this.changeSize()
     })
   },

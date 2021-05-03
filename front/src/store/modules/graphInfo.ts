@@ -1,5 +1,5 @@
-import { Module, MutationTree, GetterTree } from 'vuex'
-import { RootState, GraphInfoState } from '@/store/types'
+import { GetterTree, Module, MutationTree } from 'vuex'
+import { GraphInfoState, RootState } from '@/store/types'
 
 const getActiveGraph = (state: GraphInfoState) => {
   return state.graphs[state.activeIndex.graph] || {}

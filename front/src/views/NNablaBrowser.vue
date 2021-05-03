@@ -6,17 +6,32 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import $ from 'jquery'
+import EditorWindowSize from '@/utils/editorWindowSize'
 import Header from '@/components/Header.vue'
 import Main from '@/components/Main.vue'
-import EditorWindowSize from '@/utils/editorWindowSize'
+import Vue from 'vue'
 import { serverEventHandler } from '@/utils/serverEventHandler'
-import $ from 'jquery'
 
 let eventSrc: EventSource
 
 export default Vue.extend({
   components: { Header, Main },
+  mounted: function () {
+    EditorWindowSize.init()
+    EditorWindowSize.bind()
+
+    $.ajaxSetup({
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      xhrFields: { withCredentials: true }
+    })
+
+    this.setupSSE()
+
+    if (this.$route.query.mode === 'sai') {
+      document.documentElement.style.setProperty('--color-brand', '#D2017A')
+    }
+  },
   methods: {
     // Server sent event.
     setupSSE: function () {
@@ -57,21 +72,6 @@ export default Vue.extend({
       eventSrc.onerror = () => {
         eventSrc.close()
       }
-    }
-  },
-  mounted: function () {
-    EditorWindowSize.init()
-    EditorWindowSize.bind()
-
-    $.ajaxSetup({
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      xhrFields: { withCredentials: true }
-    })
-
-    this.setupSSE()
-
-    if (this.$route.query.mode === 'sai') {
-      document.documentElement.style.setProperty('--color-brand', '#D2017A')
     }
   }
 })

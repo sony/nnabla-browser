@@ -1,14 +1,26 @@
 <template>
-  <div id="network-container" v-zoom>
-    <svg id="network-editor" tabindex="0">
+  <div
+    id="network-container"
+    v-zoom
+  >
+    <svg
+      id="network-editor"
+      tabindex="0"
+    >
       <transition name="fade">
         <g
-          class="assist-dots"
-          id="svg-assist-dots"
           v-show="isDragging && isLargeScale"
+          id="svg-assist-dots"
+          class="assist-dots"
         >
-          <g v-for="(col, key) in assistAreaX" :key="key">
-            <g v-for="(row, key) in assistAreaY" :key="key">
+          <g
+            v-for="(col, key_col) in assistAreaX"
+            :key="key_col"
+          >
+            <g
+              v-for="(row, key_row) in assistAreaY"
+              :key="key_row"
+            >
               <circle
                 :cx="col"
                 :cy="row"
@@ -19,18 +31,32 @@
           </g>
         </g>
       </transition>
-      <g id="graph-container" :transform="originTransform">
-        <g class="layers" id="svg-layers">
+      <g
+        id="graph-container"
+        :transform="originTransform"
+      >
+        <g
+          id="svg-layers"
+          class="layers"
+        >
           <g
-            class="layer"
             v-for="(node, index) in activeGraph.nodes"
             :id="'layer-' + index"
             :key="$store.state.graphInfo.nntxtPath + '-layer-' + index"
+            class="layer"
             :transform="createTransform(node, index)"
             @mousedown="clickLayer(index)"
           >
-            <g class="link-circles top" v-if="node.type !== 'InputVariable'">
-              <circle class="linker" cx="100" cy="0" r="3.5"></circle>
+            <g
+              v-if="node.type !== 'InputVariable'"
+              class="link-circles top"
+            >
+              <circle
+                class="linker"
+                cx="100"
+                cy="0"
+                r="3.5"
+              />
               <circle
                 class="hide-linker top"
                 cx="100"
@@ -40,10 +66,15 @@
               />
             </g>
             <g
-              class="link-circles bottom"
               v-if="node.type !== 'OutputVariable'"
+              class="link-circles bottom"
             >
-              <circle class="linker" cx="100" cy="40" r="3.5"></circle>
+              <circle
+                class="linker"
+                cx="100"
+                cy="40"
+                r="3.5"
+              />
               <circle
                 class="hide-linker bottom"
                 cx="100"
@@ -57,23 +88,36 @@
               class="layer-rect"
               v-bind="getNodeAttr()"
               :style="getNodeStyle(node)"
-            ></rect>
-            <text :style="getCapitalStyle()" v-bind="getCapitalAttr()">
+            />
+            <text
+              :style="getCapitalStyle()"
+              v-bind="getCapitalAttr()"
+            >
               {{ node.type.substring(0, 1) }}
             </text>
-            <g class="text-component" v-bind="getTextComponentStyle()">
-              <text :style="getTextStyle()" v-bind="getTextAttr()">
+            <g
+              class="text-component"
+              v-bind="getTextComponentStyle()"
+            >
+              <text
+                :style="getTextStyle()"
+                v-bind="getTextAttr()"
+              >
                 {{ node.name }}
               </text>
             </g>
           </g>
         </g>
 
-        <g class="links" id="svg-links" style="opacity: 0">
+        <g
+          id="svg-links"
+          class="links"
+          style="opacity: 0"
+        >
           <path
             v-for="(link, index) in activeGraph.links"
-            :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
             :id="'link-' + index"
+            :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
             :stroke="linkLineStyleAttrs.stroke"
             :stroke-width="linkLineStyleAttrs['stroke-width']"
             :fill="linkLineStyleAttrs['fill']"
@@ -86,12 +130,11 @@
 </template>
 
 <script lang="ts">
-import { svgAreaOperator, styleHelper, Vector2D } from '@/utils/svgAreaHelper'
-import { Definitions } from '@/utils/definitions'
-import Vue, { VNode } from 'vue'
 import * as d3 from 'd3'
-
-import { Link, Graph, GraphInfoState } from '@/store/types'
+import { Graph, GraphInfoState, Link } from '@/store/types'
+import { Vector2D, styleHelper, svgAreaOperator } from '@/utils/svgAreaHelper'
+import Vue, { VNode } from 'vue'
+import { Definitions } from '@/utils/definitions'
 import { NodeInfo } from '@/utils/serverEventHandler'
 
 const grid: number = Definitions.EDIT.GRID.SIZE
@@ -124,65 +167,6 @@ interface ComputedType {
 /***************************************/
 
 export default Vue.extend<DataType, {}, ComputedType, {}>({
-  data: function () {
-    return {
-      isLargeScale: true
-    }
-  },
-  computed: {
-    graphState: function () {
-      return this.$store.state.graphInfo
-    },
-    activeGraph: function () {
-      return this.$store.getters.activeGraph
-    },
-    prevGraph: function () {
-      return this.graphState.prevGraph
-    },
-    isDragging: function () {
-      return this.graphState.isDragging
-    },
-    assistAreaSize: function () {
-      return this.graphState.assistAreaSize
-    },
-    assistAreaX: function () {
-      return d3.range(0, this.assistAreaSize.x, grid)
-    },
-    assistAreaY: function () {
-      return d3.range(0, this.assistAreaSize.y, grid)
-    },
-    linkLineStyleAttrs: styleHelper.createLinkLineStyle,
-    originTransform: function () {
-      return `translate(${originPosX}, ${originPosY}) scale(1)`
-    }
-  },
-  updated: function () {
-    svgAreaOperator.registerMouseEvent()
-
-    if (nextTransition.length > 0) {
-      svgAreaOperator.graphExchangeTransition(nextTransition)
-      // clear existing items
-      nextTransition.length = 0
-    } else {
-      svgAreaOperator.adjustSvgSize()
-    }
-    svgAreaOperator.adjustSvgSize()
-
-    d3.select('#svg-links')
-      .transition()
-      .delay(500)
-      .duration(500)
-      .style('opacity', 1)
-  },
-  watch: {
-    activeGraph: function (val, oldVal) {
-      if (val !== oldVal) {
-        const graphContainer = document.getElementById('graph-container')
-        if (!graphContainer) return
-        graphContainer.setAttribute('transform', this.originTransform)
-      }
-    }
-  },
   directives: {
     zoom: {
       inserted: function (el, binding, vNode: VNode) {
@@ -303,6 +287,65 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
         )
       }
     }
+  },
+  data: function () {
+    return {
+      isLargeScale: true
+    }
+  },
+  computed: {
+    graphState: function () {
+      return this.$store.state.graphInfo
+    },
+    activeGraph: function () {
+      return this.$store.getters.activeGraph
+    },
+    prevGraph: function () {
+      return this.graphState.prevGraph
+    },
+    isDragging: function () {
+      return this.graphState.isDragging
+    },
+    assistAreaSize: function () {
+      return this.graphState.assistAreaSize
+    },
+    assistAreaX: function () {
+      return d3.range(0, this.assistAreaSize.x, grid)
+    },
+    assistAreaY: function () {
+      return d3.range(0, this.assistAreaSize.y, grid)
+    },
+    linkLineStyleAttrs: styleHelper.createLinkLineStyle,
+    originTransform: function () {
+      return `translate(${originPosX}, ${originPosY}) scale(1)`
+    }
+  },
+  watch: {
+    activeGraph: function (val, oldVal) {
+      if (val !== oldVal) {
+        const graphContainer = document.getElementById('graph-container')
+        if (!graphContainer) return
+        graphContainer.setAttribute('transform', this.originTransform)
+      }
+    }
+  },
+  updated: function () {
+    svgAreaOperator.registerMouseEvent()
+
+    if (nextTransition.length > 0) {
+      svgAreaOperator.graphExchangeTransition(nextTransition)
+      // clear existing items
+      nextTransition.length = 0
+    } else {
+      svgAreaOperator.adjustSvgSize()
+    }
+    svgAreaOperator.adjustSvgSize()
+
+    d3.select('#svg-links')
+      .transition()
+      .delay(500)
+      .duration(500)
+      .style('opacity', 1)
   },
   methods: {
     clickLayer: function (index: number) {

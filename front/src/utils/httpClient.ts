@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from 'axios'
-import * as Path from 'path'
 
 class HttpClient {
   BaseURL: string

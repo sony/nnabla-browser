@@ -2,17 +2,20 @@
   <div class="monitoring">
     <div
       v-for="metrics in dataCollection"
-      v-bind:key="metrics.options.plugins.title.text"
+      :key="metrics.options.plugins.title.text"
     >
-      <series-chart :chart-data="metrics.data" :options="metrics.options" />
+      <series-chart
+        :chart-data="metrics.data"
+        :options="metrics.options"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import SeriesChart from '@/components/center/SeriesChart.vue'
 import { ChartDatum } from '@/store/types'
+import SeriesChart from '@/components/center/SeriesChart.vue'
+import Vue from 'vue'
 
 const COLORS = [
   '#3498db',

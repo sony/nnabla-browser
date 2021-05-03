@@ -1,17 +1,16 @@
-import mixins from './mixin'
-
 import {
   Bar,
-  HorizontalBar,
+  Bubble,
   Doughnut,
+  HorizontalBar,
   Line,
   Pie,
   PolarArea,
   Radar,
-  Bubble,
   Scatter,
   generateChart
 } from './chartjs'
+import mixins from './mixin'
 
 export {
   Bar,

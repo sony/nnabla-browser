@@ -1,6 +1,8 @@
 <template>
   <div>
-    <div class="title">Directory Tree</div>
+    <div class="title">
+      Directory Tree
+    </div>
     <div
       class="app-row app-scroll-x app-scroll-y"
       style="top: 40px; bottom: 0;"
@@ -16,8 +18,8 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import Directory from './Directory.vue'
+import Vue from 'vue'
 
 export default Vue.extend({
   components: {

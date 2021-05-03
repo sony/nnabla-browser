@@ -4,7 +4,7 @@
       <nav-button tab-name="graph" />
       <nav-button tab-name="monitoring" />
     </div>
-    <div class="editor-navbar-center"></div>
+    <div class="editor-navbar-center" />
   </div>
 </template>
 

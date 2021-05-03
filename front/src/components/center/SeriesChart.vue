@@ -1,6 +1,6 @@
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue'
 import { Line, mixins } from '../chart'
+import Vue, { VueConstructor } from 'vue'
 import Chart from 'chart.js'
 
 const { reactiveProp } = mixins

@@ -1,8 +1,8 @@
 <template>
   <div
     class="graphs-tab nnc-invoker"
-    @click="click"
     :class="{ active: selected }"
+    @click="click"
   >
     <span class="graph-name">{{ graph.name }}</span>
   </div>

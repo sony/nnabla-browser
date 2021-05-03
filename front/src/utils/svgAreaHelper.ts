@@ -1,9 +1,8 @@
-import { Definitions } from '@/utils/definitions'
-import store from '@/store'
-import { nnablaCore } from './nnablaApi'
 import * as d3 from 'd3'
-
+import { Definitions } from '@/utils/definitions'
 import { NodeInfo } from '@/utils/serverEventHandler'
+import { nnablaCore } from './nnablaApi'
+import store from '@/store'
 
 const layerDef = Definitions.EDIT.LAYER
 
@@ -457,13 +456,13 @@ class SvgAreaOperator {
   }
 
   getLayerClicked () {
-    return (event: any, d: any) => {
+    return (event: any) => {
       this.layerFocusing(event.currentTarget.parentNode)
     }
   }
 
   getLayerMouseOver () {
-    return (event: any, d: any) => {
+    return (event: any) => {
       const elem = event.currentTarget
       d3.select(elem)
         .select('rect')
@@ -473,7 +472,7 @@ class SvgAreaOperator {
   }
 
   getLayerMouseOut () {
-    return (event: any, d: any) => {
+    return (event: any) => {
       const elem = event.currentTarget
       d3.select(elem)
         .select('rect')
@@ -484,7 +483,7 @@ class SvgAreaOperator {
 
   // for link event
   getLinkDragStart () {
-    return (event: any, d: any) => {
+    return (event: any) => {
       const elem = event.sourceEvent.currentTarget
 
       this.layerFocusing(elem.parentNode.parentNode)
@@ -506,7 +505,7 @@ class SvgAreaOperator {
   }
 
   getLinkDragging () {
-    return (event: any, d: any) => {
+    return (event: any) => {
       let [x, y] = d3.pointer(event)
 
       if (event.dx) {
@@ -540,7 +539,7 @@ class SvgAreaOperator {
   }
 
   getLinkDragEnd () {
-    return (event: any, d: any) => {
+    return (event: any) => {
       const elem = event.currentTarget
 
       const m = this.drawingLinkMemory

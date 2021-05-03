@@ -1,5 +1,8 @@
 <template>
-  <div class="center-content" id="centerContent">
+  <div
+    id="centerContent"
+    class="center-content"
+  >
     <keep-alive>
       <graph
         v-if="selectedEditTab"
@@ -12,18 +15,18 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import MonitoringComponent from '@/components/center/Monitoring.vue'
 import NetworkComponent from '@/components/center/GraphViewer.vue'
+import Vue from 'vue'
 
 export default Vue.extend({
-  props: {
-    historyInfo: Object,
-    zoomInfo: Object
-  },
   components: {
     graph: NetworkComponent,
     monitoring: MonitoringComponent
+  },
+  props: {
+    historyInfo: {},
+    zoomInfo: {}
   },
   computed: {
     // todo: change to ":is" binding from this rule base switching after re-implementing history and zoom

@@ -1,7 +1,13 @@
 <template>
-  <div class="left-content" id="leftContent">
+  <div
+    id="leftContent"
+    class="left-content"
+  >
     <div class="left-component">
-      <div class="app-row" style="top: 0; bottom: 0;">
+      <div
+        class="app-row"
+        style="top: 0; bottom: 0;"
+      >
         <directory-tree />
         <property-area v-show="isPropertyAreaShow" />
       </div>
@@ -10,9 +16,9 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import DirectoryTree from '@/components/left/DirectoryTree.vue'
 import PropertyArea from '@/components/left/PropertyArea.vue'
+import Vue from 'vue'
 
 export default Vue.extend({
   components: {

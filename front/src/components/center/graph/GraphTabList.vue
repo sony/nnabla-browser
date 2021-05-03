@@ -2,8 +2,8 @@
   <div class="graph-tab-list">
     <graph-tab
       v-for="(graph, index) in graphs"
-      :graph="graph"
       :key="path + '-' + index"
+      :graph="graph"
       :index="index"
       :selected="index === activeGraphIndex"
       @history="command => $emit('history', command)"

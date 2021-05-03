@@ -1,5 +1,5 @@
+import { ChartInfoState, RootState } from '@/store/types'
 import { Module, MutationTree } from 'vuex'
-import { RootState, ChartInfoState } from '@/store/types'
 
 const state: ChartInfoState = {
   charts: []

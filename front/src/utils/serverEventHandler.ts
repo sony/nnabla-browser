@@ -1,7 +1,7 @@
-import store from '@/store'
-import { Definitions } from '@/utils/definitions'
 import * as PathOperator from '@/utils/pathOperator'
 import { LayerInfo, LayerRegister, Parameter } from '@/utils/layerRegister'
+import { Definitions } from '@/utils/definitions'
+import store from '@/store'
 
 const GRID = Definitions.EDIT.GRID.SIZE
 
