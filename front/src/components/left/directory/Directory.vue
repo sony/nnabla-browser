@@ -115,7 +115,6 @@ export default Vue.extend({
   margin-top: 0;
   margin-left: 0;
   white-space: nowrap;
-  font-weight: 600;
   cursor: pointer;
   user-select: none;
   border-bottom: solid 1px var(--color-gray2);
