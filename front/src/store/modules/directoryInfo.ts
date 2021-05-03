@@ -11,7 +11,7 @@ const deleteDirectoryInfo = (
   parent: DirectoryNode,
   fileName: string,
   fileType: string
-) => {
+): boolean => {
   if (fileType !== 'nntxtFiles' && fileType !== 'monitorFiles') {
     return false
   }
@@ -48,7 +48,7 @@ function createNewNode (name: string): DirectoryNode {
   }
 }
 
-function createNewSubTree (relPath: string, insertData: any) {
+function createNewSubTree (relPath: string, insertData: any): DirectoryNode {
   const split = relPath.split('/')
 
   const subTree = createNewNode(split[0])
@@ -92,9 +92,9 @@ function searchParent (
 
   return [currentNode, split.slice(i, split.length).join('/')]
 }
-function findInsertIndex (list: { [key: string]: any }, name: string) {
+function findInsertIndex (list: Array<{ name: string }>, name: string): number {
   let insertIndex = list.findIndex(
-    (x: any) => x.name.toLowerCase() > name.toLowerCase()
+    (x): boolean => x.name.toLowerCase() > name.toLowerCase()
   )
   insertIndex = insertIndex > -1 ? insertIndex : list.length
 
@@ -106,7 +106,7 @@ function insertFile (
   fileName: string,
   insertData: object,
   replace = false
-) {
+): void {
   const fileType = pathOperator.getFileType(fileName)
 
   if (fileType) {
@@ -138,7 +138,7 @@ function addDirectoryInfo (
   path: string,
   data: object,
   replace = false
-) {
+): void {
   const [parent, relPath] = searchParent(path, state.data)
 
   if (relPath.split('/').length === 1) {
@@ -150,7 +150,7 @@ function addDirectoryInfo (
   }
 }
 
-function deleteFileOrDirectoryPath (state: DirectoryInfoState, path: string) {
+function deleteFileOrDirectoryPath (state: DirectoryInfoState, path: string): void {
   const [parent, relPath] = searchParent(path, state.data)
 
   const fileType = pathOperator.getFileType(relPath)

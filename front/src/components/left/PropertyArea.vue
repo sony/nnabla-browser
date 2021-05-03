@@ -37,14 +37,14 @@ interface Selectedlayer {
   outputShape: string;
   type: string;
   length: number;
-  [key: string]: any;
+  [key: string]: object | string | number;
 }
 
 interface ComputedPropertyArea {
   selectedLayer: Selectedlayer;
   isLayerSelected: boolean;
   defaultProps: object;
-  layerParams: object;
+  layerParams: object | string | number;
   ioInfos: object;
 }
 

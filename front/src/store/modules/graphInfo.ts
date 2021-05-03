@@ -1,7 +1,8 @@
 import { GetterTree, Module, MutationTree } from 'vuex'
-import { GraphInfoState, RootState } from '@/store/types'
+import { Graph, GraphInfoState, Link, RootState } from '@/store/types'
+import { NodeInfo } from '@/utils/serverEventHandler'
 
-const getActiveGraph = (state: GraphInfoState) => {
+const getActiveGraph = (state: GraphInfoState): Graph => {
   return state.graphs[state.activeIndex.graph] || {}
 }
 
@@ -78,15 +79,14 @@ const mutations: MutationTree<GraphInfoState> = {
 const getters: GetterTree<GraphInfoState, RootState> = {
   activeGraph: getActiveGraph,
 
-  activeLayer: (state, getters) => {
+  activeLayer: (state, getters): NodeInfo => {
     if (Object.prototype.hasOwnProperty.call(getters.activeGraph, 'nodes')) {
       return getters.activeGraph.nodes[state.activeIndex.layer] || {}
-    } else {
-      return {}
     }
+    return {} as NodeInfo
   },
 
-  activeLinks: (state, getters) => (id: number) => {
+  activeLinks: (state, getters) => (id: number): Link[] => {
     const ret = []
     for (const index in getters.activeGraph.links) {
       const link = getters.activeGraph.links[index]

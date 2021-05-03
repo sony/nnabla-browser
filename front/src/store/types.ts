@@ -2,8 +2,8 @@ import { NodeInfo } from '@/utils/serverEventHandler'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RootState {
-  editor: any;
-  graphInfo: any;
+  editor: EditorState;
+  graphInfo: GraphInfoState;
 }
 
 /***************************************
