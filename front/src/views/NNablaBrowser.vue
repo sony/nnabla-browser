@@ -69,6 +69,10 @@ export default Vue.extend({
     })
 
     this.setupSSE()
+
+    if (this.$route.query.mode === 'sai') {
+      document.documentElement.style.setProperty('--color-brand', '#D2017A')
+    }
   }
 })
 </script>
