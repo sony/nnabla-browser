@@ -347,7 +347,6 @@ class ServerEventHandler {
   createSSEConnectionIdListener () {
     return (event: Event) => {
       this.SSEConnectionId = parseInt((event as ServerEvent).data)
-      console.log(this.SSEConnectionId)
     }
   }
 
