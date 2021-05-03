@@ -236,11 +236,11 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
               `translate(${a}, ${b}) scale(${scale})`
             )
           }
-          el.onmouseup = function (ev) {
+          el.onmouseup = function () {
             el.onmousemove = null
             setAssistAreaTransform(el, vNode)
           }
-          el.onmouseleave = function (ev) {
+          el.onmouseleave = function () {
             el.onmousemove = null
           }
         }

@@ -10,7 +10,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint front/src/**/*.{vue,ts,js,jsx,json} & eslint front/src --ext .vue,.ts,.js,.jsx",
+    "lint": "eslint front/src --ext .vue,.ts,.js,.jsx",
     "format": "prettier-eslint --jsx-bracket-same-line --write \"./front/**/*.{vue,ts,js,jsx,json}\""
   },
   "dependencies": {

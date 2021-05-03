@@ -12,6 +12,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import SeriesChart from '@/components/center/SeriesChart.vue'
+import { ChartDatum } from '@/store/types'
 
 const COLORS = [
   '#3498db',
@@ -35,7 +36,7 @@ export default Vue.extend({
       const ret = []
       for (const i in charts) {
         const title = charts[i].name
-        const datasets = charts[i].data.map((d: any) => {
+        const datasets = charts[i].data.map((d: ChartDatum) => {
           const data = []
           for (let j = 0; j < d.values.t.length; ++j) {
             data.push({ x: d.values.t[j], y: d.values.v[j] })

@@ -148,7 +148,7 @@ class SvgAreaOperator {
     }
   }
 
-  getTranslateCoordinate (node: any) {
+  getTranslateCoordinate (node: HTMLElement) {
     // str == "translate(x, y)"
     const str = d3.select(node).attr('transform')
 
@@ -160,8 +160,8 @@ class SvgAreaOperator {
     return [parseInt(x), parseInt(y)]
   }
 
-  getLayerIndex (layerNode: any) {
-    return layerNode.id.split('-')[1]
+  getLayerIndex (layerNode: HTMLElement) {
+    return Number(layerNode.id.split('-')[1])
   }
 
   getLayerPosition (layerIndex: number): Vector2D {
@@ -224,7 +224,7 @@ class SvgAreaOperator {
       .remove()
   }
 
-  layerFocusing (node: any) {
+  layerFocusing (node: HTMLElement) {
     if (typeof this.focusLayerRect !== 'undefined') {
       // if the same layer is clicked again, do nothing
       if (
@@ -259,7 +259,7 @@ class SvgAreaOperator {
 
   createLinkLineContext (v1: Vector2D, v2: Vector2D) {
     const offset = layerDef.GRID / 2
-    let points: any[] = []
+    let points: number[][] = []
 
     const context = d3.path()
 
@@ -310,7 +310,7 @@ class SvgAreaOperator {
   getLayerDragStart (
     selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>
   ) {
-    return (event: any, elem: any) => {
+    return (event: any, elem: HTMLElement) => {
       const index = selection.nodes().indexOf(elem)
 
       this.layerFocusing(elem)
@@ -359,7 +359,7 @@ class SvgAreaOperator {
     const createLinkLineContext = this.createLinkLineContext
     const getCorrectPosition = this.getCorrectPosition
 
-    return (event: any, elem: any) => {
+    return (event: any, elem: HTMLElement) => {
       // remove auxiliary layer
       d3.select('#svg-layers')
         .select('rect#auxiliary-layer')
@@ -402,7 +402,7 @@ class SvgAreaOperator {
   getLayerDragEnd (
     selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, any>
   ) {
-    return (event: any, elem: any) => {
+    return (event: any, elem: HTMLElement) => {
       const index = selection.nodes().indexOf(elem)
 
       let [x, y] = this.getTranslateCoordinate(elem)
@@ -458,8 +458,7 @@ class SvgAreaOperator {
 
   getLayerClicked () {
     return (event: any, d: any) => {
-      const elem = event.currentTarget
-      this.layerFocusing(elem.parentNode)
+      this.layerFocusing(event.currentTarget.parentNode)
     }
   }
 
@@ -469,7 +468,7 @@ class SvgAreaOperator {
       d3.select(elem)
         .select('rect')
         .attr('fill-opacity', '0.5')
-      this.drawingLinkMemory.destination = this.getLayerIndex(elem) // todo: fix
+      this.drawingLinkMemory.destination = this.getLayerIndex(elem)
     }
   }
 

@@ -30,7 +30,7 @@ export default Vue.extend({
 
       eventSrc.addEventListener(
         'uniqueId',
-        serverEventHandler.createSSEConnectionIdListener(),
+        serverEventHandler.createSSEConnectionIdListener,
         false
       )
 
@@ -42,7 +42,7 @@ export default Vue.extend({
 
       eventSrc.addEventListener(
         'fileContent',
-        serverEventHandler.createFileContentEventListener(),
+        serverEventHandler.createFileContentEventListener,
         false
       )
 

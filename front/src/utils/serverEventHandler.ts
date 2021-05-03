@@ -1,22 +1,9 @@
 import store from '@/store'
 import { Definitions } from '@/utils/definitions'
-import { range } from '@/utils/arrayOperator'
 import * as PathOperator from '@/utils/pathOperator'
-import { layer } from '@fortawesome/fontawesome-svg-core'
+import { LayerInfo, LayerRegister, Parameter } from '@/utils/layerRegister'
 
 const GRID = Definitions.EDIT.GRID.SIZE
-
-/***************************************
- interface
- ***************************************/
-// todo: move interface definitions to other file.
-interface LayerInfo {
-  input: string[];
-  index: number;
-  depth: number[];
-  visitCount: number;
-  parameters: any; // todo
-}
 
 export interface NodeInfo extends LayerInfo {
   x: number;
@@ -25,105 +12,15 @@ export interface NodeInfo extends LayerInfo {
   type: string;
 }
 
-interface ServerEvent extends Event {
+export interface ServerEvent extends Event {
   lastEventId: string;
   data: string;
   event: string;
 }
 
-/***************************************/
-class LayerRegister {
-  counter = 0
-  layers: { [key: string]: LayerInfo } = {}
-  links: any[] = [] // todo
-  allParameters: any // todo
-
-  initialize (params?: any) {
-    this.counter = 0
-    this.layers = {}
-    this.links = []
-    this.allParameters = params
-  }
-
-  addLayer (layer: any, depth: number): [LayerInfo, boolean] {
-    if (!Object.prototype.hasOwnProperty.call(this.layers, layer.name)) {
-      // first visit
-      let visitCount = 1
-      const parameters = []
-      const buffers = []
-
-      // collect all function parameters
-      for (const _input of layer.input) {
-        const varIndex = this.allParameters.findIndex(
-          (x: { name: string }) => x.name === _input
-        )
-        if (varIndex > -1) {
-          parameters.push(this.allParameters[varIndex])
-        } else {
-          // check deprecated input
-          if (buffers.findIndex(x => x === _input) > -1) visitCount++
-
-          buffers.push(_input)
-        }
-      }
-
-      this.layers[layer.name] = {
-        ...layer,
-        input: buffers,
-        index: this.counter++,
-        depth: [depth],
-        visitCount,
-        parameters
-      }
-    } else {
-      // visit again
-      this.layers[layer.name].depth.push(depth)
-      this.layers[layer.name].visitCount++
-    }
-
-    const retLayer = this.layers[layer.name]
-
-    return [retLayer, retLayer.input.length <= retLayer.visitCount]
-  }
-
-  addLink (link: any) {
-    this.links.push(link)
-  }
-
-  getDepthToLayers () {
-    const depth2layers: { [key: number]: any } = {}
-    Object.values(this.layers).forEach(layer => {
-      const depthList = layer.depth
-      const maxDepth = Math.max(...depthList)
-
-      if (layer.depth.length > 1) {
-        const minDepth = Math.min(...depthList)
-
-        for (const i of range(minDepth, maxDepth, true)) {
-          const slice = depthList.filter(x => x - 1 < i).length
-          if (Object.prototype.hasOwnProperty.call(depth2layers, i)) {
-            depth2layers[i].needSlice += slice
-          } else {
-            depth2layers[i] = { needSlice: slice, layers: [] }
-          }
-        }
-      }
-
-      if (Object.prototype.hasOwnProperty.call(depth2layers, maxDepth)) {
-        depth2layers[maxDepth].layers.push({
-          ...layer,
-          depth: maxDepth
-        })
-      } else {
-        depth2layers[maxDepth] = {
-          needSlice: 0,
-          layers: [{ ...layer, depth: maxDepth }]
-        }
-      }
-    })
-
-    return depth2layers
-  }
+export interface Variable {
+  dataName: string;
+  variableName: string;
 }
 
 const layerRegister = new LayerRegister()
@@ -136,7 +33,7 @@ class ServerEventHandler {
     this.layerRegister = layerRegister
   }
 
-  createDummyInputLayer (variable: any) {
+  createDummyInputLayer (variable: Variable) {
     return {
       inputParam: null,
       input: [],
@@ -146,7 +43,7 @@ class ServerEventHandler {
     }
   }
 
-  createDummyOutputLayer (variable: any) {
+  createDummyOutputLayer (variable: Variable) {
     return {
       outputParam: null,
       input: [variable.variableName],
@@ -160,19 +57,19 @@ class ServerEventHandler {
     return { x: GRID * needSlice * 15, y: GRID * depth * 4 }
   }
 
-  setupGetNodeAndLinkRecursive = (functions: any, outputVariables: any) => {
-    const recursive = (sourceLayer: any, sourceDepthFromRoot: any) => {
+  setupGetNodeAndLinkRecursive (functions: any, outputVariables: Variable[]) {
+    const recursive = (sourceLayer: LayerInfo, sourceDepthFromRoot: number) => {
       for (const sourceOutput of sourceLayer.output) {
         // find user define output
         const outputVariableIndex = outputVariables.findIndex(
-          (v: any) => v.variableName === sourceOutput
+          (v: Variable) => v.variableName === sourceOutput
         )
         if (outputVariableIndex > -1) {
           const tmpLayer = this.createDummyOutputLayer(
             outputVariables[outputVariableIndex]
           )
 
-          const [layer, _] = this.layerRegister.addLayer(
+          const [layer] = this.layerRegister.addLayer(
             tmpLayer,
             sourceDepthFromRoot + 1
           )
@@ -239,7 +136,7 @@ class ServerEventHandler {
       })
 
       const allParameters = network.variable.filter(
-        (x: any) => x.type === 'Parameter'
+        (x: Parameter) => x.type === 'Parameter'
       )
 
       this.layerRegister.initialize(allParameters)
@@ -256,7 +153,7 @@ class ServerEventHandler {
       ]
 
       for (const inputLayer of inputLayers) {
-        const [layer, _] = this.layerRegister.addLayer(inputLayer, 0)
+        const [layer] = this.layerRegister.addLayer(inputLayer, 0)
         recursive(layer, 0)
       }
 
@@ -292,7 +189,7 @@ class ServerEventHandler {
     return graphInfoArray
   }
 
-  getMonitorInfo (data: any) {
+  getMonitorInfo (data: string) {
     const split = data.split('\n')
 
     const times = []
@@ -307,47 +204,9 @@ class ServerEventHandler {
     return { t: times, v: values }
   }
 
-  getCsvData (filepath: any, data: any) {
-    const csvType = filepath
-      .split('/')
-      .pop()
-      .split('.')[0]
-    switch (csvType) {
-      case 'profile':
-        // profile.result.csv
-        return this.getProfileCsvData(data)
-      default:
-        console.error('file category not support yet!')
-    }
-  }
-
-  // todo support outputs from nnabla.utils.GraphProfiler
-  getProfileCsvData (data: Event) {
-    const profile: any = {}
-
-    // todo: fix parser
-
-    // const parser = parse({ delimiter: ',' })
-    // parser.on('readable', () => {
-
-    // const csv = new CSV(event.data, {
-    //   cast: false
-    // })
-    // const csvArr = csv.parse()
-    // //  in profile.result.csv, profile data starts at 6th row, and 12 rows contain profile attributes
-    // const dataArr = csvArr.splice(6, csvArr.length - 12)
-    // //  get data from profile.result.csv and store in an object
-    // csvArr.filter((x: string) => x !== '').forEach((y: any) => { profile[y[0]] = y[1] })
-    // profile.data = dataArr
-    // profile.type = 'profile'
-    return profile
-  }
-
   /** SSE event listeners **/
-  createSSEConnectionIdListener () {
-    return (event: Event) => {
-      this.SSEConnectionId = parseInt((event as ServerEvent).data)
-    }
+  createSSEConnectionIdListener (event: Event) {
+    this.SSEConnectionId = parseInt((event as ServerEvent).data)
   }
 
   directoryStructureEventListener (event: Event) {
@@ -356,29 +215,25 @@ class ServerEventHandler {
     store.commit('updateDirectoryStructure', { path: filePath })
   }
 
-  createFileContentEventListener () {
-    return (event: Event) => {
-      const filePath = (event as ServerEvent).lastEventId
+  createFileContentEventListener (event: Event) {
+    const filePath = (event as ServerEvent).lastEventId
 
-      const fileType = PathOperator.getFileType(filePath)
+    const fileType = PathOperator.getFileType(filePath)
 
-      if (fileType === null) return
+    if (fileType === null) return
 
-      if (!store.getters.isSubscribe(filePath)) return
+    if (!store.getters.isSubscribe(filePath)) return
 
-      // Have to convert sent data by sse to json explicitly.
-      let data
-      if (fileType === 'nntxtFiles') {
-        const json = JSON.parse((event as ServerEvent).data)
-        data = this.getGraphInfoFromNNtxt(json)
-      } else if (fileType === 'monitorFiles') {
-        data = this.getMonitorInfo((event as ServerEvent).data)
-      } else if (fileType === 'csvResultFiles') {
-        data = this.getCsvData(filePath, (event as ServerEvent).data)
-      }
-
-      store.commit('updateFileContent', { path: filePath, data })
+    // Have to convert sent data by sse to json explicitly.
+    let data
+    if (fileType === 'nntxtFiles') {
+      const json = JSON.parse((event as ServerEvent).data)
+      data = this.getGraphInfoFromNNtxt(json)
+    } else if (fileType === 'monitorFiles') {
+      data = this.getMonitorInfo((event as ServerEvent).data)
     }
+
+    store.commit('updateFileContent', { path: filePath, data })
   }
 }
 

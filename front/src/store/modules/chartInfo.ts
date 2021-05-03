@@ -8,35 +8,18 @@ const state: ChartInfoState = {
 const mutations: MutationTree<ChartInfoState> = {
   insertChartData: function (state, { chartTitle, data }) {
     const targetChart = state.charts.find(x => x.name === chartTitle)
-
-    const updateFunction = function (
-      target: any[],
-      data: any,
-      index: number,
-      isUpdate: number
-    ) {
-      index = index > -1 ? index : target.length
-
-      target.splice(index, isUpdate, data)
-    }
-
     if (typeof targetChart !== 'undefined') {
       // update chart data
-      const insertIndex = targetChart.data.findIndex(
-        (x: any) => x.name === data.name
-      )
-      updateFunction(targetChart.data, data, insertIndex, 1)
+      const insertIndex = targetChart.data.findIndex(x => x.name === data.name)
+      const index = insertIndex > -1 ? insertIndex : targetChart.data.length
+      targetChart.data.splice(index, 1, data)
     } else {
       // insert new chart
       const insertIndex = state.charts.findIndex(
         x => x.name.toLowerCase() > chartTitle.toLowerCase()
       )
-      updateFunction(
-        state.charts,
-        { name: chartTitle, data: [data] },
-        insertIndex,
-        0
-      )
+      const index = insertIndex > -1 ? insertIndex : state.charts.length
+      state.charts.splice(index, 0, { name: chartTitle, data: [data] })
     }
   },
 
@@ -45,7 +28,7 @@ const mutations: MutationTree<ChartInfoState> = {
 
     if (targetChartIndex > -1) {
       const targetDataIndex = state.charts[targetChartIndex].data.findIndex(
-        (x: any) => x.name === data.name
+        x => x.name === data.name
       )
 
       if (targetDataIndex > -1) {

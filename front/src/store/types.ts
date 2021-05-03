@@ -78,6 +78,22 @@ export interface DialogueInfoState {
  chartInfo
  ***************************************/
 
+export interface ChartValue {
+  t: number[];
+  v: number[];
+}
+
+export interface ChartDatum {
+  id: number;
+  name: string;
+  values: ChartValue;
+}
+
+export interface ChartData {
+  data: ChartDatum[];
+  name: string;
+}
+
 export interface ChartInfoState {
-  charts: any[];
+  charts: ChartData[];
 }
