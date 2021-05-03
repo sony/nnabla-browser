@@ -8,7 +8,7 @@ NNabla browser is a browser based visualizer for Neural Network Libraries.
 
 ### Environment
 
-python >=3.5, <=3.6.5
+python >=3.5
 
 ### Install
 
@@ -33,6 +33,11 @@ Once you have installed nnabla-browser in your environment, you can launch serve
 
 ``` shell
 $nnabla-browser --logdir /path/to/logdir --port PORT
+```
+
+For macOS users, you have to set an environment variable to allow NNabla Browser to use multi-process as follows:
+``` shell
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 ```
 
 ### Access server

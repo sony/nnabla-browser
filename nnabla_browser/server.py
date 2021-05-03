@@ -10,7 +10,6 @@ from gevent.pywsgi import WSGIServer
 from watchdog.observers import Observer
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-# need to make it beutiful
 from .directory_monitoring import (
     Monitor,
     get_directory_tree_recursive,
@@ -50,9 +49,10 @@ def create_supervise_process(logdir):
             send_manager=_send_manager,
             directory_manager=_directory_manager,
             sse_updates=_sse_updates,
+            update_interval=app.config["USER"]["UPDATE_INTERVAL"],
         )
 
-        observer = Observer()
+        observer = Observer(timeout=5)
         observer.schedule(monitor, monitor.logdir, recursive=True)
         observer.start()
 
@@ -162,7 +162,7 @@ def sse():
         finally:
             # Free queue for this connection
             # Initialize with empty list to keep order.
-            send_manager[idx].insert(idx, [])
+            send_manager.insert(idx, [])
             sse_updates.insert(idx, {})
             free_idx.put(idx)
 
@@ -183,10 +183,33 @@ def run_server(port):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", "-p", default=8888, type=int)
-    parser.add_argument("--logdir", "-d", default="./logdir", type=str)
     parser.add_argument(
-        "--communication_interval", "-c", default=0.1, type=float
+        "--port",
+        "-p",
+        default=8888,
+        type=int,
+        help="Port number to access NNabla Browser.",
+    )
+    parser.add_argument(
+        "--logdir",
+        "-d",
+        default="./logdir",
+        type=str,
+        help="Directory path to monitor. All subdirectory will be monitored.",
+    )
+    parser.add_argument(
+        "--communication_interval",
+        "-c",
+        default=0.1,
+        type=float,
+        help="Timeout between each server-client data transfer. (second)",
+    )
+    parser.add_argument(
+        "--file_update_interval",
+        "-u",
+        default=10,
+        type=int,
+        help="Timeout between each file update action. 10 second in default. (second)",
     )
     args = parser.parse_args()
 
@@ -198,6 +221,7 @@ def main():
     # app configuration
     app.config["USER"]["LOGDIR"] = logdir
     app.config["USER"]["INTERVAL"] = args.communication_interval
+    app.config["USER"]["UPDATE_INTERVAL"] = args.file_update_interval
 
     # init directory_manager
     directory_manager.extend(get_directory_tree_recursive(logdir))

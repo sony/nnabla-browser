@@ -77,7 +77,7 @@ export default Vue.extend({
     monitor: {
       handler: function () {
         if (this.checked) {
-          this.changeEvent()
+          this.updateChart()
         }
       },
       deep: true

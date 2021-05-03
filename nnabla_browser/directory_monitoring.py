@@ -1,6 +1,7 @@
 import fnmatch
 import glob
 import os
+import time
 import zipfile
 from multiprocessing import Lock
 
@@ -79,13 +80,24 @@ def initialize_send_queue(path_list, base_path):
 
 
 class Monitor(FileSystemEventHandler):
-    def __init__(self, logdir, send_manager, directory_manager, sse_updates):
+    def __init__(
+        self,
+        logdir,
+        send_manager,
+        directory_manager,
+        sse_updates,
+        update_interval=10,
+    ):
         super().__init__()
         self.logdir = logdir
 
         self.send_manager = send_manager
         self.directory_manager = directory_manager
         self.sse_updates = sse_updates
+
+        # store modified timestamp to skip consecutive events in a short time
+        self.update_interval = update_interval  # second
+        self.file_modified_timestamp = {}
 
     def set_send_queue(self, abs_path, action):
 
@@ -102,7 +114,9 @@ class Monitor(FileSystemEventHandler):
 
         with Lock():
             num_access = len(self.send_manager)
-            assert len(self.sse_updates) == num_access
+            if len(self.sse_updates) != num_access:
+                # Some of managed lists might be staled. Skip to send data to client.
+                return
 
             for i in range(num_access):
                 # check if the updated file is registerd as sse target.
@@ -121,16 +135,20 @@ class Monitor(FileSystemEventHandler):
             abs_path,
         ]
 
+        self.file_modified_timestamp[abs_path] = 0  # init time by 0
+
         # Send name only
         self.set_send_queue(abs_path, "directoryStructure")
 
     def on_modified(self, event):
+        modified_time = time.time()
         abs_path = os.path.abspath(event.src_path)
 
-        # todo: detect rename
-
         # Send name only
-        self.set_send_queue(abs_path, "fileContent")
+        last_modified = self.file_modified_timestamp.get(abs_path, 0)
+        if modified_time - last_modified > self.update_interval:
+            self.file_modified_timestamp[abs_path] = modified_time
+            self.set_send_queue(abs_path, "fileContent")
 
     def on_deleted(self, event):
         abs_path = os.path.relpath(event.src_path)

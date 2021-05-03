@@ -169,12 +169,12 @@ const mutations: MutationTree<DirectoryInfoState> = {
   resetActiveFile: function (state) {
     state.activeFile = ''
   },
-  activateSubscribe: function (state, path) {
+  activateSubscribe: function (state, { path }) {
     if (!state.subscribedList.includes(path)) {
       state.subscribedList.push(path)
     }
   },
-  deactivateSubscribe: function (state, path) {
+  deactivateSubscribe: function (state, { path }) {
     const index = state.subscribedList.indexOf(path)
     if (index > -1) {
       state.subscribedList.splice(index, 1)
