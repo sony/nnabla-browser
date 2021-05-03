@@ -15,14 +15,19 @@ import EditorWindowSize from '@/utils/editorWindowSize'
 import Vue from 'vue'
 
 export default Vue.extend({
-  props: ['tabName'],
+  props: {
+    tabName: {
+      type: String,
+      default: 'graph'
+    }
+  },
   computed: {
-    activeTabName: function () {
+    activeTabName: function (): string {
       return this.$store.state.editor.activeTabName
     }
   },
   methods: {
-    changeActiveTab: function (tabName: string) {
+    changeActiveTab: function (tabName: string): void {
       this.$store.commit('changeActiveTab', tabName)
       Vue.nextTick(function () {
         EditorWindowSize.init()
