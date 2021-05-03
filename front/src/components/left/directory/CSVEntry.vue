@@ -1,11 +1,5 @@
 <template>
   <div class="csv-entry" :class="{ active: checked }" v-on:click="clickArea">
-    <input
-      type="checkbox"
-      :id="filePath"
-      v-model="checked"
-      @change="changeEvent"
-    />
     <label :for="dirName + '/' + monitor.name">{{ monitor.name }}</label>
   </div>
 </template>
