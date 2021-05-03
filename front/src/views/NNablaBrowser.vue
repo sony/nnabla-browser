@@ -33,8 +33,8 @@ export default Vue.extend({
     }
   },
   methods: {
-    // Server sent event.
-    setupSSE: function () {
+    // Set up server sent event.
+    setupSSE: function (): void {
       if (process.env.NODE_ENV === 'development') {
         eventSrc = new EventSource('http://localhost:8888/sse', {
           withCredentials: true
@@ -81,7 +81,7 @@ export default Vue.extend({
         false
       )
 
-      eventSrc.onerror = () => {
+      eventSrc.onerror = (): void => {
         eventSrc.close()
       }
     }
