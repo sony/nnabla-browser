@@ -103,6 +103,9 @@ export default Vue.extend({
 }
 
 .property .name {
+  height: 25px;
+  line-height: 25px;
+  width: 50%;
   float: left;
   overflow: hidden;
   color: var(--color-gray4);
@@ -110,6 +113,8 @@ export default Vue.extend({
 }
 
 .property .value {
+  height: 25px;
+  line-height: 25px;
   float: left;
   overflow: hidden;
   color: var(--color-gray5);
