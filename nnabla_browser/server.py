@@ -16,7 +16,7 @@ from .directory_monitoring import (
     get_file_content,
     initialize_send_queue,
 )
-from .parse_nnabla_function import parse_all
+from .parse_nnabla_function import init_functions_yaml, parse_all
 from .utils import (
     allow_cors,
     check_and_create_logdir,
@@ -233,6 +233,10 @@ def main():
         daemon=True,
     )
     p.start()
+
+    # init functions.yaml
+    # Note that this function should be called after starting ovserving directory.
+    init_functions_yaml()
 
     # Launch
     run_server(args.port)

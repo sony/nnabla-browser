@@ -17,20 +17,40 @@ YAML_PATH = {
     )
 }
 
+_activations = None
 
-def get_activation_list():
+
+def init_functions_yaml():
+    try:
+        functions_yaml_path = YAML_PATH["functions"]
+        if not os.path.exists(functions_yaml_path):
+            nnabla_core_root = os.path.dirname(functions_yaml_path)
+            os.makedirs(nnabla_core_root, exist_ok=True)
+
+            import requests
+
+            url = "https://raw.github.com/sony/nnabla/master/build-tools/code_generator/functions.yaml"
+
+            r = requests.get(url)
+
+            with open(functions_yaml_path, "wb") as f:
+                f.write(r.content)
+
+    except:
+        raise FileNotFoundError(
+            "functions.yaml is not found and also cannot be downloaded from https://github.com/sony/nnabla."
+            "Please make sure your internet connection is valid."
+        )
+
+    # get activation list
+    global _activations
     with open(YAML_PATH["functions"], "r") as f:
         yaml_obj = yaml.load(f, Loader=yaml.FullLoader)
 
-    activations = [
+    _activations = [
         x["snake_name"]
         for x in yaml_obj["Neural Network Activation Functions"].values()
     ]
-
-    return activations
-
-
-_activations = get_activation_list()
 
 
 def _snake_to_camel(string):

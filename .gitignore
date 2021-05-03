@@ -18,3 +18,5 @@ front/lib/js/nnablaCore.js
 .vscode/
 
 logdir/
+
+nnabla_browser/nnabla_core/
