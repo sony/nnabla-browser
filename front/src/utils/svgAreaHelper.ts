@@ -6,6 +6,10 @@ import store from '@/store'
 
 const layerDef = Definitions.EDIT.LAYER
 
+export interface AttrType {
+  [key: string]: string | number;
+}
+
 class StyleHelper {
   getDefaultComponent (layerType: string) {
     return nnablaCore.findFunction(layerType)
@@ -15,25 +19,25 @@ class StyleHelper {
     return this.getDefaultComponent(layerType).color
   }
 
-  createNodeAttr () {
+  createNodeAttr (): AttrType {
     return { width: layerDef.RECT_WIDTH, height: layerDef.RECT_HEIGHT }
   }
 
-  createNodeStyle (node: NodeInfo) {
+  createNodeStyle (node: NodeInfo): AttrType {
     return {
       fill: this.getLayerColor(node.type),
       stroke: this.getLayerColor(node.type)
     }
   }
 
-  createCapitalAttr () {
+  createCapitalAttr (): AttrType {
     return {
       x: layerDef.DROPCAP_CHAR.OFFSET_X,
       y: layerDef.DROPCAP_CHAR.OFFSET_Y
     }
   }
 
-  createCapitalStyle () {
+  createCapitalStyle (): AttrType {
     return {
       fill: layerDef.DROPCAP_CHAR.FONTCOLOR,
       'font-size': layerDef.DROPCAP_CHAR.FONTSIZE,
@@ -42,21 +46,21 @@ class StyleHelper {
     }
   }
 
-  createTextComponentStyle () {
+  createTextComponentStyle (): AttrType {
     return {
       'clip-path': `url(#${layerDef.CLIP_PATH.ID})`,
       transform: `translate(${layerDef.CLIP_PATH.OFFSET_X},${Definitions.EDIT.LAYER.CLIP_PATH.OFFSET_Y})`
     }
   }
 
-  createTextAttr () {
+  createTextAttr (): AttrType {
     return {
       x: layerDef.NAME_LABEL.OFFSET_X,
       y: layerDef.NAME_LABEL.OFFSET_Y
     }
   }
 
-  createTextStyle () {
+  createTextStyle (): AttrType {
     return {
       'pointer-events': 'none',
       fill: layerDef.NAME_LABEL.FONTCOLOR,
@@ -64,7 +68,7 @@ class StyleHelper {
     }
   }
 
-  createLinkLineStyle () {
+  createLinkLineStyle (): AttrType {
     return {
       stroke: '#262626',
       'stroke-width': '1.5',
@@ -256,7 +260,7 @@ class SvgAreaOperator {
       .attr('transform', 'translate(0, 0) scale(1, 1)')
   }
 
-  createLinkLineContext (v1: Vector2D, v2: Vector2D) {
+  createLinkLineContext (v1: Vector2D, v2: Vector2D): string {
     const offset = layerDef.GRID / 2
     let points: number[][] = []
 

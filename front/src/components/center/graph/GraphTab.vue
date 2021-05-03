@@ -9,8 +9,8 @@
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
 import { Graph } from '@/store/types'
-import Vue from 'vue'
 
 interface GraphTabProps {
   graph: Graph;
@@ -20,15 +20,24 @@ interface GraphTabProps {
 
 export default Vue.extend<{}, {}, {}, GraphTabProps>({
   props: {
-    graph: Object,
-    index: Number,
-    selected: Boolean
+    graph: {
+      type: Object as PropType<Graph>,
+      default: null
+    },
+    index: {
+      type: Number,
+      default: -1
+    },
+    selected: {
+      type: Boolean,
+      default: false
+    }
   },
   methods: {
-    click: function () {
+    click: function (): void {
       this.$store.commit('setActiveGraphIndex', this.index)
     },
-    keydown: (e: KeyboardEvent) => {
+    keydown: (e: KeyboardEvent): void => {
       switch (e.keyCode) {
         case 27:
         case 13:

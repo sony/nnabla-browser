@@ -18,7 +18,10 @@ export default Vue.extend({
     'svg-area': SvgArea
   },
   props: {
-    historyInfo: Object
+    historyInfo: {
+      type: Object,
+      default: Object
+    }
   }
 })
 </script>

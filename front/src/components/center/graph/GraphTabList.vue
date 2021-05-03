@@ -12,6 +12,7 @@
 </template>
 
 <script lang="ts">
+import { Graph } from '@/store/types'
 import GraphTab from '@/components/center/graph/GraphTab.vue'
 import Vue from 'vue'
 
@@ -20,13 +21,13 @@ export default Vue.extend({
     'graph-tab': GraphTab
   },
   computed: {
-    graphs: function () {
+    graphs: function (): Graph[] {
       return this.$store.state.graphInfo.graphs
     },
-    path: function () {
+    path: function (): string {
       return this.$store.state.graphInfo.nntxtPath
     },
-    activeGraphIndex: function () {
+    activeGraphIndex: function (): Graph {
       return this.$store.state.graphInfo.activeIndex.graph
     }
   }

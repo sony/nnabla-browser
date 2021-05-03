@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Line, mixins } from '../chart'
-import Vue, { VueConstructor } from 'vue'
+import Vue, { PropType, VueConstructor } from 'vue'
 import Chart from 'chart.js'
 
 const { reactiveProp } = mixins
@@ -15,15 +15,24 @@ type _Vue = VueConstructor<
   }
 >
 
-interface PropType {
+interface PropTypeLocal {
   chartData: Chart.ChartData;
   options: Chart.ChartOptions;
 }
 
-export default (Vue as _Vue).extend<{}, {}, {}, PropType>({
+export default (Vue as _Vue).extend<{}, {}, {}, PropTypeLocal>({
   extends: Line,
   mixins: [reactiveProp],
-  props: { chartData: {}, options: {} },
+  props: {
+    chartData: {
+      type: Object as PropType<Chart.ChartData>,
+      default: null
+    },
+    options: {
+      type: Object as PropType<Chart.ChartOptions>,
+      default: null
+    }
+  },
   mounted () {
     this.renderChart(this.chartData, this.options)
   }

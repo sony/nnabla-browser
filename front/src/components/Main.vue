@@ -19,8 +19,14 @@ export default Vue.extend({
     'center-content': CenterContent
   },
   props: {
-    historyInfo: Object,
-    zoomInfo: Object
+    historyInfo: {
+      type: Object,
+      default: Object
+    },
+    zoomInfo: {
+      type: Object,
+      default: Object
+    }
   }
 })
 </script>

@@ -25,15 +25,21 @@ export default Vue.extend({
     monitoring: MonitoringComponent
   },
   props: {
-    historyInfo: {},
-    zoomInfo: {}
+    historyInfo: {
+      type: Object,
+      default: Object
+    },
+    zoomInfo: {
+      type: Object,
+      default: Object
+    }
   },
   computed: {
     // todo: change to ":is" binding from this rule base switching after re-implementing history and zoom
-    selectedEditTab: function () {
+    selectedEditTab: function (): boolean {
       return String(this.$store.state.editor.activeTabName) === 'graph'
     },
-    selectedMonitoringTab: function () {
+    selectedMonitoringTab: function (): boolean {
       return String(this.$store.state.editor.activeTabName) === 'monitoring'
     }
   }

@@ -131,8 +131,8 @@
 
 <script lang="ts">
 import * as d3 from 'd3'
+import { AttrType, Vector2D, styleHelper, svgAreaOperator } from '@/utils/svgAreaHelper'
 import { Graph, GraphInfoState, Link } from '@/store/types'
-import { Vector2D, styleHelper, svgAreaOperator } from '@/utils/svgAreaHelper'
 import Vue, { VNode } from 'vue'
 import { Definitions } from '@/utils/definitions'
 import { NodeInfo } from '@/utils/serverEventHandler'
@@ -142,7 +142,7 @@ const originPosX = grid * 2
 const originPosY = grid * 2
 
 // define this variable outside Vue data to prevent infinite updates
-const nextTransition: any[] = []
+const nextTransition: {index: number; transform: string}[] = []
 
 /***************************************
  interface
@@ -164,13 +164,20 @@ interface ComputedType {
   originTransform: string;
 }
 
+interface TransformInfo {
+  graph: Element | null;
+  translateX: number;
+  translateY: number;
+  scale: number;
+}
+
 /***************************************/
 
 export default Vue.extend<DataType, {}, ComputedType, {}>({
   directives: {
     zoom: {
-      inserted: function (el, binding, vNode: VNode) {
-        const getTransformInfo = (el: HTMLElement) => {
+      inserted: function (el, binding, vNode: VNode): void {
+        const getTransformInfo = (el: HTMLElement): TransformInfo => {
           const graph = el.querySelector('#graph-container')
           if (!graph) {
             return { graph: null, translateX: 0, translateY: 0, scale: 1 }
@@ -186,7 +193,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
           return { graph, translateX, translateY, scale }
         }
 
-        const setAssistAreaTransform = (el: HTMLElement, vNode: VNode) => {
+        const setAssistAreaTransform = (el: HTMLElement, vNode: VNode): void => {
           const { graph, translateX, translateY, scale } = getTransformInfo(el)
           if (!graph) return
           const newGrid = scale * grid
@@ -204,13 +211,13 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
           )
         }
 
-        el.onselectstart = () => false
-        el.onmousedown = function (event) {
+        el.onselectstart = (): boolean => false
+        el.onmousedown = function (event): void {
           const { graph, translateX, translateY, scale } = getTransformInfo(el)
 
           if (!graph) return
 
-          el.onmousemove = function (ev) {
+          el.onmousemove = function (ev): void {
             let a = ev.screenX - event.screenX
             let b = ev.screenY - event.screenY
             a = translateX + a
@@ -220,18 +227,18 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
               `translate(${a}, ${b}) scale(${scale})`
             )
           }
-          el.onmouseup = function () {
+          el.onmouseup = function (): void {
             el.onmousemove = null
             setAssistAreaTransform(el, vNode)
           }
-          el.onmouseleave = function () {
+          el.onmouseleave = function (): void {
             el.onmousemove = null
           }
         }
 
         el.addEventListener(
           'wheel',
-          event => {
+          (event): void => {
             event.preventDefault()
             const pointerX = event.clientX
             const pointerY = event.clientY
@@ -294,34 +301,34 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
     }
   },
   computed: {
-    graphState: function () {
+    graphState: function (): GraphInfoState {
       return this.$store.state.graphInfo
     },
-    activeGraph: function () {
+    activeGraph: function (): Graph {
       return this.$store.getters.activeGraph
     },
-    prevGraph: function () {
+    prevGraph: function (): Graph {
       return this.graphState.prevGraph
     },
-    isDragging: function () {
+    isDragging: function (): boolean {
       return this.graphState.isDragging
     },
-    assistAreaSize: function () {
+    assistAreaSize: function (): Vector2D {
       return this.graphState.assistAreaSize
     },
-    assistAreaX: function () {
+    assistAreaX: function (): number[] {
       return d3.range(0, this.assistAreaSize.x, grid)
     },
-    assistAreaY: function () {
+    assistAreaY: function (): number[] {
       return d3.range(0, this.assistAreaSize.y, grid)
     },
     linkLineStyleAttrs: styleHelper.createLinkLineStyle,
-    originTransform: function () {
+    originTransform: function (): string {
       return `translate(${originPosX}, ${originPosY}) scale(1)`
     }
   },
   watch: {
-    activeGraph: function (val, oldVal) {
+    activeGraph: function (val, oldVal): void {
       if (val !== oldVal) {
         const graphContainer = document.getElementById('graph-container')
         if (!graphContainer) return
@@ -348,10 +355,10 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
       .style('opacity', 1)
   },
   methods: {
-    clickLayer: function (index: number) {
+    clickLayer: function (index: number): void {
       this.$store.commit('setActiveLayerIndex', index)
     },
-    createTransform: function (node: NodeInfo, index: number) {
+    createTransform: function (node: NodeInfo, index: number): string {
       let ret = `translate(${node.x}, ${node.y})`
       if (Object.prototype.hasOwnProperty.call(this.prevGraph, 'nodes')) {
         const prev = this.prevGraph.nodes.find(x => x.name === node.name)
@@ -362,7 +369,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
       }
       return ret
     },
-    getAssistDotsStyle: () => {
+    getAssistDotsStyle: (): { transform?: string; opacity?: number } => {
       const scroller = d3
         .select('div.tab-content.network-editor-scroller')
         .node()
@@ -379,14 +386,14 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
         opacity: 1.0
       }
     },
-    getNodeAttr: () => styleHelper.createNodeAttr(),
-    getNodeStyle: (node: NodeInfo) => styleHelper.createNodeStyle(node),
-    getCapitalAttr: () => styleHelper.createCapitalAttr(),
-    getCapitalStyle: () => styleHelper.createCapitalStyle(),
-    getTextComponentStyle: () => styleHelper.createTextComponentStyle(),
-    getTextAttr: () => styleHelper.createTextAttr(),
-    getTextStyle: () => styleHelper.createTextStyle(),
-    createLinkLineContext: (link: Link) => {
+    getNodeAttr: (): AttrType => styleHelper.createNodeAttr(),
+    getNodeStyle: (node: NodeInfo): AttrType => styleHelper.createNodeStyle(node),
+    getCapitalAttr: (): AttrType => styleHelper.createCapitalAttr(),
+    getCapitalStyle: (): AttrType => styleHelper.createCapitalStyle(),
+    getTextComponentStyle: (): AttrType => styleHelper.createTextComponentStyle(),
+    getTextAttr: (): AttrType => styleHelper.createTextAttr(),
+    getTextStyle: (): AttrType => styleHelper.createTextStyle(),
+    createLinkLineContext: (link: Link): string => {
       const source = svgAreaOperator.getLinkerPosition(link.source, true)
       const destination = svgAreaOperator.getLinkerPosition(
         link.destination,

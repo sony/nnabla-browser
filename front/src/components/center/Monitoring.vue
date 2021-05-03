@@ -13,6 +13,7 @@
 </template>
 
 <script lang="ts">
+import Chart from 'chart.js'
 import { ChartDatum } from '@/store/types'
 import SeriesChart from '@/components/center/SeriesChart.vue'
 import Vue from 'vue'
@@ -30,10 +31,21 @@ const COLORS = [
   '#f39c12'
 ]
 
+/***************************************
+ interface
+ ***************************************/
+
+interface DataCollectionType {
+  data: { datasets: Chart.ChartData };
+  options: Chart.ChartOptions;
+}
+
+/***************************************/
+
 export default Vue.extend({
   components: { SeriesChart },
   computed: {
-    dataCollection: function () {
+    dataCollection: function (): DataCollectionType[] {
       const charts = this.$store.state.chartInfo.charts
 
       const ret = []
@@ -59,7 +71,7 @@ export default Vue.extend({
             title: {
               display: true,
               text: title,
-              font: { size: 20, weight: 600 }
+              font: { size: 20, weight: '600' }
             },
             tooltip: { enabled: true }
           },
@@ -90,7 +102,7 @@ export default Vue.extend({
           responsive: true,
           maintainAspectRatio: false
         }
-        ret.push({ data: data, options: options })
+        ret.push({ data: data, options: options as Chart.ChartOptions })
       }
       return ret
     }
