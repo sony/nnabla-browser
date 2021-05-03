@@ -150,6 +150,25 @@ function addDirectoryInfo (
   }
 }
 
+function deleteFileOrDirectoryPath (state: DirectoryInfoState, path: string) {
+  const [parent, relPath] = searchParent(path, state.data)
+
+  const fileType = pathOperator.getFileType(relPath)
+  if (fileType) {
+    // delete file
+    const index = parent[fileType].findIndex(x => x.name === relPath)
+    if (index === -1) return
+
+    parent[fileType].splice(index, index + 1)
+  } else {
+    // delete directory
+    const index = parent.children.findIndex(x => x.name === relPath)
+    if (index === -1) return
+
+    parent.children.splice(index, index + 1)
+  }
+}
+
 const mutations: MutationTree<DirectoryInfoState> = {
   initDirectoryStructure: function (state, { paths }) {
     for (const path of paths) {
@@ -159,6 +178,9 @@ const mutations: MutationTree<DirectoryInfoState> = {
   updateDirectoryStructure: function (state, { path }) {
     // Register file path without file content
     addDirectoryInfo(state, path, {})
+  },
+  deleteFileOrDirectory: function (state, { path }) {
+    deleteFileOrDirectoryPath(state, path)
   },
   updateFileContent: function (state, { path, data }) {
     // Register file path with file content

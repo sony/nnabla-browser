@@ -241,6 +241,12 @@ class ServerEventHandler {
 
     store.commit('updateFileContent', { path: filePath, data })
   }
+
+  deleteEventListener (event: Event) {
+    const path = (event as ServerEvent).lastEventId
+
+    store.commit('deleteFileOrDirectory', { path })
+  }
 }
 
 const serverEventHandler = new ServerEventHandler()

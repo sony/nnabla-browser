@@ -68,6 +68,12 @@ export default Vue.extend({
       )
 
       eventSrc.addEventListener(
+        'delete',
+        serverEventHandler.deleteEventListener,
+        false
+      )
+
+      eventSrc.addEventListener(
         'checkAlive',
         () => {
           /** do nothing **/
