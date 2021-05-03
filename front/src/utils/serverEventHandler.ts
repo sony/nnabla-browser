@@ -209,6 +209,12 @@ class ServerEventHandler {
     this.SSEConnectionId = parseInt((event as ServerEvent).data)
   }
 
+  initDirectoryStructureEventListener (event: Event) {
+    const paths = (event as ServerEvent).data.split('\n')
+
+    store.commit('initDirectoryStructure', { paths })
+  }
+
   directoryStructureEventListener (event: Event) {
     const filePath = (event as ServerEvent).lastEventId
 

@@ -66,17 +66,16 @@ def get_file_content(path):
 
 
 def initialize_send_queue(path_list, base_path):
-    ret = []
+    send_info = {
+        "path": None,
+        "event": "initDirectoryStructure",
+        "data": "\n".join([os.path.relpath(x, base_path) for x in path_list]),
+    }
 
-    for path in path_list:
-        send_info = {
-            "path": os.path.relpath(path, base_path),
-            "event": "directoryStructure",
-            "data": None,
-        }
-        ret.append(send_info)
-
-    return ret
+    # return as list
+    return [
+        send_info,
+    ]
 
 
 class Monitor(FileSystemEventHandler):

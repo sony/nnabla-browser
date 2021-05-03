@@ -50,6 +50,12 @@ export default Vue.extend({
       )
 
       eventSrc.addEventListener(
+        'initDirectoryStructure',
+        serverEventHandler.initDirectoryStructureEventListener,
+        false
+      )
+
+      eventSrc.addEventListener(
         'directoryStructure',
         serverEventHandler.directoryStructureEventListener,
         false

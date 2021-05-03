@@ -151,6 +151,11 @@ function addDirectoryInfo (
 }
 
 const mutations: MutationTree<DirectoryInfoState> = {
+  initDirectoryStructure: function (state, { paths }) {
+    for (const path of paths) {
+      addDirectoryInfo(state, path, {})
+    }
+  },
   updateDirectoryStructure: function (state, { path }) {
     // Register file path without file content
     addDirectoryInfo(state, path, {})
