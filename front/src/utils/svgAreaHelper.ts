@@ -90,7 +90,6 @@ class SvgAreaOperator {
       delta: { x: 0, y: 0 }
     }
     this.connectedLinks = []
-    this.focusLayerRect = null
   }
 
   adjustSvgSize () {

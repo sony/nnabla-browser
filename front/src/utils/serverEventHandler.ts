@@ -1,5 +1,5 @@
 import * as PathOperator from '@/utils/pathOperator'
-import { Layer, Link } from '@/types/graph'
+import { Layer, Node, Link } from '@/types/graph'
 import { NNtxt, Variable } from '@/types/nnablaApi'
 import { Definitions } from '@/utils/definitions'
 import { LayerRegister } from '@/utils/layerRegister'
@@ -19,19 +19,21 @@ class ServerEventHandler {
     this.layerRegister = layerRegister
   }
 
-  createDummyInputLayer (variable: Variable): Partial<Layer> {
+  createDummyInputLayer (variable: Variable): Partial<Node> {
     return {
       input: [],
       name: variable.dataName,
-      output: [variable.variableName]
+      output: [variable.variableName],
+      type: 'InputVariable'
     }
   }
 
-  createDummyOutputLayer (variable: Variable): Partial<Layer> {
+  createDummyOutputLayer (variable: Variable): Partial<Node> {
     return {
       input: [variable.variableName],
       name: variable.dataName,
-      output: []
+      output: [],
+      type: 'OutputVariable'
     }
   }
 
@@ -100,8 +102,6 @@ class ServerEventHandler {
     const networks = json.network || []
     const executors = json.executor || []
 
-    console.log(json)
-
     for (const executor of executors) {
       const network = networks.find(x => x.name === executor.networkName)
 
@@ -150,7 +150,7 @@ class ServerEventHandler {
         )) {
           nodes.push({
             ...layer,
-            ...this.getLayerPosition(layer.depth, needSlice++)
+            position: this.getLayerPosition(layer.depth, needSlice++)
           })
         }
       }
