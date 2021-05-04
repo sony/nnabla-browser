@@ -59,6 +59,7 @@ export default Vue.extend({
           return {
             label: d.name[0] === '/' ? d.name.substr(1) : d.name,
             borderColor: COLORS[d.id % COLORS.length],
+            borderWidth: 2,
             pointBorderWidth: 0,
             pointRadius: 0,
             fill: false,
@@ -83,7 +84,7 @@ export default Vue.extend({
             x: {
               type: 'linear',
               axis: 'x',
-              title: { display: true, text: 'epoch' },
+              title: { display: true, text: 'Epoch' },
               ticks: {
                 autoSkip: true,
                 fontSize: 14
@@ -92,7 +93,6 @@ export default Vue.extend({
             y: {
               type: 'linear',
               axis: 'y',
-              title: { display: true, text: 'value' },
               ticks: {
                 autoSkip: true,
                 fontSize: 14
