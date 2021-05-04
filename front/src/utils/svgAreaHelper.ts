@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { DrawingLinkMemory, NextTransition, Node, TempLink } from '@/types/graph'
+import { DrawingLinkMemory, Link, NextTransition, Node, TempLink } from '@/types/graph'
 import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
 import { RawFunction } from '@/types/nnablaApi'
@@ -293,16 +293,16 @@ class SvgAreaOperator {
       store.commit('startDragging')
 
       // get all links connecting this layer
-      const links = store.getters.activeLinks(index)
+      const links: Link[] = store.getters.activeLinks(index)
 
       this.connectedLinks = []
 
       for (const link of links) {
         let insert: TempLink
-        if (link.source === index) {
+        if (link.srcNodeId === index) {
           insert = {
-            index: link.index,
-            destPosition: this.getLinkerPosition(link.destination, false),
+            index: link.index as number,
+            destPosition: this.getLinkerPosition(link.destNodeId, false),
             update: function (v: Vector2D): void {
               this.srcPosition = {
                 x: v.x + layerDef.GRID * 5,
@@ -310,10 +310,10 @@ class SvgAreaOperator {
               }
             }
           }
-        } else if (link.destination === index) {
+        } else if (link.destNodeId === index) {
           insert = {
-            index: link.index,
-            srcPosition: this.getLinkerPosition(link.source, true),
+            index: link.index as number,
+            srcPosition: this.getLinkerPosition(link.srcNodeId, true),
             update: function (v: Vector2D): void {
               this.destPosition = { x: v.x + layerDef.GRID * 5, y: v.y }
             }

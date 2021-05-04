@@ -24,7 +24,7 @@ export default Vue.extend<{}, {}, {}, PropertyProp>({
     },
     layerParam: {
       type: String,
-      required: true
+      default: null
     }
   },
   methods: {

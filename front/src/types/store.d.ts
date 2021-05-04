@@ -34,7 +34,7 @@ export interface EditorState {
 
 export interface MonitorFile {
    name: string;
-   data: MonitorSeriesData;
+   data: MonitorSeriesData | AnyObject;
    isView?: boolean;
 }
 

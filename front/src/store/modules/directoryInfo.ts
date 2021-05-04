@@ -2,7 +2,7 @@ import * as Path from 'path'
 import * as d3 from 'd3'
 import * as pathOperator from '@/utils/pathOperator'
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { DirectoryInfoState, DirectoryNode, RootState } from '@/types/store'
+import { DirectoryInfoState, DirectoryNode, MonitorFile, NNtxtFile, RootState } from '@/types/store'
 import { AnyObject } from '@/types/basic'
 
 // monotonic incremental counter to assign unique id
@@ -17,7 +17,7 @@ const deleteDirectoryInfo = (
     return false
   }
 
-  const index = parent[fileType].findIndex(x => x.name === fileName)
+  const index = parent[fileType].findIndex((x: NNtxtFile | MonitorFile) => x.name === fileName)
   if (index > -1) {
     parent[fileType].splice(index, 1)
 
@@ -111,7 +111,7 @@ function insertFile (
   const fileType = pathOperator.getFileType(fileName)
 
   if (fileType) {
-    const index = parent[fileType].findIndex(x => x.name === fileName)
+    const index = parent[fileType].findIndex((x: NNtxtFile | MonitorFile) => x.name === fileName)
     if (index > -1) {
       // Found. Update file contents.
       if (replace) {
@@ -157,7 +157,7 @@ function deleteFileOrDirectoryPath (state: DirectoryInfoState, path: string): vo
   const fileType = pathOperator.getFileType(relPath)
   if (fileType) {
     // delete file
-    const index = parent[fileType].findIndex(x => x.name === relPath)
+    const index = parent[fileType].findIndex((x: NNtxtFile | MonitorFile) => x.name === relPath)
     if (index === -1) return
 
     parent[fileType].splice(index, index + 1)
@@ -213,7 +213,8 @@ const actions: ActionTree<DirectoryInfoState, RootState> = {
   deleteDirectoryInfo: function ({ commit, state }, { path }) {
     const [parent, dirName] = searchParent(path, state.data)
 
-    let fileType = pathOperator.getFileType(dirName)
+    type extendFileType = 'nntxtFiles' | 'monitorFiles' | 'children' | null
+    let fileType: extendFileType = pathOperator.getFileType(dirName)
     if (!fileType) fileType = 'children'
 
     if (deleteDirectoryInfo(parent, dirName, fileType)) {
