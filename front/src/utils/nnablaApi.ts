@@ -1,8 +1,20 @@
 import { httpClient } from './httpClient'
 
+interface Dict {
+  [key: string]: Dict;
+}
+export interface Function {
+  api_type: string;
+  arguments: {[key: string]: Dict};
+  inputs: Dict;
+  color: string;
+  layer_name: string;
+  snake_name: string;
+}
+
 class NnablaCore {
-  nnablaApi: object = {}
-  allFunctions: any[] = []
+  nnablaApi: Dict = {}
+  allFunctions: Function[] = []
 
   constructor () {
     httpClient.getNnablaApi().then(res => {
@@ -11,32 +23,32 @@ class NnablaCore {
     })
   }
 
-  getAllFuncionsRecursive (obj: any) {
-    let ret: any[] = []
+  getAllFuncionsRecursive (obj: Dict | Function): Function[] {
+    let ret: Function[] = []
     if (typeof obj.snake_name !== 'undefined') {
-      ret.push(obj)
+      ret.push(obj as Function)
     } else if (typeof obj === 'object') {
       for (const key in obj) {
-        ret = ret.concat(this.getAllFuncionsRecursive(obj[key]))
+        ret = ret.concat(this.getAllFuncionsRecursive((obj as Dict)[key]))
       }
     }
     return ret
   }
 
-  getNnablaApi () {
+  getNnablaApi (): Dict {
     return this.nnablaApi
   }
 
-  getAllFunctions () {
+  getAllFunctions (): Function[] {
     return this.allFunctions
   }
 
-  findFunction (layerType: string) {
+  findFunction (layerType: string): Function {
     // workaround for some incorrect cases
     const target = layerType.toLowerCase()
     return this.getAllFunctions().find(
-      (functionInfo: any) => functionInfo.layer_name.toLowerCase() === target
-    )
+      (functionInfo: Function) => functionInfo.layer_name.toLowerCase() === target
+    ) as Function
   }
 }
 

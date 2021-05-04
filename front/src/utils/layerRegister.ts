@@ -1,10 +1,12 @@
+import { Function } from '@/utils/nnablaApi'
 import { range } from '@/utils/arrayOperator'
 
-export interface LayerInfo {
+export interface LayerInfo extends Function {
+  name: string;
   input: string[];
   output: string[];
   index: number;
-  depth: number[];
+  depth: number[] | number;
   visitCount: number;
   parameters: Parameter[];
 }
@@ -24,13 +26,17 @@ export interface Parameter {
   type: string;
 }
 
+interface Depth2Layers {
+  [key: number]: {needSlice: number; layers: Array<LayerInfo>};
+}
+
 export class LayerRegister {
   counter = 0
   layers: { [key: string]: LayerInfo } = {}
   links: Link[] = []
   allParameters: Parameter[] = []
 
-  initialize (params?: Parameter[]) {
+  initialize (params?: Parameter[]): void {
     this.counter = 0
     this.layers = {}
     this.links = []
@@ -39,7 +45,7 @@ export class LayerRegister {
     }
   }
 
-  addLayer (layer: any, depth: number): [LayerInfo, boolean] {
+  addLayer (layer: LayerInfo, depth: number): [LayerInfo, boolean] {
     if (!Object.prototype.hasOwnProperty.call(this.layers, layer.name)) {
       // first visit
       let visitCount = 1
@@ -71,7 +77,7 @@ export class LayerRegister {
       }
     } else {
       // visit again
-      this.layers[layer.name].depth.push(depth)
+      (this.layers[layer.name].depth as number[]).push(depth)
       this.layers[layer.name].visitCount++
     }
 
@@ -80,17 +86,17 @@ export class LayerRegister {
     return [retLayer, retLayer.input.length <= retLayer.visitCount]
   }
 
-  addLink (link: Link) {
+  addLink (link: Link): void {
     this.links.push(link)
   }
 
-  getDepthToLayers () {
-    const depth2layers: { [key: number]: any } = {}
+  getDepthToLayers (): Depth2Layers {
+    const depth2layers: Depth2Layers = {}
     Object.values(this.layers).forEach(layer => {
-      const depthList = layer.depth
+      const depthList = layer.depth as number[]
       const maxDepth = Math.max(...depthList)
 
-      if (layer.depth.length > 1) {
+      if ((layer.depth as number[]).length > 1) {
         const minDepth = Math.min(...depthList)
 
         for (const i of range(minDepth, maxDepth, true)) {

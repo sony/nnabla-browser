@@ -1,6 +1,7 @@
 import * as PathOperator from '@/utils/pathOperator'
 import { LayerInfo, LayerRegister, Parameter } from '@/utils/layerRegister'
 import { Definitions } from '@/utils/definitions'
+import { Vector2D } from '@/utils/svgAreaHelper'
 import store from '@/store'
 
 const GRID = Definitions.EDIT.GRID.SIZE
@@ -33,31 +34,27 @@ class ServerEventHandler {
     this.layerRegister = layerRegister
   }
 
-  createDummyInputLayer (variable: Variable) {
+  createDummyInputLayer (variable: Variable): Partial<LayerInfo> {
     return {
-      inputParam: null,
       input: [],
       name: variable.dataName,
-      output: [variable.variableName],
-      type: 'InputVariable'
+      output: [variable.variableName]
     }
   }
 
-  createDummyOutputLayer (variable: Variable) {
+  createDummyOutputLayer (variable: Variable): Partial<LayerInfo> {
     return {
-      outputParam: null,
       input: [variable.variableName],
       name: variable.dataName,
-      output: [],
-      type: 'OutputVariable'
+      output: []
     }
   }
 
-  getLayerPosition (depth: number, needSlice: number) {
+  getLayerPosition (depth: number, needSlice: number): Vector2D {
     return { x: GRID * needSlice * 15, y: GRID * depth * 4 }
   }
 
-  setupGetNodeAndLinkRecursive (functions: any, outputVariables: Variable[]) {
+  setupGetNodeAndLinkRecursive (functions: LayerInfo[], outputVariables: Variable[]) {
     const recursive = (sourceLayer: LayerInfo, sourceDepthFromRoot: number) => {
       for (const sourceOutput of sourceLayer.output) {
         // find user define output
@@ -70,7 +67,7 @@ class ServerEventHandler {
           )
 
           const [layer] = this.layerRegister.addLayer(
-            tmpLayer,
+            tmpLayer as LayerInfo,
             sourceDepthFromRoot + 1
           )
 
@@ -82,7 +79,7 @@ class ServerEventHandler {
           this.layerRegister.addLink(link)
         }
 
-        const destLayers = functions.filter((f: any) =>
+        const destLayers = functions.filter((f: LayerInfo) =>
           (f.input || []).find((name: string) => name === sourceOutput)
         )
 
@@ -94,7 +91,7 @@ class ServerEventHandler {
           }
 
           const [layer, isVisitEnough] = this.layerRegister.addLayer(
-            tmpLayer,
+            tmpLayer as LayerInfo,
             sourceDepthFromRoot + depthIncrement
           )
 
@@ -105,7 +102,7 @@ class ServerEventHandler {
 
           this.layerRegister.addLink(link)
 
-          if (isVisitEnough) recursive(layer, Math.max(...layer.depth))
+          if (isVisitEnough) recursive(layer, Math.max(...layer.depth as number[]))
         }
       }
     }
