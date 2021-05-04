@@ -82,7 +82,7 @@ export const styleHelper = new StyleHelper()
 class SvgAreaOperator {
   drawingLinkMemory: DrawingLinkMemory
   connectedLinks: TempLink[]
-  focusLayerRect: any
+  focusLayerRect: d3.Selection<SVGRectElement, unknown, null, unknown>
 
   constructor () {
     this.drawingLinkMemory = {
@@ -123,7 +123,7 @@ class SvgAreaOperator {
     }
   }
 
-  getTranslateCoordinate (node: HTMLElement): number[] {
+  getTranslateCoordinate (node: SVGRectElement): number[] {
     // str == "translate(x, y)"
     const str = d3.select(node).attr('transform')
 
@@ -199,7 +199,7 @@ class SvgAreaOperator {
       .remove()
   }
 
-  layerFocusing (node: HTMLElement): void {
+  layerFocusing (node: SVGRectElement): void {
     if (typeof this.focusLayerRect !== 'undefined') {
       // if the same layer is clicked again, do nothing
       if (
@@ -283,9 +283,9 @@ class SvgAreaOperator {
 
   // for layer event
   getLayerDragStart (
-    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>
+    selection: d3.Selection<SVGRectElement, unknown, HTMLElement, unknown>
   ) {
-    return (event: Event, elem: HTMLElement): void => {
+    return (event: Event, elem: SVGRectElement): void => {
       const index = selection.nodes().indexOf(elem)
 
       this.layerFocusing(elem)
@@ -328,13 +328,13 @@ class SvgAreaOperator {
     }
   }
 
-  getLayerDragging (): (arg1: any, arg2: HTMLElement) => void {
+  getLayerDragging (): (arg1: d3.D3DragEvent<SVGRectElement, unknown, unknown>, arg2: SVGRectElement) => void {
     // bind functions of this
     const getTranslateCoordinate = this.getTranslateCoordinate
     const createLinkLineContext = this.createLinkLineContext
     const getCorrectPosition = this.getCorrectPosition
 
-    return (event: any, elem: HTMLElement): void => {
+    return (event: d3.D3DragEvent<SVGRectElement, unknown, unknown>, elem: SVGRectElement): void => {
       // remove auxiliary layer
       d3.select('#svg-layers')
         .select('rect#auxiliary-layer')
@@ -375,9 +375,9 @@ class SvgAreaOperator {
   }
 
   getLayerDragEnd (
-    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>
+    selection: d3.Selection<SVGRectElement, unknown, d3.BaseType, unknown>
   ) {
-    return (event: Event, elem: HTMLElement): void => {
+    return (event: Event, elem: SVGRectElement): void => {
       const index = selection.nodes().indexOf(elem)
 
       let [x, y] = this.getTranslateCoordinate(elem)
@@ -431,128 +431,31 @@ class SvgAreaOperator {
     }
   }
 
-  getLayerClicked (): (arg1: any) => void {
-    return (event: any): void => {
-      this.layerFocusing(event.currentTarget.parentNode)
+  getLayerClicked (): (arg1: Event) => void {
+    return (event: Event): void => {
+      this.layerFocusing((event.currentTarget as SVGRectElement).parentNode as SVGRectElement)
     }
   }
 
-  getLayerMouseOver (): (arg1: any) => void {
-    return (event: any): void => {
+  getLayerMouseOver (): (arg1: Event) => void {
+    return (event: Event): void => {
       const elem = event.currentTarget
-      d3.select(elem)
+      if (!elem) return
+      d3.select(elem as HTMLElement)
         .select('rect')
         .attr('fill-opacity', '0.5')
-      this.drawingLinkMemory.destNodeId = this.getLayerIndex(elem)
+      this.drawingLinkMemory.destNodeId = this.getLayerIndex(elem as HTMLElement)
     }
   }
 
-  getLayerMouseOut (): (arg1: any) => void {
-    return (event: any): void => {
+  getLayerMouseOut (): (arg1: Event) => void {
+    return (event: Event): void => {
       const elem = event.currentTarget
-      d3.select(elem)
+      if (!elem) return
+      d3.select(elem as HTMLElement)
         .select('rect')
         .attr('fill-opacity', '1')
       this.drawingLinkMemory.destNodeId = -1
-    }
-  }
-
-  // for link event
-  getLinkDragStart (): (arg1: any) => void {
-    return (event: any): void => {
-      const elem = event.sourceEvent.currentTarget
-
-      this.layerFocusing(elem.parentNode.parentNode)
-      d3.select(elem.parentNode)
-        .select('.linker')
-        .style('fill', 'var(--color-system3)')
-      this.drawingLinkMemory.srcNodeId = this.getLayerIndex(
-        elem.parentNode.parentNode
-      )
-      const lineIndex = d3
-        .select('#svg-links')
-        .selectAll('path')
-        .nodes().length
-      this.drawingLinkMemory.tmpLine = d3
-        .select('#svg-links')
-        .append('path')
-        .attr('id', 'link-' + lineIndex)
-    }
-  }
-
-  getLinkDragging (): (arg1: any) => void {
-    return (event: any): void => {
-      let [x, y] = d3.pointer(event)
-
-      if (event.dx) {
-        this.drawingLinkMemory.delta.x = Math.sign(event.dx) * 2
-      }
-      if (event.dy) {
-        this.drawingLinkMemory.delta.y = Math.sign(event.dy) * 2
-      }
-
-      x -= this.drawingLinkMemory.delta.x
-      y -= this.drawingLinkMemory.delta.y
-
-      const context = this.createLinkLineContext(
-        this.getLinkerPosition(this.drawingLinkMemory.srcNodeId, true),
-        { x, y }
-      )
-
-      const line = this.drawingLinkMemory.tmpLine as d3.Selection<
-        SVGPathElement,
-        unknown,
-        HTMLElement,
-        any
-      >
-
-      line
-        .attr('d', context)
-        .style('fill', 'none')
-        .style('stroke', 'var(--color-system3)')
-        .style('stroke-width', '1.5')
-    }
-  }
-
-  getLinkDragEnd (): (arg1: any) => void {
-    return (event: any): void => {
-      const elem = event.currentTarget
-
-      const m = this.drawingLinkMemory
-
-      const line = m.tmpLine as d3.Selection<
-        SVGPathElement,
-        unknown,
-        HTMLElement,
-        any
-      >
-
-      if (m.destNodeId !== null) {
-        const context = this.createLinkLineContext(
-          this.getLinkerPosition(m.srcNodeId, true),
-          this.getLinkerPosition(m.destNodeId, false)
-        )
-
-        line
-          .attr('d', context)
-          .style('stroke', 'var(--color-gray5)')
-          .style('stroke-width', '1.5')
-          .style('stroke-opacity', null)
-
-        store.commit('addNewLink', m)
-      }
-
-      line.remove()
-
-      this.drawingLinkMemory = {
-        srcNodeId: -1,
-        destNodeId: -1,
-        delta: { x: 0, y: 0 }
-      }
-
-      d3.select(elem.parentNode)
-        .select('.linker')
-        .style('fill', null)
     }
   }
 
@@ -568,13 +471,13 @@ class SvgAreaOperator {
   }
 
   registerMouseEvent (): void {
-    const allLayers = d3.selectAll('#svg-layers .layer')
+    const allLayers: d3.Selection<SVGRectElement, unknown, HTMLElement, unknown> = d3.selectAll('#svg-layers .layer')
 
     if (allLayers.nodes().length > 0) {
       // drag event
       allLayers.data(allLayers).call(
         d3
-          .drag<any, any>()
+          .drag<SVGRectElement, SVGRectElement>()
           .on('start', this.getLayerDragStart(allLayers))
           .on('drag', this.getLayerDragging())
           .on('end', this.getLayerDragEnd(allLayers))
@@ -588,16 +491,6 @@ class SvgAreaOperator {
       allLayers
         .on('mouseover', this.getLayerMouseOver())
         .on('mouseout', this.getLayerMouseOut())
-
-      // linker event
-
-      allLayers.selectAll('circle.hide-linker.bottom').call(
-        d3
-          .drag<any, any>()
-          .on('start', this.getLinkDragStart())
-          .on('drag', this.getLinkDragging())
-          .on('end', this.getLinkDragEnd())
-      )
     }
   }
 }
