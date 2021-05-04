@@ -1,6 +1,6 @@
-import { NodeInfo } from '@/utils/serverEventHandler'
+import { AnyObject } from '@/types/basic'
+import { Graph } from '@/types/graph'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RootState {
   editor: EditorState;
   graphInfo: GraphInfoState;
@@ -9,19 +9,6 @@ export interface RootState {
 /***************************************
  graphinfo
  ***************************************/
-
-export interface Link {
-  source: number;
-  destination: number;
-}
-
-export interface Graph {
-  x?: number;
-  y?: number;
-  name?: string;
-  nodes: NodeInfo[];
-  links: Link[];
-}
 
 export interface GraphInfoState {
   prevGraph: Graph;
@@ -48,8 +35,8 @@ export interface DirectoryNode {
   id: number;
   name: string;
   children: DirectoryNode[];
-  nntxtFiles: Array<{ name: string; data: any }>;
-  monitorFiles: Array<{ name: string; data: any }>;
+  nntxtFiles: Array<{ name: string; data: AnyObject }>;
+  monitorFiles: Array<{ name: string; data: AnyObject }>;
 }
 
 export interface DirectoryInfoState {
@@ -71,7 +58,7 @@ export interface DialogueInfoState {
   dialogueType: string;
   defaultStr: string;
   inputStr: string;
-  inputDef: any; // after replace jquey by others, fix this.
+  inputDef: ReturnType<$.Deferred>; // after replace jquey by others, fix this.
 }
 
 /***************************************

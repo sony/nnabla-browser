@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import { Graph } from '@/store/types'
+import { Graph } from '@/types/graph'
 
 interface GraphTabProps {
   graph: Graph;

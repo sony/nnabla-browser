@@ -1,27 +1,13 @@
 import * as PathOperator from '@/utils/pathOperator'
-import { LayerInfo, LayerRegister, Parameter } from '@/utils/layerRegister'
+import { Layer, Link } from '@/types/graph'
+import { NNtxt, Variable } from '@/types/nnablaApi'
 import { Definitions } from '@/utils/definitions'
+import { LayerRegister } from '@/utils/layerRegister'
+import { ServerEvent } from '@/types/serverEvent'
+import { Vector2D } from '@/types/geometry'
 import store from '@/store'
 
 const GRID = Definitions.EDIT.GRID.SIZE
-
-export interface NodeInfo extends LayerInfo {
-  x: number;
-  y: number;
-  name: string;
-  type: string;
-}
-
-export interface ServerEvent extends Event {
-  lastEventId: string;
-  data: string;
-  event: string;
-}
-
-export interface Variable {
-  dataName: string;
-  variableName: string;
-}
 
 const layerRegister = new LayerRegister()
 
@@ -33,32 +19,28 @@ class ServerEventHandler {
     this.layerRegister = layerRegister
   }
 
-  createDummyInputLayer (variable: Variable) {
+  createDummyInputLayer (variable: Variable): Partial<Layer> {
     return {
-      inputParam: null,
       input: [],
       name: variable.dataName,
-      output: [variable.variableName],
-      type: 'InputVariable'
+      output: [variable.variableName]
     }
   }
 
-  createDummyOutputLayer (variable: Variable) {
+  createDummyOutputLayer (variable: Variable): Partial<Layer> {
     return {
-      outputParam: null,
       input: [variable.variableName],
       name: variable.dataName,
-      output: [],
-      type: 'OutputVariable'
+      output: []
     }
   }
 
-  getLayerPosition (depth: number, needSlice: number) {
+  getLayerPosition (depth: number, needSlice: number): Vector2D {
     return { x: GRID * needSlice * 15, y: GRID * depth * 4 }
   }
 
-  setupGetNodeAndLinkRecursive (functions: any, outputVariables: Variable[]) {
-    const recursive = (sourceLayer: LayerInfo, sourceDepthFromRoot: number) => {
+  setupGetNodeAndLinkRecursive (functions: Layer[], outputVariables: Variable[]) {
+    const recursive = (sourceLayer: Layer, sourceDepthFromRoot: number) => {
       for (const sourceOutput of sourceLayer.output) {
         // find user define output
         const outputVariableIndex = outputVariables.findIndex(
@@ -70,19 +52,19 @@ class ServerEventHandler {
           )
 
           const [layer] = this.layerRegister.addLayer(
-            tmpLayer,
+            tmpLayer as Layer,
             sourceDepthFromRoot + 1
           )
 
-          const link = {
-            source: sourceLayer.index,
-            destination: layer.index
+          const link: Link = {
+            srcNodeId: sourceLayer.index,
+            destNodeId: layer.index
           }
 
           this.layerRegister.addLink(link)
         }
 
-        const destLayers = functions.filter((f: any) =>
+        const destLayers = functions.filter((f: Layer) =>
           (f.input || []).find((name: string) => name === sourceOutput)
         )
 
@@ -94,18 +76,18 @@ class ServerEventHandler {
           }
 
           const [layer, isVisitEnough] = this.layerRegister.addLayer(
-            tmpLayer,
+            tmpLayer as Layer,
             sourceDepthFromRoot + depthIncrement
           )
 
-          const link = {
-            source: sourceLayer.index,
-            destination: layer.index
+          const link: Link = {
+            srcNodeId: sourceLayer.index,
+            destNodeId: layer.index
           }
 
           this.layerRegister.addLink(link)
 
-          if (isVisitEnough) recursive(layer, Math.max(...layer.depth))
+          if (isVisitEnough) recursive(layer, Math.max(...layer.depth as number[]))
         }
       }
     }
@@ -113,20 +95,22 @@ class ServerEventHandler {
     return recursive
   }
 
-  getGraphInfoFromNNtxt (json: any) {
+  getGraphInfoFromNNtxt (json: NNtxt) {
     const graphInfoArray = []
     const networks = json.network || []
     const executors = json.executor || []
 
+    console.log(json)
+
     for (const executor of executors) {
-      const network = networks.find((x: any) => x.name === executor.networkName)
+      const network = networks.find(x => x.name === executor.networkName)
 
       if (typeof network === 'undefined') continue
       const variableMap = new Map()
-      network.variable.forEach((x: any) => variableMap.set(x.name, x))
+      network.variable.forEach(x => variableMap.set(x.name, x))
 
-      const inputVariables = executor.dataVariable // list
-      const outputVariables = executor.outputVariable // list
+      const inputVariables = executor.dataVariable
+      const outputVariables = executor.outputVariable
 
       const functions: any[] = []
       const noInputFunctions: any[] = []
@@ -136,7 +120,7 @@ class ServerEventHandler {
       })
 
       const allParameters = network.variable.filter(
-        (x: Parameter) => x.type === 'Parameter'
+        x => x.type === 'Parameter'
       )
 
       this.layerRegister.initialize(allParameters)

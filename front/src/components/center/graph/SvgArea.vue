@@ -131,18 +131,20 @@
 
 <script lang="ts">
 import * as d3 from 'd3'
-import { AttrType, Vector2D, styleHelper, svgAreaOperator } from '@/utils/svgAreaHelper'
-import { Graph, GraphInfoState, Link } from '@/store/types'
+import { Graph, Link, NextTransition, Node } from '@/types/graph'
 import Vue, { VNode } from 'vue'
+import { styleHelper, svgAreaOperator } from '@/utils/svgAreaHelper'
+import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
-import { NodeInfo } from '@/utils/serverEventHandler'
+import { GraphInfoState } from '@/types/store'
+import { Vector2D } from '@/types/geometry'
 
 const grid: number = Definitions.EDIT.GRID.SIZE
 const originPosX = grid * 2
 const originPosY = grid * 2
 
 // define this variable outside Vue data to prevent infinite updates
-const nextTransition: {index: number; transform: string}[] = []
+const nextTransition: NextTransition[] = []
 
 /***************************************
  interface
@@ -358,13 +360,13 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
     clickLayer: function (index: number): void {
       this.$store.commit('setActiveLayerIndex', index)
     },
-    createTransform: function (node: NodeInfo, index: number): string {
-      let ret = `translate(${node.x}, ${node.y})`
+    createTransform: function (node: Node, index: number): string {
+      let ret = `translate(${node.position.x}, ${node.position.y})`
       if (Object.prototype.hasOwnProperty.call(this.prevGraph, 'nodes')) {
         const prev = this.prevGraph.nodes.find(x => x.name === node.name)
         if (prev) {
           nextTransition.push({ index, transform: ret })
-          ret = `translate(${prev.x}, ${prev.y})`
+          ret = `translate(${prev.position.x}, ${prev.position.y})`
         }
       }
       return ret
@@ -386,17 +388,17 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
         opacity: 1.0
       }
     },
-    getNodeAttr: (): AttrType => styleHelper.createNodeAttr(),
-    getNodeStyle: (node: NodeInfo): AttrType => styleHelper.createNodeStyle(node),
-    getCapitalAttr: (): AttrType => styleHelper.createCapitalAttr(),
-    getCapitalStyle: (): AttrType => styleHelper.createCapitalStyle(),
-    getTextComponentStyle: (): AttrType => styleHelper.createTextComponentStyle(),
-    getTextAttr: (): AttrType => styleHelper.createTextAttr(),
-    getTextStyle: (): AttrType => styleHelper.createTextStyle(),
+    getNodeAttr: (): AnyObject => styleHelper.createNodeAttr(),
+    getNodeStyle: (node: Node): AnyObject => styleHelper.createNodeStyle(node),
+    getCapitalAttr: (): AnyObject => styleHelper.createCapitalAttr(),
+    getCapitalStyle: (): AnyObject => styleHelper.createCapitalStyle(),
+    getTextComponentStyle: (): AnyObject => styleHelper.createTextComponentStyle(),
+    getTextAttr: (): AnyObject => styleHelper.createTextAttr(),
+    getTextStyle: (): AnyObject => styleHelper.createTextStyle(),
     createLinkLineContext: (link: Link): string => {
-      const source = svgAreaOperator.getLinkerPosition(link.source, true)
+      const source = svgAreaOperator.getLinkerPosition(link.srcNodeId, true)
       const destination = svgAreaOperator.getLinkerPosition(
-        link.destination,
+        link.destNodeId,
         false
       )
       return svgAreaOperator.createLinkLineContext(source, destination)

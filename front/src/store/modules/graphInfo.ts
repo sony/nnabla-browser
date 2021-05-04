@@ -1,6 +1,6 @@
 import { GetterTree, Module, MutationTree } from 'vuex'
-import { Graph, GraphInfoState, Link, RootState } from '@/store/types'
-import { NodeInfo } from '@/utils/serverEventHandler'
+import { Graph, Link, Node } from '@/types/graph'
+import { GraphInfoState, RootState } from '@/types/store'
 
 const getActiveGraph = (state: GraphInfoState): Graph => {
   return state.graphs[state.activeIndex.graph] || {}
@@ -49,17 +49,16 @@ const mutations: MutationTree<GraphInfoState> = {
   setNodePosition: function (state, { index, x, y }) {
     const activeGraph = getActiveGraph(state)
 
-    activeGraph.nodes[index].x = x
-    activeGraph.nodes[index].y = y
+    activeGraph.nodes[index].position.x = x
+    activeGraph.nodes[index].position.y = y
   },
 
   addNewLink: function (
     state,
-    { source, destination }: { source: number; destination: number }
+    link: Link
   ) {
     const activeGraph = getActiveGraph(state)
-
-    activeGraph.links.push({ source, destination })
+    activeGraph.links.push(link)
   },
 
   startDragging: function (state) {
@@ -79,19 +78,19 @@ const mutations: MutationTree<GraphInfoState> = {
 const getters: GetterTree<GraphInfoState, RootState> = {
   activeGraph: getActiveGraph,
 
-  activeLayer: (state, getters): NodeInfo => {
+  activeLayer: (state, getters): Node => {
     if (Object.prototype.hasOwnProperty.call(getters.activeGraph, 'nodes')) {
       return getters.activeGraph.nodes[state.activeIndex.layer] || {}
     }
-    return {} as NodeInfo
+    return {} as Node
   },
 
   activeLinks: (state, getters) => (id: number): Link[] => {
     const ret = []
     for (const index in getters.activeGraph.links) {
-      const link = getters.activeGraph.links[index]
-      if (link.source === id || link.destination === id) {
-        ret.push({ index, ...link })
+      const link: Link = getters.activeGraph.links[index]
+      if (link.srcNodeId === id || link.destNodeId === id) {
+        ret.push({ ...link, index: Number(index) })
       }
     }
 

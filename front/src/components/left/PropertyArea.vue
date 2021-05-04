@@ -27,12 +27,6 @@ import LayerType from '@/components/left/property/LayerType.vue'
 import Vue from 'vue'
 import { nnablaCore } from '@/utils/nnablaApi'
 
-// type definition
-// todo: refactoring
-interface DefaultParam {
-  default: boolean;
-}
-
 interface Selectedlayer {
   outputShape: string;
   type: string;
