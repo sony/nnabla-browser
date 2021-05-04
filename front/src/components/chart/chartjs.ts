@@ -53,7 +53,7 @@ Chart.register(
   Tooltip
 )
 
-export function generateChart (chartId: string, chartType: string) {
+export function generateChart (chartId: string, chartType: string): any {
   return {
     render: function (createElement: any) {
       return createElement(
@@ -97,7 +97,7 @@ export function generateChart (chartId: string, chartType: string) {
       },
       plugins: {
         type: Array,
-        default () {
+        default (): [] {
           return []
         }
       }
@@ -111,7 +111,7 @@ export function generateChart (chartId: string, chartType: string) {
     },
 
     methods: {
-      addPlugin (plugin) {
+      addPlugin (plugin): void {
         this.$data._plugins.push(plugin)
       },
       generateLegend () {
@@ -119,7 +119,7 @@ export function generateChart (chartId: string, chartType: string) {
           return this.$data._chart.generateLegend()
         }
       },
-      renderChart (data, options) {
+      renderChart (data, options): void {
         if (this.$data._chart) this.$data._chart.destroy()
         if (!this.$refs.canvas) {
           throw new Error(
@@ -134,7 +134,7 @@ export function generateChart (chartId: string, chartType: string) {
         })
       }
     },
-    beforeDestroy () {
+    beforeDestroy (): void {
       if (this.$data._chart) {
         this.$data._chart.destroy()
       }

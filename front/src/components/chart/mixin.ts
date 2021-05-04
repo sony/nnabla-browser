@@ -1,16 +1,19 @@
 /* eslint no-prototype-builtins: 0 */
 // @ts-nocheck
 
-function dataHandler (newData: any, oldData: any) {
+import { ChartData, ChartDataset } from 'chart.js'
+import { ReactiveDataMixin } from '@/types/chart'
+
+function dataHandler (newData: ChartData, oldData: ChartData): void {
   if (oldData) {
     const chart = this.$data._chart
 
     // Get new and old DataSet Labels
-    const newDatasetLabels = newData.datasets.map((dataset: any) => {
+    const newDatasetLabels = newData.datasets.map((dataset: ChartDataset) => {
       return dataset.label
     })
 
-    const oldDatasetLabels = oldData.datasets.map((dataset: any) => {
+    const oldDatasetLabels = oldData.datasets.map((dataset: ChartDataset) => {
       return dataset.label
     })
 
@@ -23,7 +26,7 @@ function dataHandler (newData: any, oldData: any) {
       newLabels === oldLabels &&
       oldData.datasets.length === newData.datasets.length
     ) {
-      newData.datasets.forEach((dataset: any, i: number) => {
+      newData.datasets.forEach((dataset: ChartDataset, i: number) => {
         // Get new and old dataset keys
         const oldDatasetKeys = Object.keys(oldData.datasets[i])
         const newDatasetKeys = Object.keys(dataset)
@@ -78,7 +81,7 @@ function dataHandler (newData: any, oldData: any) {
   }
 }
 
-export const reactiveData = {
+export const reactiveData: ReactiveDataMixin = {
   data () {
     return {
       chartData: null
@@ -95,7 +98,7 @@ export const reactiveProp = {
     chartData: {
       type: Object,
       required: true,
-      default: function () {
+      default: function (): void {
         /* do nothing */
       }
     }
