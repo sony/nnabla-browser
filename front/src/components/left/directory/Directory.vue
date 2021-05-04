@@ -113,6 +113,7 @@ export default Vue.extend({
 <style scoped>
 .branch {
   font-size: 14px;
+  font-weight: 500;
 }
 
 .branch-name {
@@ -127,7 +128,7 @@ export default Vue.extend({
 }
 
 .branch-name:hover {
-  background: var(--color-gray2);
+  background: var(--color-gray0);
 }
 
 ul {

@@ -86,12 +86,12 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
 }
 
 .nntxt-entry.active {
-  font-weight: bold;
   cursor: pointer;
   color: var(--color-brand);
+  background: var(--color-gray0);
 }
 
 .nntxt-entry:hover {
-  background: var(--color-gray2);
+  background: var(--color-gray0);
 }
 </style>

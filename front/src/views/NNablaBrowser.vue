@@ -90,6 +90,8 @@ export default Vue.extend({
 </script>
 
 <style>
+@import url('http://fonts.googleapis.com/earlyaccess/notosansjp.css');
+
 :root {
   --color-brand: #006699;
   --color-system1: #ff6666;
@@ -124,12 +126,10 @@ body {
   margin: 0;
   padding: 0;
   font-size: 13px;
-  font-family: 'SSTUI-Roman';
+  font-family: 'Noto Sans JP', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
-}
-
-.text-fixed-width {
-  font-family: 'SSTUI-Roman';
 }
 
 .app-row,
@@ -212,7 +212,6 @@ img.nnc-disabled.navbar-img {
 }
 
 .title {
-  font-family: 'SSTUI-Medium';
   height: 40px;
   margin-top: 12px;
   margin-left: 16px;
@@ -260,7 +259,6 @@ img.nnc-disabled.navbar-img {
 
 .network-action-text,
 .job-action-text {
-  font-family: 'SSTUI-Medium';
   font-size: 13px;
   color: var(--color-gray5);
   margin: 8px 4px 8px 4px;

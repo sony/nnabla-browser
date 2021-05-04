@@ -97,12 +97,12 @@ export default Vue.extend({
 }
 
 .csv-entry:hover {
-  background: var(--color-gray2);
+  background: var(--color-gray0);
 }
 
 .csv-entry.active {
-  font-weight: bold;
   color: var(--color-brand);
+  background: var(--color-gray0);
 }
 
 .csv-entry,
