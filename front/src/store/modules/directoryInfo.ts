@@ -49,7 +49,7 @@ function createNewNode (name: string): DirectoryNode {
   }
 }
 
-function createNewSubTree (relPath: string, insertData: any): DirectoryNode {
+function createNewSubTree (relPath: string, insertData: AnyObject): DirectoryNode {
   const split = relPath.split('/')
 
   const subTree = createNewNode(split[0])

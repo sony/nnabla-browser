@@ -1,6 +1,8 @@
 import fnmatch
 import glob
 import os
+import pickle as pkl
+import re
 import time
 import zipfile
 from multiprocessing import Lock
@@ -25,7 +27,26 @@ def nnabla_proto_to_json(file_path):
             else:
                 return ""
 
-    return json_format.MessageToJson(proto)
+    raw_msg = json_format.MessageToJson(proto)
+
+    # Manipulate key name from "XXXParam" to "param"
+    s = raw_msg.split("\n")
+    for i, line in enumerate(s):
+        if 'Param"' not in line:
+            continue
+
+        s_cur = line.split('"')  # muse bt ["    ", "XXXPram", ": {"]
+
+        # assertion
+        # assert len(s) == 3
+        # assert s[1].endswith("Param")
+
+        s_cur[1] = "param"
+        s[i] = '"'.join(s_cur)
+
+    ret_msg = "\n".join(s)
+
+    return ret_msg
 
 
 def check_file_extension(filepath):

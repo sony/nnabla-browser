@@ -22,24 +22,20 @@
 </template>
 
 <script lang="ts">
+import { AnyObject } from '@/types/basic'
 import LayerProperties from '@/components/left/property/LayerProperties.vue'
 import LayerType from '@/components/left/property/LayerType.vue'
+import { Node } from '@/types/graph'
+import { RawFunction } from '@/types/nnablaApi'
 import Vue from 'vue'
 import { nnablaCore } from '@/utils/nnablaApi'
 
-interface Selectedlayer {
-  outputShape: string;
-  type: string;
-  length: number;
-  [key: string]: object | string | number;
-}
-
 interface ComputedPropertyArea {
-  selectedLayer: Selectedlayer;
+  selectedLayer: Node;
   isLayerSelected: boolean;
-  defaultProps: object;
+  defaultProps: RawFunction;
   layerParams: object | string | number;
-  ioInfos: object;
+  ioInfos: { outputShape: string[] };
 }
 
 export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
@@ -48,20 +44,19 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
     'layer-properties': LayerProperties
   },
   computed: {
-    selectedLayer: function () {
+    selectedLayer: function (): Node {
       return this.$store.getters.activeLayer
     },
-    isLayerSelected: function () {
+    isLayerSelected: function (): boolean {
       return Object.keys(this.selectedLayer).length > 0
     },
-    defaultProps: function () {
+    defaultProps: function (): RawFunction {
       return nnablaCore.findFunction(this.selectedLayer.type)
     },
-    layerParams: function () {
-      const paramKey: string = this.selectedLayer.type.toLowerCase() + 'Param'
-      return this.selectedLayer[paramKey] || {}
+    layerParams: function (): AnyObject {
+      return this.selectedLayer.param || {}
     },
-    ioInfos: function () {
+    ioInfos: function (): {outputShape: string[] } {
       // return input/output related info,ie. shapes etc.
       return {
         outputShape: this.selectedLayer.outputShape

@@ -1,5 +1,5 @@
 import { Layer, Link } from '@/types/graph'
-import { Parameter } from '@/types/nnablaApi'
+import { NNtxtFunction, Parameter } from '@/types/nnablaApi'
 import { range } from '@/utils/arrayOperator'
 
 interface Depth2Layers {
@@ -20,15 +20,15 @@ export class LayerRegister {
     }
   }
 
-  addLayer (layer: Layer, depth: number): [Layer, boolean] {
-    if (!Object.prototype.hasOwnProperty.call(this.layers, layer.name)) {
+  addLayer (func: NNtxtFunction, depth: number): [Layer, boolean] {
+    if (!Object.prototype.hasOwnProperty.call(this.layers, func.name)) {
       // first visit
       let visitCount = 1
       const parameters = []
       const buffers = []
 
       // collect all function parameters
-      for (const _input of layer.input) {
+      for (const _input of func.input) {
         const varIndex = this.allParameters.findIndex(
           (x: { name: string }) => x.name === _input
         )
@@ -42,8 +42,8 @@ export class LayerRegister {
         }
       }
 
-      this.layers[layer.name] = {
-        ...layer,
+      this.layers[func.name] = {
+        ...func,
         input: buffers,
         index: this.counter++,
         depth: [depth],
@@ -52,11 +52,11 @@ export class LayerRegister {
       }
     } else {
       // visit again
-      (this.layers[layer.name].depth as number[]).push(depth)
-      this.layers[layer.name].visitCount++
+      (this.layers[func.name].depth as number[]).push(depth)
+      this.layers[func.name].visitCount++
     }
 
-    const retLayer = this.layers[layer.name]
+    const retLayer = this.layers[func.name]
 
     return [retLayer, retLayer.input.length <= retLayer.visitCount]
   }

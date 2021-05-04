@@ -28,9 +28,14 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 library.add(faExternalLinkAlt)
 
 export default Vue.extend({
-  props: { defaultProps: Object },
+  props: {
+    defaultProps: {
+      type: Object,
+      required: true
+    }
+  },
   methods: {
-    getDocUrl: function () {
+    getDocUrl: function (): string {
       const APIDEF = Definitions.NNABLA_CORE_API
       let url
       if ((this.defaultProps.api_type || '') === 'parametric_functions_api') {

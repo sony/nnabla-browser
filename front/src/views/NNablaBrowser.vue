@@ -63,7 +63,7 @@ export default Vue.extend({
 
       eventSrc.addEventListener(
         'fileContent',
-        serverEventHandler.createFileContentEventListener,
+        serverEventHandler.fileContentEventListener,
         false
       )
 

@@ -1,24 +1,23 @@
 import { AnyObject } from '@/types/basic'
-import { Function } from '@/types/nnablaApi'
+import { RawFunction } from '@/types/nnablaApi'
 
 import { httpClient } from './httpClient'
 
 class NnablaCore {
   nnablaApi: AnyObject = {}
-  allFunctions: Function[] = []
+  allFunctions: RawFunction[] = []
 
   constructor () {
     httpClient.getNnablaApi().then(res => {
       this.nnablaApi = JSON.parse(res.data)
       this.allFunctions = this.getAllFuncionsRecursive(this.nnablaApi)
-      console.log(this.allFunctions)
     })
   }
 
-  getAllFuncionsRecursive (obj: AnyObject | Function): Function[] {
-    let ret: Function[] = []
+  getAllFuncionsRecursive (obj: AnyObject | RawFunction): RawFunction[] {
+    let ret: RawFunction[] = []
     if (typeof obj.snake_name !== 'undefined') {
-      ret.push(obj as Function)
+      ret.push(obj as RawFunction)
     } else if (typeof obj === 'object') {
       for (const key in obj) {
         ret = ret.concat(this.getAllFuncionsRecursive((obj as AnyObject)[key] as AnyObject))
@@ -31,16 +30,16 @@ class NnablaCore {
     return this.nnablaApi
   }
 
-  getAllFunctions (): Function[] {
+  getAllFunctions (): RawFunction[] {
     return this.allFunctions
   }
 
-  findFunction (layerType: string): Function {
+  findFunction (layerType: string): RawFunction {
     // workaround for some incorrect cases
     const target = layerType.toLowerCase()
     return this.getAllFunctions().find(
-      (functionInfo: Function) => functionInfo.layer_name.toLowerCase() === target
-    ) as Function
+      (functionInfo: RawFunction) => functionInfo.layer_name.toLowerCase() === target
+    ) as RawFunction
   }
 }
 

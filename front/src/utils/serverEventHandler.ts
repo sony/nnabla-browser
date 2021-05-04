@@ -1,8 +1,9 @@
 import * as PathOperator from '@/utils/pathOperator'
-import { Layer, Node, Link } from '@/types/graph'
-import { NNtxt, Variable } from '@/types/nnablaApi'
+import { Graph, Layer, Link, Node } from '@/types/graph'
+import { NNtxt, NNtxtFunction, Variable } from '@/types/nnablaApi'
 import { Definitions } from '@/utils/definitions'
 import { LayerRegister } from '@/utils/layerRegister'
+import { MonitorSeriesData } from '@/types/monitor'
 import { ServerEvent } from '@/types/serverEvent'
 import { Vector2D } from '@/types/geometry'
 import store from '@/store'
@@ -19,21 +20,23 @@ class ServerEventHandler {
     this.layerRegister = layerRegister
   }
 
-  createDummyInputLayer (variable: Variable): Partial<Node> {
+  createDummyInput (variable: Variable): NNtxtFunction {
     return {
       input: [],
       name: variable.dataName,
       output: [variable.variableName],
-      type: 'InputVariable'
+      type: 'InputVariable',
+      param: {}
     }
   }
 
-  createDummyOutputLayer (variable: Variable): Partial<Node> {
+  createDummyOutputLayer (variable: Variable): NNtxtFunction {
     return {
       input: [variable.variableName],
       name: variable.dataName,
       output: [],
-      type: 'OutputVariable'
+      type: 'OutputVariable',
+      param: {}
     }
   }
 
@@ -41,8 +44,8 @@ class ServerEventHandler {
     return { x: GRID * needSlice * 15, y: GRID * depth * 4 }
   }
 
-  setupGetNodeAndLinkRecursive (functions: Layer[], outputVariables: Variable[]) {
-    const recursive = (sourceLayer: Layer, sourceDepthFromRoot: number) => {
+  setupGetNodeAndLinkRecursive (functions: NNtxtFunction[], outputVariables: Variable[]): (arg1: Layer, arg2: number) => void {
+    const recursive = (sourceLayer: Layer, sourceDepthFromRoot: number): void => {
       for (const sourceOutput of sourceLayer.output) {
         // find user define output
         const outputVariableIndex = outputVariables.findIndex(
@@ -54,7 +57,7 @@ class ServerEventHandler {
           )
 
           const [layer] = this.layerRegister.addLayer(
-            tmpLayer as Layer,
+            tmpLayer as NNtxtFunction,
             sourceDepthFromRoot + 1
           )
 
@@ -66,7 +69,7 @@ class ServerEventHandler {
           this.layerRegister.addLink(link)
         }
 
-        const destLayers = functions.filter((f: Layer) =>
+        const destLayers = functions.filter((f: NNtxtFunction) =>
           (f.input || []).find((name: string) => name === sourceOutput)
         )
 
@@ -97,8 +100,8 @@ class ServerEventHandler {
     return recursive
   }
 
-  getGraphInfoFromNNtxt (json: NNtxt) {
-    const graphInfoArray = []
+  getGraphInfoFromNNtxt (json: NNtxt): Graph[] {
+    const graphInfoArray: Graph[] = []
     const networks = json.network || []
     const executors = json.executor || []
 
@@ -112,9 +115,9 @@ class ServerEventHandler {
       const inputVariables = executor.dataVariable
       const outputVariables = executor.outputVariable
 
-      const functions: any[] = []
-      const noInputFunctions: any[] = []
-      network.function.forEach((f: any) => {
+      const functions: NNtxtFunction[] = []
+      const noInputFunctions: NNtxtFunction[] = []
+      network.function.forEach((f: NNtxtFunction) => {
         if (Object.prototype.hasOwnProperty.call(f, 'input')) functions.push(f)
         else noInputFunctions.push({ ...f, input: [] })
       })
@@ -132,7 +135,7 @@ class ServerEventHandler {
 
       // create input nodes
       const inputLayers = [
-        ...inputVariables.map(this.createDummyInputLayer),
+        ...inputVariables.map(this.createDummyInput),
         ...noInputFunctions
       ]
 
@@ -143,7 +146,7 @@ class ServerEventHandler {
 
       const depthToLayers = this.layerRegister.getDepthToLayers()
 
-      const nodes = []
+      const nodes: Node[] = []
       for (let { needSlice, layers } of Object.values(depthToLayers)) {
         for (const layer of layers.sort((a: number, b: number) =>
           a > b ? 1 : -1
@@ -157,11 +160,9 @@ class ServerEventHandler {
 
       nodes.sort((a, b) => (a.index > b.index ? 1 : -1))
       nodes.forEach(a => {
-        a.outputShape = {}
         const b = a.type === 'OutputVariable' ? a.input : a.output
         for (const x of b) {
-          const name = a.type === 'OutputVariable' ? a.name : x
-          a.outputShape[`${name}_output_shape`] = variableMap.get(x).shape.dim
+          a.outputShape = variableMap.get(x).shape.dim
         }
       })
 
@@ -173,7 +174,7 @@ class ServerEventHandler {
     return graphInfoArray
   }
 
-  getMonitorInfo (data: string) {
+  getMonitorInfo (data: string): MonitorSeriesData {
     const split = data.split('\n')
 
     const times = []
@@ -189,23 +190,23 @@ class ServerEventHandler {
   }
 
   /** SSE event listeners **/
-  createSSEConnectionIdListener (event: Event) {
+  createSSEConnectionIdListener (event: Event): void {
     this.SSEConnectionId = parseInt((event as ServerEvent).data)
   }
 
-  initDirectoryStructureEventListener (event: Event) {
+  initDirectoryStructureEventListener (event: Event): void {
     const paths = (event as ServerEvent).data.split('\n')
 
     store.commit('initDirectoryStructure', { paths })
   }
 
-  directoryStructureEventListener (event: Event) {
+  directoryStructureEventListener (event: Event): void {
     const filePath = (event as ServerEvent).lastEventId
 
     store.commit('updateDirectoryStructure', { path: filePath })
   }
 
-  createFileContentEventListener (event: Event) {
+  fileContentEventListener (event: Event): void {
     const filePath = (event as ServerEvent).lastEventId
 
     const fileType = PathOperator.getFileType(filePath)
@@ -226,7 +227,7 @@ class ServerEventHandler {
     store.commit('updateFileContent', { path: filePath, data })
   }
 
-  deleteEventListener (event: Event) {
+  deleteEventListener (event: Event): void {
     const path = (event as ServerEvent).lastEventId
 
     store.commit('deleteFileOrDirectory', { path })

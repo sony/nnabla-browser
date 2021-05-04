@@ -18,11 +18,17 @@ interface PropertyProp {
 
 export default Vue.extend<{}, {}, {}, PropertyProp>({
   props: {
-    defaultParam: Object,
-    layerParam: String
+    defaultParam: {
+      type: Object,
+      required: true
+    },
+    layerParam: {
+      type: String,
+      required: true
+    }
   },
   methods: {
-    getValue: function () {
+    getValue: function (): string | boolean {
       if (this.layerParam !== null) return this.layerParam
       return this.defaultParam.default
     }

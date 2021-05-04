@@ -1,6 +1,6 @@
 import * as Path from 'path'
 
-const getFileType = (path: string) => {
+const getFileType = (path: string): string | null => {
   const ext = Path.extname(path)
   const subExt = Path.extname(Path.basename(path, ext))
 

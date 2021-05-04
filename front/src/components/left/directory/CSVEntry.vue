@@ -9,12 +9,30 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
+import { MonitorFile } from '@/types/store'
 import { httpClient } from '@/utils/httpClient'
 import { serverEventHandler } from '@/utils/serverEventHandler'
 
 export default Vue.extend({
-  props: ['monitor', 'dirName', 'dirId', 'level'],
+  props: {
+    monitor: {
+      type: Object as PropType<MonitorFile>,
+      required: true
+    },
+    dirName: {
+      type: String,
+      required: true
+    },
+    dirId: {
+      type: Number,
+      required: true
+    },
+    level: {
+      type: Number,
+      required: true
+    }
+  },
   data: function () {
     return {
       checked: this.monitor.isView || false,
@@ -24,7 +42,7 @@ export default Vue.extend({
   },
   watch: {
     monitor: {
-      handler: function () {
+      handler: function (): void {
         if (this.checked) {
           this.updateChart()
         }
@@ -33,7 +51,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    updateChart: function () {
+    updateChart: function (): void {
       if (this.monitor.data) {
         this.monitor.isView = this.checked
 
@@ -51,11 +69,11 @@ export default Vue.extend({
         this.$store.commit(mutation, chartData)
       }
     },
-    clickArea: function () {
+    clickArea: function (): void {
       this.checked = !this.checked
       this.changeEvent()
     },
-    changeEvent: function () {
+    changeEvent: function (): void {
       if (this.checked) {
         if (this.loaded) return
 

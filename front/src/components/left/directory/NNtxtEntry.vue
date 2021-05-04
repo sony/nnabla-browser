@@ -10,8 +10,8 @@
 
 <script lang="ts">
 import * as d3 from 'd3'
-import { GraphInfoState, RootState } from '@/types/store'
-import Vue from 'vue'
+import { GraphInfoState, NNtxtFile, RootState } from '@/types/store'
+import Vue, { PropType } from 'vue'
 import { httpClient } from '@/utils/httpClient'
 import { serverEventHandler } from '@/utils/serverEventHandler'
 
@@ -23,30 +23,39 @@ interface NNtxtCouputedType {
 }
 
 interface NNtxtPropsType {
-  nntxt: { data: object; name: string };
+  nntxt: NNtxtFile;
   dirName: string;
   level: number;
 }
 
 export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
   props: {
-    nntxt: Object,
-    dirName: String,
-    level: Number
+    nntxt: {
+      type: Object as PropType<NNtxtFile>,
+      required: true
+    },
+    dirName: {
+      type: String,
+      required: true
+    },
+    level: {
+      type: Number,
+      required: true
+    }
   },
   computed: {
-    nntxtPath: function () {
+    nntxtPath: function (): string {
       return (this.level > 0 ? this.dirName + '/' : '') + this.nntxt.name
     },
-    isSelected: function () {
+    isSelected: function (): boolean {
       return this.$store.state.directoryInfo.activeFile === this.nntxtPath
     },
-    graphInfo: function () {
+    graphInfo: function (): GraphInfoState {
       return (this.$store.state as RootState).graphInfo
     }
   },
   methods: {
-    clickEvent: function () {
+    clickEvent: function (): void {
       if (this.nntxtPath !== this.graphInfo.nntxtPath) {
         // get nntxt contents from server
         httpClient.getFileContent(this.nntxtPath).then(res => {

@@ -19,7 +19,7 @@
       </div>
     </div>
     <div
-      v-for="(value, key) in ioInfos.outputShape"
+      v-for="(value, key) in ioInfos"
       :key="value + '-' + key"
       class="property"
     >
@@ -39,9 +39,11 @@
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
+import { AnyObject } from '@/types/basic'
 import PropBool from '@/components/left/property/PropBool.vue'
 import PropText from '@/components/left/property/PropText.vue'
-import Vue from 'vue'
+import { RawFunction } from '@/types/nnablaApi'
 
 export default Vue.extend({
   components: {
@@ -49,24 +51,33 @@ export default Vue.extend({
     'prop-bool': PropBool
   },
   props: {
-    defaultParams: Object,
-    layerParams: Object,
-    ioInfos: Object
+    defaultParams: {
+      type: Object as PropType<RawFunction>,
+      required: true
+    },
+    layerParams: {
+      type: Object,
+      required: true
+    },
+    ioInfos: {
+      type: Object,
+      required: true
+    }
   },
   computed: {
-    filteredParams: function () {
-      const values: any = {}
-      const keys = Object.keys(this.defaultParams)
-      for (let i = 0; i < keys.length; ++i) {
-        if (keys[i] !== 'outputs' && keys[i] !== 'n_outputs') {
-          values[keys[i]] = this.defaultParams[keys[i]]
+    filteredParams: function (): RawFunction {
+      type paramKeys = keyof RawFunction
+      const values: RawFunction = {} as RawFunction
+      for (const [key, value] of Object.entries(this.defaultParams)) {
+        if (key !== 'outputs' && key !== 'n_outputs') {
+          values[key as paramKeys] = value
         }
       }
       return values
     }
   },
   methods: {
-    getLayerParam: function (key: string): string | null {
+    getLayerParam: function (key: string): boolean | string | null {
       const name = key.replace(/_./g, (s: string) => s.charAt(1).toUpperCase())
       const params = this.layerParams[name]
 
@@ -78,9 +89,14 @@ export default Vue.extend({
       ) {
         return '[' + Object.values(params.dim).join(', ') + ']'
       }
-      return params
+
+      if (typeof params === 'boolean') {
+        return params
+      }
+
+      return String(params)
     },
-    selectComponent: function (prop: any) {
+    selectComponent: function (prop: AnyObject): string {
       if (Object.prototype.hasOwnProperty.call(prop, 'type')) {
         if (prop.type === 'bool') {
           return 'prop-bool'

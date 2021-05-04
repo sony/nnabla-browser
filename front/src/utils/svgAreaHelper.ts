@@ -2,6 +2,7 @@ import * as d3 from 'd3'
 import { DrawingLinkMemory, NextTransition, Node, TempLink } from '@/types/graph'
 import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
+import { RawFunction } from '@/types/nnablaApi'
 import { Vector2D } from '@/types/geometry'
 import { nnablaCore } from './nnablaApi'
 import store from '@/store'
@@ -9,11 +10,11 @@ import store from '@/store'
 const layerDef = Definitions.EDIT.LAYER
 
 class StyleHelper {
-  getDefaultComponent (layerType: string) {
+  getDefaultComponent (layerType: string): RawFunction {
     return nnablaCore.findFunction(layerType)
   }
 
-  getLayerColor (layerType: string) {
+  getLayerColor (layerType: string): string {
     return this.getDefaultComponent(layerType).color
   }
 
@@ -92,7 +93,7 @@ class SvgAreaOperator {
     this.connectedLinks = []
   }
 
-  adjustSvgSize () {
+  adjustSvgSize (): void {
     // todo: refactor
     const svg = d3.select('svg#network-editor')
     const svgLayers = svg.select('#svg-layers')
@@ -122,7 +123,7 @@ class SvgAreaOperator {
     }
   }
 
-  getTranslateCoordinate (node: HTMLElement) {
+  getTranslateCoordinate (node: HTMLElement): number[] {
     // str == "translate(x, y)"
     const str = d3.select(node).attr('transform')
 
@@ -134,13 +135,13 @@ class SvgAreaOperator {
     return [parseInt(x), parseInt(y)]
   }
 
-  getLayerIndex (layerNode: HTMLElement) {
+  getLayerIndex (layerNode: HTMLElement): number {
     return Number(layerNode.id.split('-')[1])
   }
 
   getLayerPosition (layerIndex: number): Vector2D {
-    const targetLayer = store.getters.activeGraph.nodes[layerIndex]
-    return { x: targetLayer.x, y: targetLayer.y }
+    const targetLayer: Node = store.getters.activeGraph.nodes[layerIndex]
+    return { x: targetLayer.position.x, y: targetLayer.position.y }
   }
 
   getLinkerPosition (layerIndex: number, isSourceNode: boolean): Vector2D {
@@ -164,7 +165,7 @@ class SvgAreaOperator {
     return s2 - s1 > 0 && t2 - t1 > 0
   }
 
-  getOverlapLayerPosition (v: Vector2D, layerIndex: number) {
+  getOverlapLayerPosition (v: Vector2D, layerIndex: number): Vector2D | null {
     // todo: nearest neighbor search
 
     const numLayers = store.getters.activeGraph.nodes.length
@@ -176,10 +177,10 @@ class SvgAreaOperator {
       if (this.checkOverlapLayers(v, position)) return position
     }
 
-    return false
+    return null
   }
 
-  getCorrectPosition (x: number, y: number) {
+  getCorrectPosition (x: number, y: number): number[] {
     const grid: number = layerDef.GRID
     const X = Math.max(Math.round(x / grid), 0) * grid
     const Y = Math.max(Math.round(y / grid), 0) * grid
@@ -187,7 +188,7 @@ class SvgAreaOperator {
     return [X, Y]
   }
 
-  layerDefocusing () {
+  layerDefocusing (): void {
     this.focusLayerRect
       .transition()
       .ease(d3.easeCircleOut)
@@ -198,7 +199,7 @@ class SvgAreaOperator {
       .remove()
   }
 
-  layerFocusing (node: HTMLElement) {
+  layerFocusing (node: HTMLElement): void {
     if (typeof this.focusLayerRect !== 'undefined') {
       // if the same layer is clicked again, do nothing
       if (
@@ -284,7 +285,7 @@ class SvgAreaOperator {
   getLayerDragStart (
     selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>
   ) {
-    return (event: Event, elem: HTMLElement) => {
+    return (event: Event, elem: HTMLElement): void => {
       const index = selection.nodes().indexOf(elem)
 
       this.layerFocusing(elem)
@@ -302,7 +303,7 @@ class SvgAreaOperator {
           insert = {
             index: link.index,
             destPosition: this.getLinkerPosition(link.destination, false),
-            update: function (v: Vector2D) {
+            update: function (v: Vector2D): void {
               this.srcPosition = {
                 x: v.x + layerDef.GRID * 5,
                 y: v.y + layerDef.GRID * 2
@@ -313,7 +314,7 @@ class SvgAreaOperator {
           insert = {
             index: link.index,
             srcPosition: this.getLinkerPosition(link.source, true),
-            update: function (v: Vector2D) {
+            update: function (v: Vector2D): void {
               this.destPosition = { x: v.x + layerDef.GRID * 5, y: v.y }
             }
           }
@@ -327,13 +328,13 @@ class SvgAreaOperator {
     }
   }
 
-  getLayerDragging () {
+  getLayerDragging (): (arg1: any, arg2: HTMLElement) => void {
     // bind functions of this
     const getTranslateCoordinate = this.getTranslateCoordinate
     const createLinkLineContext = this.createLinkLineContext
     const getCorrectPosition = this.getCorrectPosition
 
-    return (event: any, elem: HTMLElement) => {
+    return (event: any, elem: HTMLElement): void => {
       // remove auxiliary layer
       d3.select('#svg-layers')
         .select('rect#auxiliary-layer')
@@ -376,14 +377,14 @@ class SvgAreaOperator {
   getLayerDragEnd (
     selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>
   ) {
-    return (event: Event, elem: HTMLElement) => {
+    return (event: Event, elem: HTMLElement): void => {
       const index = selection.nodes().indexOf(elem)
 
       let [x, y] = this.getTranslateCoordinate(elem)
 
       // auto positioning
       while (true) {
-        ;[x, y] = this.getCorrectPosition(x, y)
+        [x, y] = this.getCorrectPosition(x, y)
 
         const overlapLayerPosition = this.getOverlapLayerPosition(
           { x, y },
@@ -430,14 +431,14 @@ class SvgAreaOperator {
     }
   }
 
-  getLayerClicked () {
-    return (event: any) => {
+  getLayerClicked (): (arg1: any) => void {
+    return (event: any): void => {
       this.layerFocusing(event.currentTarget.parentNode)
     }
   }
 
-  getLayerMouseOver () {
-    return (event: any) => {
+  getLayerMouseOver (): (arg1: any) => void {
+    return (event: any): void => {
       const elem = event.currentTarget
       d3.select(elem)
         .select('rect')
@@ -446,8 +447,8 @@ class SvgAreaOperator {
     }
   }
 
-  getLayerMouseOut () {
-    return (event: any) => {
+  getLayerMouseOut (): (arg1: any) => void {
+    return (event: any): void => {
       const elem = event.currentTarget
       d3.select(elem)
         .select('rect')
@@ -457,8 +458,8 @@ class SvgAreaOperator {
   }
 
   // for link event
-  getLinkDragStart () {
-    return (event: any) => {
+  getLinkDragStart (): (arg1: any) => void {
+    return (event: any): void => {
       const elem = event.sourceEvent.currentTarget
 
       this.layerFocusing(elem.parentNode.parentNode)
@@ -479,8 +480,8 @@ class SvgAreaOperator {
     }
   }
 
-  getLinkDragging () {
-    return (event: any) => {
+  getLinkDragging (): (arg1: any) => void {
+    return (event: any): void => {
       let [x, y] = d3.pointer(event)
 
       if (event.dx) {
@@ -513,8 +514,8 @@ class SvgAreaOperator {
     }
   }
 
-  getLinkDragEnd () {
-    return (event: any) => {
+  getLinkDragEnd (): (arg1: any) => void {
+    return (event: any): void => {
       const elem = event.currentTarget
 
       const m = this.drawingLinkMemory
@@ -555,7 +556,7 @@ class SvgAreaOperator {
     }
   }
 
-  graphExchangeTransition = (transitionList: NextTransition[]) => {
+  graphExchangeTransition = (transitionList: NextTransition[]): void => {
     for (const elm of transitionList) {
       d3.select('#layer-' + elm.index)
         .transition()
@@ -566,7 +567,7 @@ class SvgAreaOperator {
     }
   }
 
-  registerMouseEvent () {
+  registerMouseEvent (): void {
     const allLayers = d3.selectAll('#svg-layers .layer')
 
     if (allLayers.nodes().length > 0) {

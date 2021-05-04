@@ -1,5 +1,6 @@
 import { AnyObject } from '@/types/basic'
 import { Graph } from '@/types/graph'
+import { MonitorSeriesData } from './monitor'
 
 export interface RootState {
   editor: EditorState;
@@ -31,12 +32,23 @@ export interface EditorState {
  directoryInfo
  ***************************************/
 
+export interface MonitorFile {
+   name: string;
+   data: MonitorSeriesData;
+   isView?: boolean;
+}
+
+export interface NNtxtFile {
+  name: string;
+  data: AnyObject;
+}
+
 export interface DirectoryNode {
   id: number;
   name: string;
   children: DirectoryNode[];
-  nntxtFiles: Array<{ name: string; data: AnyObject }>;
-  monitorFiles: Array<{ name: string; data: AnyObject }>;
+  nntxtFiles: NNtxtFile[];
+  monitorFiles: MonitorFile[];
 }
 
 export interface DirectoryInfoState {

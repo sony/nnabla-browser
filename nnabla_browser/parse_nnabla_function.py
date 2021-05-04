@@ -61,7 +61,7 @@ def _camel_to_snake(string):
     return re.sub("([A-Z])", lambda x: "_" + x.group(1).lower(), string)
 
 
-def treat_name_exception(snake_name):
+def get_normalized_snake_name(snake_name):
     if fnmatch.fnmatch(snake_name, "*relu*"):
         # exception
         return snake_name.replace("relu", "ReLU")
@@ -102,7 +102,7 @@ def get_all_function_api_definitions(
         if ignores is not None and snake_name in ignores:
             continue
 
-        snake_name = treat_name_exception(snake_name.lower())
+        snake_name = get_normalized_snake_name(snake_name.lower())
         camel_name = _snake_to_camel(snake_name)
         layer_name = camel_name[0].upper() + camel_name[1:]
 

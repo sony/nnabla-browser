@@ -24,15 +24,18 @@ export interface RawFunction {
     snake_name: string;
 }
 
-export interface Function extends RawFunction {
+export interface NNtxtFunction {
     input: string[];
     output: string[];
+    name: string;
+    type: string;
+    param: AnyObject;
 }
 
 export interface NNtxtNetwork {
     name: string;
     variable: Parameter[];
-    function: Function[];
+    function: NNtxtFunction[];
 }
 
 export interface NNtxtExecutor {

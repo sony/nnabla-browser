@@ -73,10 +73,11 @@
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
 import { faAngleDown, faAngleRight } from '@fortawesome/free-solid-svg-icons'
 import CSVEntry from './CSVEntry.vue'
+import { DirectoryNode } from '@/types/store'
 import NNtxtEntry from './NNtxtEntry.vue'
-import Vue from 'vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
 
 library.add(faAngleRight, faAngleDown)
@@ -87,7 +88,20 @@ export default Vue.extend({
     'nntxts-component': NNtxtEntry,
     'csv-entry': CSVEntry
   },
-  props: ['info', 'dirName', 'level'],
+  props: {
+    info: {
+      type: Object as PropType<DirectoryNode>,
+      required: true
+    },
+    dirName: {
+      type: String,
+      required: true
+    },
+    level: {
+      type: Number,
+      required: true
+    }
+  },
   data: function () {
     return { expand: true }
   },

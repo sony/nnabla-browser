@@ -1,8 +1,7 @@
-import { Function, Parameter } from '@/types/nnablaApi'
+import { NNtxtFunction, Parameter } from '@/types/nnablaApi'
 import { Vector2D } from '@/types/geometry'
 
-export interface Layer extends Function {
-    name: string;
+export interface Layer extends NNtxtFunction {
     index: number;
     depth: number[] | number;
     visitCount: number;
@@ -11,7 +10,7 @@ export interface Layer extends Function {
 
 export interface Node extends Layer {
     position: Vector2D;
-    type: string;
+    outputShape: string[];
 }
 
 export interface Link {

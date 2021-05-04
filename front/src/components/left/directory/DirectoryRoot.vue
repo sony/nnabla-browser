@@ -19,6 +19,7 @@
 
 <script lang="ts">
 import Directory from './Directory.vue'
+import { DirectoryNode } from '@/types/store'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -26,7 +27,7 @@ export default Vue.extend({
     'directory-component': Directory
   },
   computed: {
-    directoryInfo: function () {
+    directoryInfo: function (): DirectoryNode {
       return this.$store.state.directoryInfo.data
     }
   }
