@@ -1,5 +1,5 @@
 import Vuex, { StoreOptions } from 'vuex'
-import { RootState } from './types'
+import { RootState } from '../types/store'
 import Vue from 'vue'
 import { chartInfo } from './modules/chartInfo'
 import { dialogueInfo } from './modules/dialogueInfo'

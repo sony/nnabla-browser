@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import Chart from 'chart.js'
-import { ChartDatum } from '@/store/types'
+import { ChartDatum } from '@/types/store'
 import SeriesChart from '@/components/center/SeriesChart.vue'
 import Vue from 'vue'
 

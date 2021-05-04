@@ -1,41 +1,33 @@
+import { AnyObject } from '@/types/basic'
+import { Function } from '@/types/nnablaApi'
+
 import { httpClient } from './httpClient'
 
-interface Dict {
-  [key: string]: Dict;
-}
-export interface Function {
-  api_type: string;
-  arguments: {[key: string]: Dict};
-  inputs: Dict;
-  color: string;
-  layer_name: string;
-  snake_name: string;
-}
-
 class NnablaCore {
-  nnablaApi: Dict = {}
+  nnablaApi: AnyObject = {}
   allFunctions: Function[] = []
 
   constructor () {
     httpClient.getNnablaApi().then(res => {
       this.nnablaApi = JSON.parse(res.data)
       this.allFunctions = this.getAllFuncionsRecursive(this.nnablaApi)
+      console.log(this.allFunctions)
     })
   }
 
-  getAllFuncionsRecursive (obj: Dict | Function): Function[] {
+  getAllFuncionsRecursive (obj: AnyObject | Function): Function[] {
     let ret: Function[] = []
     if (typeof obj.snake_name !== 'undefined') {
       ret.push(obj as Function)
     } else if (typeof obj === 'object') {
       for (const key in obj) {
-        ret = ret.concat(this.getAllFuncionsRecursive((obj as Dict)[key]))
+        ret = ret.concat(this.getAllFuncionsRecursive((obj as AnyObject)[key] as AnyObject))
       }
     }
     return ret
   }
 
-  getNnablaApi (): Dict {
+  getNnablaApi (): AnyObject {
     return this.nnablaApi
   }
 

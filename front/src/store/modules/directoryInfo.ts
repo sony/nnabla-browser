@@ -2,7 +2,8 @@ import * as Path from 'path'
 import * as d3 from 'd3'
 import * as pathOperator from '@/utils/pathOperator'
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { DirectoryInfoState, DirectoryNode, RootState } from '@/store/types'
+import { DirectoryInfoState, DirectoryNode, RootState } from '@/types/store'
+import { AnyObject } from '@/types/basic'
 
 // monotonic incremental counter to assign unique id
 let nodeCounter = 0
@@ -104,7 +105,7 @@ function findInsertIndex (list: Array<{ name: string }>, name: string): number {
 function insertFile (
   parent: DirectoryNode,
   fileName: string,
-  insertData: object,
+  insertData: AnyObject,
   replace = false
 ): void {
   const fileType = pathOperator.getFileType(fileName)
@@ -136,7 +137,7 @@ function insertFile (
 function addDirectoryInfo (
   state: DirectoryInfoState,
   path: string,
-  data: object,
+  data: AnyObject,
   replace = false
 ): void {
   const [parent, relPath] = searchParent(path, state.data)

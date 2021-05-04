@@ -1,4 +1,4 @@
-import { EditorState, RootState } from '@/store/types'
+import { EditorState, RootState } from '@/types/store'
 import { Module, MutationTree } from 'vuex'
 
 const state: EditorState = {

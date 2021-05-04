@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { Graph } from '@/store/types'
+import { Graph } from '@/types/graph'
 import GraphTab from '@/components/center/graph/GraphTab.vue'
 import Vue from 'vue'
 

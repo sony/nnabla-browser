@@ -10,11 +10,12 @@
 
 <script lang="ts">
 import * as d3 from 'd3'
-import { GraphInfoState, RootState } from '@/store/types'
+import { GraphInfoState, RootState } from '@/types/store'
 import Vue from 'vue'
 import { httpClient } from '@/utils/httpClient'
 import { serverEventHandler } from '@/utils/serverEventHandler'
 
+/** local interface **/
 interface NNtxtCouputedType {
   isSelected: boolean;
   nntxtPath: string;

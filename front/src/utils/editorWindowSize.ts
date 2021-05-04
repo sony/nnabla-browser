@@ -1,8 +1,7 @@
-// todo:  must be refactored
-
-import { AttrType, svgAreaOperator } from './svgAreaHelper'
 import $ from 'jquery'
+import { AnyObject } from '@/types/basic'
 import store from '@/store'
+import { svgAreaOperator } from './svgAreaHelper'
 
 const EditorWindowSize = {
   init: function (): void {
@@ -15,7 +14,7 @@ const EditorWindowSize = {
   },
   changeSize: function (): void {
     const _NullQueriedDom = {
-      getBoundingClientRect: (): AttrType => {
+      getBoundingClientRect: (): AnyObject => {
         return { width: 0, height: 0 }
       }
     }

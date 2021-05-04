@@ -1,38 +1,13 @@
-import { Function } from '@/utils/nnablaApi'
+import { Layer, Link } from '@/types/graph'
+import { Parameter } from '@/types/nnablaApi'
 import { range } from '@/utils/arrayOperator'
 
-export interface LayerInfo extends Function {
-  name: string;
-  input: string[];
-  output: string[];
-  index: number;
-  depth: number[] | number;
-  visitCount: number;
-  parameters: Parameter[];
-}
-
-export interface Link {
-  destination: number;
-  source: number;
-}
-
-export interface Shape {
-  dim: number[];
-}
-
-export interface Parameter {
-  name: string;
-  shape: Shape;
-  type: string;
-}
-
 interface Depth2Layers {
-  [key: number]: {needSlice: number; layers: Array<LayerInfo>};
+  [key: number]: {needSlice: number; layers: Array<Layer>};
 }
-
 export class LayerRegister {
   counter = 0
-  layers: { [key: string]: LayerInfo } = {}
+  layers: { [key: string]: Layer } = {}
   links: Link[] = []
   allParameters: Parameter[] = []
 
@@ -45,7 +20,7 @@ export class LayerRegister {
     }
   }
 
-  addLayer (layer: LayerInfo, depth: number): [LayerInfo, boolean] {
+  addLayer (layer: Layer, depth: number): [Layer, boolean] {
     if (!Object.prototype.hasOwnProperty.call(this.layers, layer.name)) {
       // first visit
       let visitCount = 1

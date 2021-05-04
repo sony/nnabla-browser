@@ -1,5 +1,5 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { DialogueInfoState, RootState } from '@/store/types'
+import { DialogueInfoState, RootState } from '@/types/store'
 
 import $ from 'jquery'
 
