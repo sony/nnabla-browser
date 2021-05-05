@@ -8,7 +8,6 @@ import re
 
 import yaml
 
-# it`s too dirty...
 YAML_PATH = {
     "functions": os.path.join(
         os.path.abspath(os.path.dirname(__file__)),
@@ -17,8 +16,7 @@ YAML_PATH = {
     )
 }
 
-_activations = None
-
+_activations = []
 
 def init_functions_yaml():
     try:
@@ -36,14 +34,13 @@ def init_functions_yaml():
             with open(functions_yaml_path, "wb") as f:
                 f.write(r.content)
 
-    except:
+    except Exception as e:
         raise FileNotFoundError(
             "functions.yaml is not found and also cannot be downloaded from https://github.com/sony/nnabla."
             "Please make sure your internet connection is valid."
-        )
+        ) from e
 
     # get activation list
-    global _activations
     with open(YAML_PATH["functions"], "r") as f:
         yaml_obj = yaml.load(f, Loader=yaml.FullLoader)
 

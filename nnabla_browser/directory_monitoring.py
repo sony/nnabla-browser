@@ -1,8 +1,6 @@
 import fnmatch
 import glob
 import os
-import pickle as pkl
-import re
 import time
 import zipfile
 from multiprocessing import Lock
