@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
+import { MonitorBuilder } from '@/utils/monitorBuilder'
 import { MonitorFile } from '@/types/store'
 import { httpClient } from '@/utils/httpClient'
 import { serverEventHandler } from '@/utils/serverEventHandler'
@@ -80,7 +81,8 @@ export default Vue.extend({
         this.loaded = true
         httpClient.getFileContent(this.filePath).then(res => {
           // Get data from server and update.
-          const data = serverEventHandler.getMonitorInfo(res.data)
+          const builder = new MonitorBuilder(res.data)
+          const data = builder.build()
           this.$store.commit('updateFileContent', { path: this.filePath, data })
           this.updateChart()
 

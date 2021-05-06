@@ -41,7 +41,6 @@ export interface NNtxtNetwork {
 export interface NNtxtExecutor {
     name: string;
     networkName: string;
-    networkName: string;
     dataVariable: Variable[];
     outputVariable: Vairable[];
 }

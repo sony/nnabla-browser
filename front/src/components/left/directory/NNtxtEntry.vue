@@ -12,8 +12,8 @@
 import * as d3 from 'd3'
 import { GraphInfoState, NNtxtFile, RootState } from '@/types/store'
 import Vue, { PropType } from 'vue'
+import { GraphBuilder } from '@/utils/graphBuilder'
 import { httpClient } from '@/utils/httpClient'
-import { serverEventHandler } from '@/utils/serverEventHandler'
 
 /** local interface **/
 interface NNtxtCouputedType {
@@ -60,7 +60,8 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
         // get nntxt contents from server
         httpClient.getFileContent(this.nntxtPath).then(res => {
           // Sent data by http is already json. Don't have convert it explicitly.
-          const data = serverEventHandler.getGraphInfoFromNNtxt(res.data)
+          const builder = new GraphBuilder(res.data)
+          const data = builder.build()
           this.$store.commit('updateFileContent', {
             path: this.nntxtPath,
             data
