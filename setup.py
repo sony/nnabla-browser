@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="nnabla-browser",
     version="0.1.0b",
-    description="A browser base visualizer for Neural Network Libraries (NNabla).",
+    description="A browser base visualizer for Neural Network Libraries (nnabla).",
     url='https://github.com/sony/nnabla-browser',
     author="Akio Hayakawa",
     # license=...,
