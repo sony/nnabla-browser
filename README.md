@@ -65,8 +65,8 @@ $ npm run build
 ### Run server for development
 
 ```shell
-# install python dependency
-$ pipenv install
+# install python dependency (`--pre` is required to install black.)
+$ pipenv install --pre
 
 # launch python server
 $ pipenv run dev
