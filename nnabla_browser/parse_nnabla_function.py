@@ -16,9 +16,6 @@ YAML_PATH = {
     )
 }
 
-_activations = []
-
-
 def init_functions_yaml():
     try:
         functions_yaml_path = YAML_PATH["functions"]
@@ -41,15 +38,6 @@ def init_functions_yaml():
             "Please make sure your internet connection is valid."
         ) from e
 
-    # get activation list
-    with open(YAML_PATH["functions"], "r") as f:
-        yaml_obj = yaml.load(f, Loader=yaml.FullLoader)
-
-    _activations = [
-        x["snake_name"]
-        for x in yaml_obj["Neural Network Activation Functions"].values()
-    ]
-
 
 def _snake_to_camel(string):
     return re.sub("_(.)", lambda x: x.group(1).upper(), string)
@@ -70,19 +58,19 @@ def get_normalized_snake_name(snake_name):
     return snake_name
 
 
-def get_color(layer_name, default_color):
+def get_color(layer_name, default_color, activations):
     layer_name = layer_name.lower()
     if fnmatch.fnmatch(layer_name, "*pooling*"):
         return "#a58e7f"
 
-    if layer_name in _activations:
+    if layer_name in activations:
         return "#d77b6a"
 
     return default_color
 
 
 def get_all_function_api_definitions(
-    module_name, default_color, api_type, ignores=None
+    module_name, default_color, api_type, activations, ignores=None
 ):
     module = importlib.import_module(module_name)
 
@@ -125,7 +113,7 @@ def get_all_function_api_definitions(
         function_info = {
             "layer_name": layer_name,
             "snake_name": snake_name,
-            "color": get_color(layer_name, default_color),
+            "color": get_color(layer_name, default_color, activations),
             "api_type": "{}_api".format(api_type),
             "inputs": inputs,
             "arguments": arguments,
@@ -137,23 +125,32 @@ def get_all_function_api_definitions(
 
 
 def parse_function_APIs():
+    # get activation list
+    with open(YAML_PATH["functions"], "r") as f:
+        yaml_obj = yaml.load(f, Loader=yaml.FullLoader)
+    activations = [
+        x["snake_name"]
+        for x in yaml_obj["Neural Network Activation Functions"].values()
+    ]
+
     # nnabla.parametric_functions
     p_functions = get_all_function_api_definitions(
         "nnabla.parametric_functions",
         "#6aa1bd",
         "parametric_functions",
+        activations,
         ignores=["parametric_function_api"],
     )
 
     # nnabla.functions
     functions = get_all_function_api_definitions(
-        "nnabla.function_bases", "#848484", "functions"
+        "nnabla.function_bases", "#848484", "functions", activations
     )
 
     # remove deprecated (priority order is parametric_functions > functions > function_bases)
     functions.update(
         get_all_function_api_definitions(
-            "nnabla.functions", "#d77b6a", "functions"
+            "nnabla.functions", "#d77b6a", "functions", activations
         )
     )
     keys = list(functions.keys())
