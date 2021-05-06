@@ -16,6 +16,7 @@ YAML_PATH = {
     )
 }
 
+
 def init_functions_yaml():
     try:
         functions_yaml_path = YAML_PATH["functions"]
