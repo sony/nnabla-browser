@@ -33,11 +33,7 @@ def nnabla_proto_to_json(file_path):
         if 'Param"' not in line:
             continue
 
-        s_cur = line.split('"')  # muse bt ["    ", "XXXPram", ": {"]
-
-        # assertion
-        # assert len(s) == 3
-        # assert s[1].endswith("Param")
+        s_cur = line.split('"')  # must bt ["    ", "XXXPram", ": {"]
 
         s_cur[1] = "param"
         s[i] = '"'.join(s_cur)
