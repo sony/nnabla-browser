@@ -58,22 +58,6 @@ export interface DirectoryInfoState {
 }
 
 /***************************************
- dialogueInfo
- ***************************************/
-
-export interface DialogueInfoState {
-  data: {
-    windowWidth: number;
-    windowHeight: number;
-  };
-  isMaskActive: boolean;
-  dialogueType: string;
-  defaultStr: string;
-  inputStr: string;
-  inputDef: ReturnType<$.Deferred>; // after replace jquey by others, fix this.
-}
-
-/***************************************
  chartInfo
  ***************************************/
 
