@@ -53,8 +53,10 @@ Chart.register(
   Tooltip
 )
 
+// eslint-disable-next-line
 export function generateChart (chartId: string, chartType: string): any {
   return {
+    // eslint-disable-next-line
     render: function (createElement: any) {
       return createElement(
         'div',
@@ -103,6 +105,7 @@ export function generateChart (chartId: string, chartType: string): any {
       }
     },
 
+    // eslint-disable-next-line
     data () {
       return {
         _chart: null,
@@ -114,6 +117,7 @@ export function generateChart (chartId: string, chartType: string): any {
       addPlugin (plugin): void {
         this.$data._plugins.push(plugin)
       },
+      // eslint-disable-next-line
       generateLegend () {
         if (this.$data._chart) {
           return this.$data._chart.generateLegend()
