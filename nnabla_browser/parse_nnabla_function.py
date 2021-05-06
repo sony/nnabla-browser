@@ -18,6 +18,7 @@ YAML_PATH = {
 
 _activations = []
 
+
 def init_functions_yaml():
     try:
         functions_yaml_path = YAML_PATH["functions"]

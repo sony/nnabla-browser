@@ -226,7 +226,7 @@ def main():
     # init directory_manager
     directory_manager.extend(get_directory_tree_recursive(logdir))
 
-    # Start ovserving directory
+    # Start observing directory
     p = Process(
         target=create_supervise_process(logdir),
         args=[send_manager, directory_manager, sse_updates],
@@ -235,7 +235,7 @@ def main():
     p.start()
 
     # init functions.yaml
-    # Note that this function should be called after starting ovserving directory.
+    # Note that this function should be called after starting observing directory.
     init_functions_yaml()
 
     # Launch
