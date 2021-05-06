@@ -6,13 +6,17 @@ import inspect
 import os
 import re
 
+import nnabla as nn
 import yaml
+from nnabla.logger import logger
+from nnabla.utils.download import get_data_home
+
+NNABLA_VERSION = "v{}.{}.{}".format(*nn.__version__.split(".")[:3])
 
 YAML_PATH = {
     "functions": os.path.join(
-        os.path.abspath(os.path.dirname(__file__)),
-        "nnabla_core",
-        "functions.yaml",
+        get_data_home(),
+        f"browser/{NNABLA_VERSION}/functions.yaml",
     )
 }
 
@@ -21,13 +25,18 @@ def init_functions_yaml():
     try:
         functions_yaml_path = YAML_PATH["functions"]
         if not os.path.exists(functions_yaml_path):
+            logger.info(
+                f"functions.yaml for nnabla={NNABLA_VERSION} is not found."
+            )
+
             nnabla_core_root = os.path.dirname(functions_yaml_path)
             os.makedirs(nnabla_core_root, exist_ok=True)
 
             import requests
 
-            url = "https://raw.github.com/sony/nnabla/master/build-tools/code_generator/functions.yaml"
+            url = f"https://raw.github.com/sony/nnabla/{NNABLA_VERSION}/build-tools/code_generator/functions.yaml"
 
+            logger.info(f"Downloading nnabla API list from {url}.")
             r = requests.get(url)
 
             with open(functions_yaml_path, "wb") as f:
