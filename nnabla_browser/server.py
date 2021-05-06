@@ -25,9 +25,8 @@ from .utils import (
 )
 
 # flask application
-root_path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-template_path = os.path.join(root_path, "front/dist")
-static_path = os.path.join(root_path, "front/dist/static")
+template_path = os.path.join(os.path.dirname(__file__), "dist")
+static_path = os.path.join(os.path.dirname(__file__), "dist/static")
 app = Flask(__name__, template_folder=template_path, static_folder=static_path)
 app.config["USER"] = {}
 

@@ -14,7 +14,7 @@ module.exports = {
     port: 8000,
     host: 'localhost'
   },
-  outputDir: 'front/dist',
+  outputDir: 'nnabla_browser/dist',
   assetsDir: 'static',
   configureWebpack: {
     resolve: {
