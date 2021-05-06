@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="nnabla-browser",
     version="0.1.0b",
-    description="A browser base visualizer for Neural Network Libraries (nnabla).",
+    description="A browser base visualizer for Neural Network Libraries (NNabla).",
     url='https://github.com/sony/nnabla-browser',
     author="Akio Hayakawa",
     # license=...,
@@ -24,15 +24,9 @@ setup(
         "pyyaml",
     ],
     python_requires=">=3.5",
-    package_dir={
-        "nnabla_browser": "nnabla_browser",
-        "nnabla_browser/front": "front",
-        },
-    packages=["nnabla_browser", "nnabla_browser/front"],
-    package_data={
-        'nnabla_browser/front': ['*', "dist/*", "image/*.svg", "lib/css/*.css", "lib/fonts/*", "lib/js/*.js"],
-        'nnabla_browser': ["nnabla_core/*"]
-        }, # TODO: include built JS
+    packages=["nnabla_browser"],
+    package_data={'nnabla_browser': ['dist/*', "dist/static/*"]},
+    include_package_data=True,
     entry_points={
         "console_scripts": [
             "nnabla-browser = nnabla_browser.server:main"

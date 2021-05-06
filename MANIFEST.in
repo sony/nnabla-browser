@@ -1,0 +1,2 @@
+include nnabla_browser/dist/*
+include nnabla_browser/dist/static/*
