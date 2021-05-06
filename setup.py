@@ -14,19 +14,25 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     install_requires=[
-        # todo: fix versions?
         "gevent",
         "flask",
+        "flask_cors",
         "watchdog",
         "google",
         "protobuf",
         "numpy",
-        "nnabla"
+        "pyyaml",
     ],
     python_requires=">=3.5",
-    package_dir={"nnabla_browser": "nnabla_browser"},
-    packages=["nnabla_browser"],
-    package_data={'nnabla_browser': ["nnabla_core/*"]}, # TODO: include built JS
+    package_dir={
+        "nnabla_browser": "nnabla_browser",
+        "nnabla_browser/front": "front",
+        },
+    packages=["nnabla_browser", "nnabla_browser/front"],
+    package_data={
+        'nnabla_browser/front': ['*', "dist/*", "image/*.svg", "lib/css/*.css", "lib/fonts/*", "lib/js/*.js"],
+        'nnabla_browser': ["nnabla_core/*"]
+        }, # TODO: include built JS
     entry_points={
         "console_scripts": [
             "nnabla-browser = nnabla_browser.server:main"

@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "jsx": "preserve",
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strictPropertyInitialization": false,
+    "sourceMap": true,
+    "baseUrl": "./front",
+    "outDir": "./front/dist",
+    "types": [
+      "webpack-env", "d3", "d3-selection", "node", "vue", "jquery",
+      "html2canvas", "filesaver", "axios", "chart.js"
+    ],
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "front/src/**/*.ts",
+    "front/src/**/*.tsx",
+    "front/src/**/*.vue",
+    "front/tests/**/*.ts",
+    "front/tests/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

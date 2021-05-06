@@ -11,5 +11,12 @@ build/
 !editor/dist/
 
 !Pipfile
+pipfile.lock
 
 front/lib/js/nnablaCore.js
+
+.vscode/
+
+logdir/
+
+nnabla_browser/nnabla_core/

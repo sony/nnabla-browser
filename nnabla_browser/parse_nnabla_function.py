@@ -1,34 +1,52 @@
 from __future__ import print_function
 
-import os
 import fnmatch
-import re
-import yaml
-from json import dumps
-import inspect
 import importlib
+import inspect
+import os
+import re
 
-# it`s too dirty...
+import nnabla as nn
+import yaml
+from nnabla.logger import logger
+from nnabla.utils.download import get_data_home
+
+NNABLA_VERSION = "v{}.{}.{}".format(*nn.__version__.split(".")[:3])
+
 YAML_PATH = {
-    "functions":
-    os.path.join(os.path.abspath(os.path.dirname(__file__)), "nnabla_core",
-                 "functions.yaml")
+    "functions": os.path.join(
+        get_data_home(),
+        f"browser/{NNABLA_VERSION}/functions.yaml",
+    )
 }
 
 
-def get_activation_list():
-    with open(YAML_PATH["functions"], "r") as f:
-        yaml_obj = yaml.load(f)
+def init_functions_yaml():
+    try:
+        functions_yaml_path = YAML_PATH["functions"]
+        if not os.path.exists(functions_yaml_path):
+            logger.info(
+                "functions.yaml for nnabla=%s is not found.", NNABLA_VERSION
+            )
 
-    activations = [
-        x["snake_name"]
-        for x in yaml_obj["Neural Network Activation Functions"].values()
-    ]
+            nnabla_core_root = os.path.dirname(functions_yaml_path)
+            os.makedirs(nnabla_core_root, exist_ok=True)
 
-    return activations
+            import requests
 
+            url = f"https://raw.github.com/sony/nnabla/{NNABLA_VERSION}/build-tools/code_generator/functions.yaml"
 
-_activations = get_activation_list()
+            logger.info("Downloading nnabla API list from %s.", url)
+            r = requests.get(url)
+
+            with open(functions_yaml_path, "wb") as f:
+                f.write(r.content)
+
+    except Exception as e:
+        raise FileNotFoundError(
+            "functions.yaml is not found and also cannot be downloaded from https://github.com/sony/nnabla."
+            "Please make sure your internet connection is valid."
+        ) from e
 
 
 def _snake_to_camel(string):
@@ -39,7 +57,7 @@ def _camel_to_snake(string):
     return re.sub("([A-Z])", lambda x: "_" + x.group(1).lower(), string)
 
 
-def treat_name_exception(snake_name):
+def get_normalized_snake_name(snake_name):
     if fnmatch.fnmatch(snake_name, "*relu*"):
         # exception
         return snake_name.replace("relu", "ReLU")
@@ -50,21 +68,20 @@ def treat_name_exception(snake_name):
     return snake_name
 
 
-def get_color(layer_name, default_color):
+def get_color(layer_name, default_color, activations):
     layer_name = layer_name.lower()
     if fnmatch.fnmatch(layer_name, "*pooling*"):
         return "#a58e7f"
 
-    if layer_name in _activations:
+    if layer_name in activations:
         return "#d77b6a"
 
     return default_color
 
 
-def get_all_function_api_definitions(module_name,
-                                     default_color,
-                                     api_type,
-                                     ignores=None):
+def get_all_function_api_definitions(
+    module_name, default_color, api_type, activations, ignores=None
+):
     module = importlib.import_module(module_name)
 
     def predicate(value):
@@ -81,7 +98,7 @@ def get_all_function_api_definitions(module_name,
         if ignores is not None and snake_name in ignores:
             continue
 
-        snake_name = treat_name_exception(snake_name.lower())
+        snake_name = get_normalized_snake_name(snake_name.lower())
         camel_name = _snake_to_camel(snake_name)
         layer_name = camel_name[0].upper() + camel_name[1:]
 
@@ -93,22 +110,23 @@ def get_all_function_api_definitions(module_name,
         for param_name, param in sig.parameters.items():
             if param.default == inspect.Parameter.empty:
                 # inputs
-                inputs[param_name] = {"optional": False}
+                inputs[param_name] = {"optional": "False"}
             else:
                 arguments[param_name] = {
-                    "default":
-                    "None" if param.default is None else param.default,
+                    "default": "None"
+                    if param.default is None
+                    else str(param.default),
                     "type": type(param.default).__name__,
-                    "optional": True
+                    "optional": "True",
                 }
 
         function_info = {
             "layer_name": layer_name,
             "snake_name": snake_name,
-            "color": get_color(layer_name, default_color),
+            "color": get_color(layer_name, default_color, activations),
             "api_type": "{}_api".format(api_type),
             "inputs": inputs,
-            "arguments": arguments
+            "arguments": arguments,
         }
 
         ret[layer_name] = function_info
@@ -117,21 +135,34 @@ def get_all_function_api_definitions(module_name,
 
 
 def parse_function_APIs():
+    # get activation list
+    with open(YAML_PATH["functions"], "r") as f:
+        yaml_obj = yaml.load(f, Loader=yaml.FullLoader)
+    activations = [
+        x["snake_name"]
+        for x in yaml_obj["Neural Network Activation Functions"].values()
+    ]
+
     # nnabla.parametric_functions
     p_functions = get_all_function_api_definitions(
         "nnabla.parametric_functions",
         "#6aa1bd",
         "parametric_functions",
-        ignores=["parametric_function_api"])
+        activations,
+        ignores=["parametric_function_api"],
+    )
 
     # nnabla.functions
-    functions = get_all_function_api_definitions("nnabla.function_bases",
-                                                 "#848484", "functions")
+    functions = get_all_function_api_definitions(
+        "nnabla.function_bases", "#848484", "functions", activations
+    )
 
     # remove deprecated (priority order is parametric_functions > functions > function_bases)
     functions.update(
-        get_all_function_api_definitions("nnabla.functions", "#d77b6a",
-                                         "functions"))
+        get_all_function_api_definitions(
+            "nnabla.functions", "#d77b6a", "functions", activations
+        )
+    )
     keys = list(functions.keys())
     for key in keys:
         if key in p_functions:
@@ -147,14 +178,14 @@ def create_variable_info():
             "layer_name": "InputVariable",
             "snake_name": "input",
             "color": "#000000",
-            "arguments": {}
+            "arguments": {},
         },
         "output": {
             "layer_name": "OutputVariable",
             "snake_name": "output",
             "color": "#000000",
-            "arguments": {}
-        }
+            "arguments": {},
+        },
     }
 
 
@@ -165,12 +196,5 @@ def parse_all():
     return {
         "parametric_functions": p_functions,
         "functions": functions,
-        "variables": variables
+        "variables": variables,
     }
-
-
-def create_nnabla_core_js(out_path):
-    with open(out_path, "w") as f:
-        print("const nnablaCore = " + dumps(parse_all(), indent=2) +
-              ";\n export default nnablaCore;",
-              file=f)

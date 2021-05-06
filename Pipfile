@@ -3,6 +3,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[scripts]
+dev = "bash -c \"pip install -q -e . && nnabla-browser --port 8888\""
+
 [packages]
 gevent = "*"
 flask = "*"
@@ -14,6 +17,11 @@ nnabla = "*"
 
 [dev-packages]
 wheel = "*"
+yapf = "*"
+isort = "*"
+flask-cors = "*"
+pylint = "*"
+black = "*"
 
 [requires]
-python_version = "3.6.5"
+python_version = "3.7"

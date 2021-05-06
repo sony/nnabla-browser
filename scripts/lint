@@ -1,0 +1,7 @@
+#!/bin/bash -eux
+
+# Python check
+pylint nnabla_browser
+
+# TypeScript check
+npm run lint
