@@ -26,7 +26,7 @@ def init_functions_yaml():
         functions_yaml_path = YAML_PATH["functions"]
         if not os.path.exists(functions_yaml_path):
             logger.info(
-                f"functions.yaml for nnabla={NNABLA_VERSION} is not found."
+                "functions.yaml for nnabla=%s is not found.", NNABLA_VERSION
             )
 
             nnabla_core_root = os.path.dirname(functions_yaml_path)
@@ -36,7 +36,7 @@ def init_functions_yaml():
 
             url = f"https://raw.github.com/sony/nnabla/{NNABLA_VERSION}/build-tools/code_generator/functions.yaml"
 
-            logger.info(f"Downloading nnabla API list from {url}.")
+            logger.info("Downloading nnabla API list from %s.", url)
             r = requests.get(url)
 
             with open(functions_yaml_path, "wb") as f:
