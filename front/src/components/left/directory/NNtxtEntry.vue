@@ -9,11 +9,8 @@
 </template>
 
 <script lang="ts">
-import * as d3 from 'd3'
 import { GraphInfoState, NNtxtFile, RootState } from '@/types/store'
 import Vue, { PropType } from 'vue'
-import { GraphBuilder } from '@/utils/graphBuilder'
-import { httpClient } from '@/utils/httpClient'
 
 /** local interface **/
 interface NNtxtCouputedType {
@@ -57,31 +54,7 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
   methods: {
     clickEvent: function (): void {
       if (this.nntxtPath !== this.graphInfo.nntxtPath) {
-        // get nntxt contents from server
-        httpClient.getFileContent(this.nntxtPath).then(res => {
-          // Sent data by http is already json. Don't have convert it explicitly.
-          const builder = new GraphBuilder(res.data)
-          const data = builder.build()
-          this.$store.commit('updateFileContent', {
-            path: this.nntxtPath,
-            data
-          })
-
-          d3.select('#svg-links').style('opacity', 0)
-
-          d3.select('#network-editor')
-            .transition()
-            .duration(200)
-            .attr('opacity', 0.3)
-            .transition()
-            .duration(1000)
-            .attr('opacity', 1)
-
-          // this.$store.commit('setGraphs', this.nntxt.data)
-          this.$store.commit('setGraphs', data)
-          this.$store.commit('setNNtxtPath', this.nntxtPath)
-          this.$store.commit('updateActiveFile', this.nntxtPath)
-        })
+        this.$store.dispatch('graphInfo/fetchGraph', this.nntxtPath)
       }
     }
   }

@@ -140,7 +140,7 @@ class SvgAreaOperator {
   }
 
   getLayerPosition (layerIndex: number): Vector2D {
-    const targetLayer: Node = store.getters.activeGraph.nodes[layerIndex]
+    const targetLayer: Node = store.getters['graphInfo/activeGraph'].nodes[layerIndex]
     return { x: targetLayer.position.x, y: targetLayer.position.y }
   }
 
@@ -168,7 +168,7 @@ class SvgAreaOperator {
   getOverlapLayerPosition (v: Vector2D, layerIndex: number): Vector2D | null {
     // todo: nearest neighbor search
 
-    const numLayers = store.getters.activeGraph.nodes.length
+    const numLayers = store.getters['graphInfo/activeGraph'].nodes.length
 
     for (let i = 0; i < numLayers; i++) {
       if (i === layerIndex) continue
@@ -290,10 +290,17 @@ class SvgAreaOperator {
 
       this.layerFocusing(elem)
 
-      store.commit('startDragging')
+      store.commit('graphInfo/startDragging')
 
       // get all links connecting this layer
-      const links: Link[] = store.getters.activeLinks(index)
+      const activeGraph = store.getters['graphInfo/activeGraph']
+      const links: Link[] = []
+      for (const i in activeGraph.links) {
+        const link: Link = activeGraph.links[i]
+        if (link.srcNodeId === index || link.destNodeId === index) {
+          links.push({ ...link, index: Number(index) })
+        }
+      }
 
       this.connectedLinks = []
 
@@ -416,9 +423,9 @@ class SvgAreaOperator {
         .duration(500)
         .attr('transform', `translate(${x}, ${y})`)
         .on('end', () => {
-          store.commit('setNodePosition', { index: index, x, y }) // layerIndex
+          store.commit('graphInfo/setNodePosition', { index: index, x, y }) // layerIndex
           this.adjustSvgSize()
-          store.commit('endDragging')
+          store.commit('graphInfo/endDragging')
         })
 
       // remove auxiliary layer

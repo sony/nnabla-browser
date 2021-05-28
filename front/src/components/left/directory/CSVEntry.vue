@@ -10,10 +10,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import { MonitorBuilder } from '@/utils/monitorBuilder'
 import { MonitorFile } from '@/types/store'
-import { httpClient } from '@/utils/httpClient'
-import { serverEventHandler } from '@/utils/serverEventHandler'
 
 export default Vue.extend({
   props: {
@@ -77,33 +74,11 @@ export default Vue.extend({
     changeEvent: function (): void {
       if (this.checked) {
         if (this.loaded) return
-
         this.loaded = true
-        httpClient.getFileContent(this.filePath).then(res => {
-          // Get data from server and update.
-          const builder = new MonitorBuilder(res.data)
-          const data = builder.build()
-          this.$store.commit('updateFileContent', { path: this.filePath, data })
-          this.updateChart()
-
-          // Activate subscribe to update in real-time.
-          httpClient.activateSSESubscribe(
-            this.filePath,
-            serverEventHandler.SSEConnectionId
-          )
-          this.$store.commit('activateSubscribe', { path: this.filePath })
-        })
+        this.$store.dispatch('chartInfo/fetchChart', this.filePath)
       } else {
         this.loaded = false
-        this.updateChart()
-        this.$store.commit('deleteFileContent', { path: this.filePath })
-
-        // Deactivate subscribe
-        httpClient.deactivateSSESubscribe(
-          this.filePath,
-          serverEventHandler.SSEConnectionId
-        )
-        this.$store.commit('deactivateSubscribe', { path: this.filePath })
+        this.$store.dispatch('chartInfo/dropChart', this.filePath)
       }
     }
   }

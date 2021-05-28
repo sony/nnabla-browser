@@ -35,7 +35,7 @@ export default Vue.extend<{}, {}, {}, GraphTabProps>({
   },
   methods: {
     click: function (): void {
-      this.$store.commit('setActiveGraphIndex', this.index)
+      this.$store.dispatch('graphInfo/updateActiveGraph', this.index)
     },
     keydown: (e: KeyboardEvent): void => {
       switch (e.keyCode) {

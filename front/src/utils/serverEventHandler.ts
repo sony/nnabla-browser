@@ -16,13 +16,13 @@ class ServerEventHandler {
   initDirectoryStructureEventListener (event: Event): void {
     const paths = (event as ServerEvent).data.split('\n')
 
-    store.commit('initDirectoryStructure', { paths })
+    store.commit('directoryInfo/initDirectoryStructure', paths)
   }
 
   directoryStructureEventListener (event: Event): void {
     const filePath = (event as ServerEvent).lastEventId
 
-    store.commit('updateDirectoryStructure', { path: filePath })
+    store.commit('directoryInfo/updateDirectoryStructure', filePath)
   }
 
   fileContentEventListener (event: Event): void {
@@ -32,7 +32,7 @@ class ServerEventHandler {
 
     if (fileType === null) return
 
-    if (!store.getters.isSubscribe(filePath)) return
+    if (!store.state.directoryInfo.subscribedList.includes(filePath)) return
 
     // Have to convert sent data by sse to json explicitly.
     let data
@@ -46,13 +46,13 @@ class ServerEventHandler {
       data = builder.build()
     }
 
-    store.commit('updateFileContent', { path: filePath, data })
+    store.commit('directoryInfo/updateFileContent', { path: filePath, data })
   }
 
   deleteEventListener (event: Event): void {
     const path = (event as ServerEvent).lastEventId
 
-    store.commit('deleteFileOrDirectory', { path })
+    store.commit('directoryInfo/deleteFileOrDirectory', path)
   }
 }
 

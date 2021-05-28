@@ -45,7 +45,7 @@ export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
   },
   computed: {
     selectedLayer: function (): Node {
-      return this.$store.getters.activeLayer
+      return this.$store.getters['graphInfo/activeLayer']
     },
     isLayerSelected: function (): boolean {
       return Object.keys(this.selectedLayer).length > 0

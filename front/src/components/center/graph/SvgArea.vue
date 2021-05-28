@@ -307,7 +307,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
       return this.$store.state.graphInfo
     },
     activeGraph: function (): Graph {
-      return this.$store.getters.activeGraph
+      return this.$store.getters['graphInfo/activeGraph']
     },
     prevGraph: function (): Graph {
       return this.graphState.prevGraph
@@ -358,7 +358,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
   },
   methods: {
     clickLayer: function (index: number): void {
-      this.$store.commit('setActiveLayerIndex', index)
+      this.$store.commit('directoryInfo/setActiveLayerIndex', index)
     },
     createTransform: function (node: Node, index: number): string {
       let ret = `translate(${node.position.x}, ${node.position.y})`

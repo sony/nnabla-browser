@@ -5,6 +5,8 @@ import { MonitorSeriesData } from './monitor'
 export interface RootState {
   editor: EditorState;
   graphInfo: GraphInfoState;
+  chartInfo: ChartInfoState;
+  directoryInfo: DirectoryInfoState;
 }
 
 /***************************************

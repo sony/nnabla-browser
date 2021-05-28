@@ -1,9 +1,9 @@
 import * as Path from 'path'
 import * as d3 from 'd3'
 import * as pathOperator from '@/utils/pathOperator'
-import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { DirectoryInfoState, DirectoryNode, MonitorFile, NNtxtFile, RootState } from '@/types/store'
+import { DirectoryInfoState, DirectoryNode, MonitorFile, NNtxtFile } from '@/types/store'
 import { AnyObject } from '@/types/basic'
+import { Mutation, Action, VuexModule, Module } from 'vuex-module-decorators'
 
 // monotonic incremental counter to assign unique id
 let nodeCounter = 0
@@ -25,18 +25,6 @@ const deleteDirectoryInfo = (
   }
 
   return false
-}
-
-const state: DirectoryInfoState = {
-  data: {
-    id: 0,
-    children: [],
-    name: '',
-    nntxtFiles: [],
-    monitorFiles: []
-  },
-  activeFile: '',
-  subscribedList: []
 }
 
 function createNewNode (name: string): DirectoryNode {
@@ -170,48 +158,77 @@ function deleteFileOrDirectoryPath (state: DirectoryInfoState, path: string): vo
   }
 }
 
-const mutations: MutationTree<DirectoryInfoState> = {
-  initDirectoryStructure: function (state, { paths }) {
+@Module({ namespaced: true })
+export default class DirectoryInfoStateModule extends VuexModule implements DirectoryInfoState {
+  data: DirectoryNode = {
+    id: 0,
+    children: [],
+    name: '',
+    nntxtFiles: [],
+    monitorFiles: []
+  }
+
+  activeFile = ''
+
+  subscribedList: string[] = []
+
+  @Mutation
+  initDirectoryStructure (paths: string[]) {
     for (const path of paths) {
-      addDirectoryInfo(state, path, {})
-    }
-  },
-  updateDirectoryStructure: function (state, { path }) {
-    // Register file path without file content
-    addDirectoryInfo(state, path, {})
-  },
-  deleteFileOrDirectory: function (state, { path }) {
-    deleteFileOrDirectoryPath(state, path)
-  },
-  updateFileContent: function (state, { path, data }) {
-    // Register file path with file content
-    addDirectoryInfo(state, path, data)
-  },
-  deleteFileContent: function (state, { path }) {
-    addDirectoryInfo(state, path, {}, true)
-  },
-  updateActiveFile: function (state, path) {
-    state.activeFile = path
-  },
-  resetActiveFile: function (state) {
-    state.activeFile = ''
-  },
-  activateSubscribe: function (state, { path }) {
-    if (!state.subscribedList.includes(path)) {
-      state.subscribedList.push(path)
-    }
-  },
-  deactivateSubscribe: function (state, { path }) {
-    const index = state.subscribedList.indexOf(path)
-    if (index > -1) {
-      state.subscribedList.splice(index, 1)
+      addDirectoryInfo(this, path, {})
     }
   }
-}
 
-const actions: ActionTree<DirectoryInfoState, RootState> = {
-  deleteDirectoryInfo: function ({ commit, state }, { path }) {
-    const [parent, dirName] = searchParent(path, state.data)
+  @Mutation
+  updateDirectoryStructure (path: string) {
+    // Register file path without file content
+    addDirectoryInfo(this, path, {})
+  }
+
+  @Mutation
+  deleteFileOrDirectory (path: string) {
+    deleteFileOrDirectoryPath(this, path)
+  }
+
+  @Mutation
+  updateFileContent ({ path, data }: { path: string; data: AnyObject }) {
+    // Register file path with file content
+    addDirectoryInfo(this, path, data)
+  }
+
+  @Mutation
+  deleteFileContent (path: string) {
+    addDirectoryInfo(this, path, {}, true)
+  }
+
+  @Mutation
+  updateActiveFile (path: string) {
+    this.activeFile = path
+  }
+
+  @Mutation
+  resetActiveFile () {
+    this.activeFile = ''
+  }
+
+  @Mutation
+  activateSubscribe (path: string) {
+    if (!this.subscribedList.includes(path)) {
+      this.subscribedList.push(path)
+    }
+  }
+
+  @Mutation
+  deactivateSubscribe (path: string) {
+    const index = this.subscribedList.indexOf(path)
+    if (index > -1) {
+      this.subscribedList.splice(index, 1)
+    }
+  }
+
+  @Action({})
+  deleteDirectoryInfo (path: string) {
+    const [parent, dirName] = searchParent(path, this.data)
 
     type extendFileType = 'nntxtFiles' | 'monitorFiles' | 'children' | null
     let fileType: extendFileType = pathOperator.getFileType(dirName)
@@ -219,7 +236,7 @@ const actions: ActionTree<DirectoryInfoState, RootState> = {
 
     if (deleteDirectoryInfo(parent, dirName, fileType)) {
       if (
-        Path.relative(path, state.activeFile).length < state.activeFile.length
+        Path.relative(path, this.activeFile).length < this.activeFile.length
       ) {
         // active file is under deleted folder.
         // reset current display.
@@ -229,24 +246,11 @@ const actions: ActionTree<DirectoryInfoState, RootState> = {
           .duration(500)
           .attr('opacity', 0)
           .on('end', () => {
-            commit('resetActiveFile')
-            commit('resetGraphs')
-            commit('resetNNtxtPath')
+            this.resetActiveFile()
+            this.context.commit('graphInfo/resetGraphs', {}, { root: true })
+            this.context.commit('graphInfo/resetNNtxtPath', {}, { root: true })
           })
       }
     }
   }
-}
-
-const getters: GetterTree<DirectoryInfoState, RootState> = {
-  isSubscribe: (state) => (path: string): boolean => {
-    return state.subscribedList.includes(path)
-  }
-}
-
-export const directoryInfo: Module<DirectoryInfoState, RootState> = {
-  state,
-  mutations,
-  actions,
-  getters
 }

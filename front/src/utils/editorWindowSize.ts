@@ -47,7 +47,7 @@ const EditorWindowSize = {
       const graphHeight =
         contentHeight - graphsTabHeight - networkActionHeight
       $('.network-editor-scroller').height(graphHeight)
-      store.commit('setAssistAreaSize', {
+      store.commit('graphInfo/setAssistAreaSize', {
         x: $('.network-editor-scroller').width(),
         y: graphHeight
       })

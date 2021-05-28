@@ -1,105 +1,125 @@
-import { GetterTree, Module, MutationTree } from 'vuex'
+import * as d3 from 'd3'
 import { Graph, Link, Node } from '@/types/graph'
-import { GraphInfoState, RootState } from '@/types/store'
+import { GraphInfoState } from '@/types/store'
+import { GraphBuilder } from '@/utils/graphBuilder'
+import { httpClient } from '@/utils/httpClient'
+import { Mutation, Action, VuexModule, Module } from 'vuex-module-decorators'
 
-const getActiveGraph = (state: GraphInfoState): Graph => {
-  return state.graphs[state.activeIndex.graph] || {}
-}
+@Module({ namespaced: true })
+export default class GraphInfoStateModule extends VuexModule implements GraphInfoState {
+  prevGraph: Graph = { nodes: [], links: [] }
+  graphs: Graph[] = []
+  nntxtPath = ''
+  activeIndex: { graph: number; layer: number } = { graph: -1, layer: -1 }
+  isDragging = false
+  assistAreaSize: { x: number; y: number } = { x: 0, y: 0 }
 
-const state: GraphInfoState = {
-  prevGraph: { nodes: [], links: [] },
-  graphs: [],
-  nntxtPath: '',
-  activeIndex: { graph: -1, layer: -1 },
-  isDragging: false,
-  assistAreaSize: { x: 0, y: 0 }
-}
+  @Mutation
+  setGraphs (graphs: Graph[]) {
+    this.graphs = graphs
+  }
 
-const mutations: MutationTree<GraphInfoState> = {
-  setGraphs: function (state, graphs) {
-    state.prevGraph = state.graphs[state.activeIndex.graph] || {}
-    state.graphs = graphs
-    state.activeIndex.graph = 0
-    state.activeIndex.layer = -1
-  },
+  @Mutation
+  setPrevGraph (graph: Graph) {
+    this.prevGraph = graph
+  }
 
-  resetGraphs: function (state) {
-    state.graphs = []
-    state.prevGraph = { nodes: [], links: [] }
-  },
+  @Mutation
+  setNNtxtPath (path: string) {
+    this.nntxtPath = path
+  }
 
-  setActiveGraphIndex: function (state, index) {
-    state.prevGraph = state.graphs[state.activeIndex.graph] || {}
-    state.activeIndex.graph = index
-    state.activeIndex.layer = -1
-  },
+  @Mutation
+  setActiveLayerIndex (index: number) {
+    this.activeIndex.layer = index
+  }
 
-  setNNtxtPath: function (state, path) {
-    state.nntxtPath = path
-  },
+  @Mutation
+  setActiveGraphIndex (index: number) {
+    this.activeIndex.graph = index
+  }
 
-  resetNNtxtPath: function (state) {
-    state.nntxtPath = ''
-  },
-
-  setActiveLayerIndex: function (state, index) {
-    state.activeIndex.layer = index
-  },
-
-  setNodePosition: function (state, { index, x, y }) {
-    const activeGraph = getActiveGraph(state)
-
+  @Mutation
+  setNodePosition ({ index, x, y }: {index: number; x: number; y: number}) {
+    const activeGraph = this.activeGraph
     activeGraph.nodes[index].position.x = x
     activeGraph.nodes[index].position.y = y
-  },
-
-  addNewLink: function (
-    state,
-    link: Link
-  ) {
-    const activeGraph = getActiveGraph(state)
-    activeGraph.links.push(link)
-  },
-
-  startDragging: function (state) {
-    state.isDragging = true
-  },
-
-  endDragging: function (state) {
-    state.isDragging = false
-  },
-
-  setAssistAreaSize: function (state, { x, y }) {
-    state.assistAreaSize.x = x
-    state.assistAreaSize.y = y
   }
-}
 
-const getters: GetterTree<GraphInfoState, RootState> = {
-  activeGraph: getActiveGraph,
-
-  activeLayer: (state, getters): Node => {
-    if (Object.prototype.hasOwnProperty.call(getters.activeGraph, 'nodes')) {
-      return getters.activeGraph.nodes[state.activeIndex.layer] || {}
-    }
-    return {} as Node
-  },
-
-  activeLinks: (state, getters) => (id: number): Link[] => {
-    const ret = []
-    for (const index in getters.activeGraph.links) {
-      const link: Link = getters.activeGraph.links[index]
-      if (link.srcNodeId === id || link.destNodeId === id) {
-        ret.push({ ...link, index: Number(index) })
-      }
-    }
-
-    return ret
+  @Mutation
+  addNewLink (link: Link) {
+    this.activeGraph.links.push(link)
   }
-}
 
-export const graphInfo: Module<GraphInfoState, RootState> = {
-  state,
-  mutations,
-  getters
+  @Mutation
+  setIsDragging (isDragging: boolean) {
+    this.isDragging = isDragging
+  }
+
+  @Mutation
+  setAssistAreaSize ({ x, y }: {x: number; y: number}) {
+    this.assistAreaSize.x = x
+    this.assistAreaSize.y = y
+  }
+
+  @Mutation
+  updateGraphs (graphs: Graph[]) {
+    this.context.commit('setPrevGraph', this.graphs[this.activeIndex.graph] || {})
+    this.context.commit('setGraphs', graphs)
+    this.context.commit('setActiveGraphIndex', 0)
+    this.context.commit('setActiveLayerIndex', -1)
+  }
+
+  @Mutation
+  updateActiveGraph (index: number) {
+    this.context.commit('setPrevGraph', this.graphs[this.activeIndex.graph] || {})
+    this.context.commit('setActiveGraphIndex', index)
+    this.context.commit('setActiveLayerIndex', -1)
+  }
+
+  @Mutation
+  resetGraphs () {
+    this.context.commit('setGraphs', [])
+    this.context.commit('setPrevGraph', { nodes: [], links: [] })
+  }
+
+  @Mutation
+  resetNNtxtPath () {
+    this.context.commit('setNNtxtPath', '')
+  }
+
+  get activeGraph () {
+    return this.graphs[this.activeIndex.graph] || {}
+  }
+
+  get activeLayer (): Node {
+    if (this.activeGraph.nodes) {
+      return this.activeGraph.nodes[this.activeIndex.layer] || {}
+    } else {
+      return {} as Node
+    }
+  }
+
+  @Action({ rawError: true })
+  fetchGraph (path: string) {
+    httpClient.getFileContent(path).then(res => {
+      // Sent data by http is already json. Don't have convert it explicitly.
+      const builder = new GraphBuilder(res.data)
+      const data = builder.build()
+      this.context.commit('directoryInfo/updateFileContent', { path, data }, { root: true })
+
+      d3.select('#svg-links').style('opacity', 0)
+      d3.select('#network-editor')
+        .transition()
+        .duration(200)
+        .attr('opacity', 0.3)
+        .transition()
+        .duration(1000)
+        .attr('opacity', 1)
+
+      this.context.commit('setGraphs', data)
+      this.context.commit('setNNtxtPath', path)
+      this.context.commit('directoryInfo/updateActiveFile', path, { root: true })
+    })
+  }
 }
