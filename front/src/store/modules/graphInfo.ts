@@ -1,12 +1,17 @@
 import * as d3 from 'd3'
+import store from '@/store'
 import { Graph, Link, Node } from '@/types/graph'
 import { GraphInfoState } from '@/types/store'
 import { GraphBuilder } from '@/utils/graphBuilder'
 import { httpClient } from '@/utils/httpClient'
-import { Mutation, Action, VuexModule, Module } from 'vuex-module-decorators'
+import { Mutation, Action, VuexModule, Module, getModule } from 'vuex-module-decorators'
 
-@Module({ namespaced: true })
-export default class GraphInfoStateModule extends VuexModule implements GraphInfoState {
+function getActiveGraph (state: GraphInfoState): Graph {
+  return state.graphs[state.activeIndex.graph] || {}
+}
+
+@Module({ dynamic: true, store, namespaced: true, name: 'graphInfo' })
+class GraphInfoStateModule extends VuexModule implements GraphInfoState {
   prevGraph: Graph = { nodes: [], links: [] }
   graphs: Graph[] = []
   nntxtPath = ''
@@ -15,81 +20,55 @@ export default class GraphInfoStateModule extends VuexModule implements GraphInf
   assistAreaSize: { x: number; y: number } = { x: 0, y: 0 }
 
   @Mutation
-  setGraphs (graphs: Graph[]) {
+  SET_GRAPHS (graphs: Graph[]) {
     this.graphs = graphs
   }
 
   @Mutation
-  setPrevGraph (graph: Graph) {
+  SET_PREV_GRAPH (graph: Graph) {
     this.prevGraph = graph
   }
 
   @Mutation
-  setNNtxtPath (path: string) {
+  SET_NNTXT_PATH (path: string) {
     this.nntxtPath = path
   }
 
   @Mutation
-  setActiveLayerIndex (index: number) {
+  SET_ACTIVE_LAYER_INDEX (index: number) {
     this.activeIndex.layer = index
   }
 
   @Mutation
-  setActiveGraphIndex (index: number) {
+  SET_ACTIVE_GRAPH_INDEX (index: number) {
     this.activeIndex.graph = index
   }
 
   @Mutation
-  setNodePosition ({ index, x, y }: {index: number; x: number; y: number}) {
-    const activeGraph = this.activeGraph
+  SET_NODE_POSITION ({ index, x, y }: {index: number; x: number; y: number}) {
+    const activeGraph = getActiveGraph(this)
     activeGraph.nodes[index].position.x = x
     activeGraph.nodes[index].position.y = y
   }
 
   @Mutation
-  addNewLink (link: Link) {
+  ADD_NEW_LINK (link: Link) {
     this.activeGraph.links.push(link)
   }
 
   @Mutation
-  setIsDragging (isDragging: boolean) {
+  SET_IS_DRAGGING (isDragging: boolean) {
     this.isDragging = isDragging
   }
 
   @Mutation
-  setAssistAreaSize ({ x, y }: {x: number; y: number}) {
+  SET_ASSIST_AREA_SIZE ({ x, y }: {x: number; y: number}) {
     this.assistAreaSize.x = x
     this.assistAreaSize.y = y
   }
 
-  @Mutation
-  updateGraphs (graphs: Graph[]) {
-    this.context.commit('setPrevGraph', this.graphs[this.activeIndex.graph] || {})
-    this.context.commit('setGraphs', graphs)
-    this.context.commit('setActiveGraphIndex', 0)
-    this.context.commit('setActiveLayerIndex', -1)
-  }
-
-  @Mutation
-  updateActiveGraph (index: number) {
-    this.context.commit('setPrevGraph', this.graphs[this.activeIndex.graph] || {})
-    this.context.commit('setActiveGraphIndex', index)
-    this.context.commit('setActiveLayerIndex', -1)
-  }
-
-  @Mutation
-  resetGraphs () {
-    this.context.commit('setGraphs', [])
-    this.context.commit('setPrevGraph', { nodes: [], links: [] })
-  }
-
-  @Mutation
-  resetNNtxtPath () {
-    this.context.commit('setNNtxtPath', '')
-  }
-
-  get activeGraph () {
-    return this.graphs[this.activeIndex.graph] || {}
+  get activeGraph (): Graph {
+    return getActiveGraph(this)
   }
 
   get activeLayer (): Node {
@@ -117,9 +96,31 @@ export default class GraphInfoStateModule extends VuexModule implements GraphInf
         .duration(1000)
         .attr('opacity', 1)
 
-      this.context.commit('setGraphs', data)
-      this.context.commit('setNNtxtPath', path)
+      this.SET_GRAPHS(data)
+      this.SET_NNTXT_PATH(path)
+      this.SET_ACTIVE_LAYER_INDEX(-1)
+      this.SET_ACTIVE_GRAPH_INDEX(0)
       this.context.commit('directoryInfo/updateActiveFile', path, { root: true })
     })
   }
+
+  @Action({ rawError: true })
+  updateActiveGraph (index: number) {
+    this.SET_PREV_GRAPH(this.graphs[this.activeIndex.graph] || {})
+    this.SET_ACTIVE_GRAPH_INDEX(index)
+    this.SET_ACTIVE_LAYER_INDEX(-1)
+  }
+
+  @Action({ rawError: true })
+  resetGraphs () {
+    this.SET_GRAPHS([])
+    this.SET_PREV_GRAPH({ nodes: [], links: [] })
+  }
+
+  @Action({})
+  resetNNtxtPath () {
+    this.SET_NNTXT_PATH('')
+  }
 }
+
+export default getModule(GraphInfoStateModule)

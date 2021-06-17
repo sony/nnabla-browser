@@ -290,7 +290,7 @@ class SvgAreaOperator {
 
       this.layerFocusing(elem)
 
-      store.commit('graphInfo/startDragging')
+      store.commit('graphInfo/SET_IS_DRAGGING', true)
 
       // get all links connecting this layer
       const activeGraph = store.getters['graphInfo/activeGraph']
@@ -423,9 +423,9 @@ class SvgAreaOperator {
         .duration(500)
         .attr('transform', `translate(${x}, ${y})`)
         .on('end', () => {
-          store.commit('graphInfo/setNodePosition', { index: index, x, y }) // layerIndex
+          store.commit('graphInfo/SET_NODE_POSITION', { index, x, y }) // layerIndex
           this.adjustSvgSize()
-          store.commit('graphInfo/endDragging')
+          store.commit('graphInfo/SET_IS_DRAGGING', false)
         })
 
       // remove auxiliary layer

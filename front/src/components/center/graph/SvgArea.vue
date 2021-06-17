@@ -138,6 +138,7 @@ import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
 import { GraphInfoState } from '@/types/store'
 import { Vector2D } from '@/types/geometry'
+import graphInfoState from '@/store/modules/graphInfo'
 
 const grid: number = Definitions.EDIT.GRID.SIZE
 const originPosX = grid * 2
@@ -304,19 +305,19 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
   },
   computed: {
     graphState: function (): GraphInfoState {
-      return this.$store.state.graphInfo
+      return graphInfoState
     },
     activeGraph: function (): Graph {
-      return this.$store.getters['graphInfo/activeGraph']
+      return graphInfoState.activeGraph
     },
     prevGraph: function (): Graph {
-      return this.graphState.prevGraph
+      return graphInfoState.prevGraph
     },
     isDragging: function (): boolean {
-      return this.graphState.isDragging
+      return graphInfoState.isDragging
     },
     assistAreaSize: function (): Vector2D {
-      return this.graphState.assistAreaSize
+      return graphInfoState.assistAreaSize
     },
     assistAreaX: function (): number[] {
       return d3.range(0, this.assistAreaSize.x, grid)
@@ -358,7 +359,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
   },
   methods: {
     clickLayer: function (index: number): void {
-      this.$store.commit('directoryInfo/setActiveLayerIndex', index)
+      graphInfoState.SET_ACTIVE_LAYER_INDEX(index)
     },
     createTransform: function (node: Node, index: number): string {
       let ret = `translate(${node.position.x}, ${node.position.y})`

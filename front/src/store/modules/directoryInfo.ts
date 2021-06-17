@@ -247,8 +247,8 @@ export default class DirectoryInfoStateModule extends VuexModule implements Dire
           .attr('opacity', 0)
           .on('end', () => {
             this.resetActiveFile()
-            this.context.commit('graphInfo/resetGraphs', {}, { root: true })
-            this.context.commit('graphInfo/resetNNtxtPath', {}, { root: true })
+            this.context.dispatch('graphInfo/resetGraphs', {}, { root: true })
+            this.context.dispatch('graphInfo/resetNNtxtPath', {}, { root: true })
           })
       }
     }
