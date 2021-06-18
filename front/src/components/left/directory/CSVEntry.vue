@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import { MonitorFile } from '@/types/store'
+import { ChartDatum, ChartValue, MonitorFile } from '@/types/store'
 
 export default Vue.extend({
   props: {
@@ -31,54 +31,36 @@ export default Vue.extend({
       required: true
     }
   },
-  data: function () {
-    return {
-      checked: this.monitor.isView || false,
-      loaded: false,
-      filePath: (this.level > 0 ? this.dirName + '/' : '') + this.monitor.name
+  computed: {
+    chartData: function (): { chartTitle: string; data: ChartDatum } {
+      return {
+        chartTitle: this.monitor.name.split('.')[0],
+        data: {
+          id: this.dirId,
+          name: this.dirName,
+          values: this.monitor.data as ChartValue
+        }
+      }
+    },
+    filePath: function (): string {
+      return (this.level > 0 ? this.dirName + '/' : '') + this.monitor.name
     }
   },
-  watch: {
-    monitor: {
-      handler: function (): void {
-        if (this.checked) {
-          this.updateChart()
-        }
-      },
-      deep: true
+  data: function () {
+    return {
+      checked: this.monitor.isView || false
     }
   },
   methods: {
-    updateChart: function (): void {
-      if (this.monitor.data) {
-        this.monitor.isView = this.checked
-
-        const chartData = {
-          chartTitle: this.monitor.name.split('.')[0],
-          data: {
-            id: this.dirId,
-            name: this.dirName,
-            values: this.monitor.data
-          }
-        }
-
-        const mutation = this.checked ? 'insertChartData' : 'deleteChartData'
-
-        this.$store.commit(mutation, chartData)
-      }
-    },
     clickArea: function (): void {
       this.checked = !this.checked
       this.changeEvent()
     },
     changeEvent: function (): void {
       if (this.checked) {
-        if (this.loaded) return
-        this.loaded = true
-        this.$store.dispatch('chartInfo/fetchChart', this.filePath)
+        this.$store.dispatch('chartInfo/fetchChart', { path: this.filePath, chartData: this.chartData })
       } else {
-        this.loaded = false
-        this.$store.dispatch('chartInfo/dropChart', this.filePath)
+        this.$store.dispatch('chartInfo/dropChart', { path: this.filePath, chartData: this.chartData })
       }
     }
   }

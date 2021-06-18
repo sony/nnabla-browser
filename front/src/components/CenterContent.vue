@@ -9,12 +9,13 @@
         :history-info="historyInfo"
         @history="command => $emit('history', command)"
       />
-      <monitoring v-else-if="selectedMonitoringTab" />
+      <monitoring v-else-if="selectedMonitoringTab" :charts="charts"/>
     </keep-alive>
   </div>
 </template>
 
 <script lang="ts">
+import { ChartData } from '@/types/store'
 import MonitoringComponent from '@/components/center/Monitoring.vue'
 import NetworkComponent from '@/components/center/GraphViewer.vue'
 import Vue from 'vue'
@@ -41,6 +42,9 @@ export default Vue.extend({
     },
     selectedMonitoringTab: function (): boolean {
       return String(this.$store.state.editor.activeTabName) === 'monitoring'
+    },
+    charts: function (): ChartData[] {
+      return this.$store.state.chartInfo.charts
     }
   }
 })

@@ -46,7 +46,7 @@ export default class ChartInfoStateModule extends VuexModule implements ChartInf
   }
 
   @Action({})
-  fetchChart (path: string) {
+  fetchChart ({ path, chartData }: { path: string; chartData: { chartTitle: string; data: ChartDatum } }) {
     httpClient.getFileContent(path).then(res => {
       // Get data from server and update.
       const builder = new MonitorBuilder(res.data)
@@ -56,17 +56,28 @@ export default class ChartInfoStateModule extends VuexModule implements ChartInf
       // Activate subscribe to update in real-time.
       httpClient.activateSSESubscribe(path, serverEventHandler.SSEConnectionId)
 
+      const newChartData = {
+        chartTitle: chartData.chartTitle,
+        data: {
+          id: chartData.data.id,
+          name: chartData.data.name,
+          values: data
+        }
+      }
+
       this.context.commit('directoryInfo/activateSubscribe', path, { root: true })
+      this.context.commit('insertChartData', newChartData)
     })
   }
 
   @Action({})
-  dropChart (path: string) {
+  dropChart ({ path, chartData }: { path: string; chartData: { chartTitle: string; data: ChartDatum } }) {
     this.context.commit('directoryInfo/deleteFileContent', path, { root: true })
 
     // Deactivate subscribe
     httpClient.deactivateSSESubscribe(path, serverEventHandler.SSEConnectionId)
 
     this.context.commit('directoryInfo/deactivateSubscribe', path, { root: true })
+    this.context.commit('deleteChartData', chartData)
   }
 }
