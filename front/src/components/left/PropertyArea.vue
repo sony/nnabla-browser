@@ -12,7 +12,7 @@
         <layer-properties
           class="app-row app-scroll-x app-scroll-y"
           style="top: 88px; bottom: 0;"
-          :default-params="{ ...defaultProps.inputs, ...defaultProps.arguments }"
+          :default-params="defaultParams"
           :layer-params="layerParams"
           :io-infos="ioInfos"
         />
@@ -22,12 +22,12 @@
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
 import { AnyObject } from '@/types/basic'
 import LayerProperties from '@/components/left/property/LayerProperties.vue'
 import LayerType from '@/components/left/property/LayerType.vue'
 import { Node } from '@/types/graph'
 import { RawFunction } from '@/types/nnablaApi'
-import Vue, { PropType } from 'vue'
 import { nnablaCore } from '@/utils/nnablaApi'
 
 export default Vue.extend({
@@ -36,7 +36,10 @@ export default Vue.extend({
     'layer-properties': LayerProperties
   },
   props: {
-    activeLayer: { type: Object as PropType<Node> }
+    activeLayer: {
+      type: Object as PropType<Node>,
+      required: true
+    }
   },
   computed: {
     isLayerSelected: function (): boolean {
@@ -44,6 +47,9 @@ export default Vue.extend({
     },
     defaultProps: function (): RawFunction {
       return nnablaCore.findFunction(this.activeLayer.type)
+    },
+    defaultParams: function (): AnyObject {
+      return { ...this.defaultProps.inputs, ...this.defaultProps.arguments }
     },
     layerParams: function (): AnyObject {
       return this.activeLayer.param || {}

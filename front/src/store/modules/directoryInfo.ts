@@ -1,16 +1,31 @@
 import * as Path from 'path'
 import * as d3 from 'd3'
 import * as pathOperator from '@/utils/pathOperator'
+import {
+  Action,
+  Module,
+  Mutation,
+  VuexModule,
+  getModule
+} from 'vuex-module-decorators'
+import {
+  DirectoryInfoState,
+  DirectoryNode,
+  MonitorFile,
+  NNtxtFile
+} from '@/types/store'
 import { Graph } from '@/types/graph'
 import { MonitorSeriesData } from '@/types/monitor'
-import { DirectoryInfoState, DirectoryNode, MonitorFile, NNtxtFile } from '@/types/store'
-import { Mutation, Action, VuexModule, Module, getModule } from 'vuex-module-decorators'
 import store from '@/store'
 
 // monotonic incremental counter to assign unique id
 let nodeCounter = 0
 
-function findIndexByName (directoryNode: DirectoryNode, fileType: string, name: string): number {
+function findIndexByName (
+  directoryNode: DirectoryNode,
+  fileType: string,
+  name: string
+): number {
   switch (fileType) {
     case 'nntxtFiles':
       return directoryNode.nntxtFiles.findIndex(x => x.name === name)
@@ -21,7 +36,11 @@ function findIndexByName (directoryNode: DirectoryNode, fileType: string, name: 
   }
 }
 
-function deleteByIndex (directoryNode: DirectoryNode, fileType: string, index: number) {
+function deleteByIndex (
+  directoryNode: DirectoryNode,
+  fileType: string,
+  index: number
+): void {
   switch (fileType) {
     case 'nntxtFiles':
       directoryNode.nntxtFiles.splice(index, 1)
@@ -34,8 +53,15 @@ function deleteByIndex (directoryNode: DirectoryNode, fileType: string, index: n
   }
 }
 
-function findInsertIndexByName (directoryNode: DirectoryNode, fileType: string, name: string): number {
-  const findInsertIndex = (list: Array<{ name: string }>, name: string) => {
+function findInsertIndexByName (
+  directoryNode: DirectoryNode,
+  fileType: string,
+  name: string
+): number {
+  const findInsertIndex = (
+    list: Array<{ name: string }>,
+    name: string
+  ): number => {
     const insertIndex = list.findIndex(
       (x): boolean => x.name.toLowerCase() > name.toLowerCase()
     )
@@ -51,7 +77,10 @@ function findInsertIndexByName (directoryNode: DirectoryNode, fileType: string, 
   }
 }
 
-function findInsertIndexByDirectoryName (directoryNode: DirectoryNode, name: string): number {
+function findInsertIndexByDirectoryName (
+  directoryNode: DirectoryNode,
+  name: string
+): number {
   const insertIndex = directoryNode.children.findIndex(
     (x): boolean => x.name.toLowerCase() > name.toLowerCase()
   )
@@ -81,7 +110,10 @@ function createNewNode (name: string): DirectoryNode {
   }
 }
 
-function createNewSubTree (relPath: string, insertData: Graph[]|MonitorSeriesData|null): DirectoryNode {
+function createNewSubTree (
+  relPath: string,
+  insertData: Graph[]|MonitorSeriesData|null
+): DirectoryNode {
   const split = relPath.split('/')
 
   const subTree = createNewNode(split[0])
@@ -100,7 +132,10 @@ function createNewSubTree (relPath: string, insertData: Graph[]|MonitorSeriesDat
       currentNode.nntxtFiles.push({ name: name, data: insertData as Graph[] })
       break
     case 'monitorFiles':
-      currentNode.monitorFiles.push({ name: name, data: insertData as MonitorSeriesData })
+      currentNode.monitorFiles.push({
+        name: name,
+        data: insertData as MonitorSeriesData
+      })
       break
     default:
       throw new Error(`invalid fileType: ${fileType}`)
@@ -175,12 +210,18 @@ function addDirectoryInfo (
     insertFile(parent, relPath, data, replace)
   } else {
     const subTree = createNewSubTree(relPath, data)
-    const insertIndex = findInsertIndexByDirectoryName(parent, relPath.split('/')[0])
+    const insertIndex = findInsertIndexByDirectoryName(
+      parent,
+      relPath.split('/')[0]
+    )
     parent.children.splice(insertIndex, 0, subTree)
   }
 }
 
-function deleteFileOrDirectoryPath (state: DirectoryInfoState, path: string): void {
+function deleteFileOrDirectoryPath (
+  state: DirectoryInfoState,
+  path: string
+): void {
   const [parent, relPath] = searchParent(path, state.data)
   const fileType = pathOperator.getFileType(relPath)
   // delete file
@@ -190,7 +231,9 @@ function deleteFileOrDirectoryPath (state: DirectoryInfoState, path: string): vo
 }
 
 @Module({ dynamic: true, store, namespaced: true, name: 'directoryInfo' })
-class DirectoryInfoStateModule extends VuexModule implements DirectoryInfoState {
+class DirectoryInfoStateModule
+  extends VuexModule
+  implements DirectoryInfoState {
   data: DirectoryNode = {
     id: 0,
     children: [],
@@ -204,53 +247,56 @@ class DirectoryInfoStateModule extends VuexModule implements DirectoryInfoState 
   subscribedList: string[] = []
 
   @Mutation
-  SET_ACTIVE_FILE (path: string) {
+  SET_ACTIVE_FILE (path: string): void {
     this.activeFile = path
   }
 
   @Action({})
-  initDirectoryStructure (paths: string[]) {
+  initDirectoryStructure (paths: string[]): void {
     for (const path of paths) {
       addDirectoryInfo(this, path, null)
     }
   }
 
   @Action({})
-  updateDirectoryStructure (path: string) {
+  updateDirectoryStructure (path: string): void {
     // Register file path without file content
     addDirectoryInfo(this, path, null)
   }
 
   @Action({})
-  deleteFileOrDirectory (path: string) {
+  deleteFileOrDirectory (path: string): void {
     deleteFileOrDirectoryPath(this, path)
   }
 
   @Action({})
-  updateFileContent ({ path, data }: { path: string; data: Graph[]|MonitorSeriesData }) {
+  updateFileContent ({
+    path,
+    data
+  }: { path: string; data: Graph[]|MonitorSeriesData }): void {
     // Register file path with file content
     addDirectoryInfo(this, path, data)
   }
 
   @Action({})
-  deleteFileContent (path: string) {
+  deleteFileContent (path: string): void {
     deleteFileOrDirectoryPath(this, path)
   }
 
   @Action({})
-  resetActiveFile () {
+  resetActiveFile (): void {
     this.SET_ACTIVE_FILE('')
   }
 
   @Action({})
-  activateSubscribe (path: string) {
+  activateSubscribe (path: string): void {
     if (!this.subscribedList.includes(path)) {
       this.subscribedList.push(path)
     }
   }
 
   @Action({})
-  deactivateSubscribe (path: string) {
+  deactivateSubscribe (path: string): void {
     const index = this.subscribedList.indexOf(path)
     if (index > -1) {
       this.subscribedList.splice(index, 1)
@@ -258,7 +304,7 @@ class DirectoryInfoStateModule extends VuexModule implements DirectoryInfoState 
   }
 
   @Action({})
-  deleteDirectoryInfo (path: string) {
+  deleteDirectoryInfo (path: string): void {
     const [parent, dirName] = searchParent(path, this.data)
 
     type extendFileType = 'nntxtFiles' | 'monitorFiles' | 'children' | null
@@ -278,8 +324,16 @@ class DirectoryInfoStateModule extends VuexModule implements DirectoryInfoState 
           .attr('opacity', 0)
           .on('end', () => {
             this.resetActiveFile()
-            this.context.dispatch('graphInfo/resetGraphs', {}, { root: true })
-            this.context.dispatch('graphInfo/resetNNtxtPath', {}, { root: true })
+            this.context.dispatch(
+              'graphInfo/resetGraphs',
+              {},
+              { root: true }
+            )
+            this.context.dispatch(
+              'graphInfo/resetNNtxtPath',
+              {},
+              { root: true }
+            )
           })
       }
     }

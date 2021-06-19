@@ -1,8 +1,14 @@
 <template>
   <div class="editor-navbar">
     <div style="margin-left: 30px;">
-      <nav-button tab-name="graph" :isActive="activeTabName === 'graph'" />
-      <nav-button tab-name="monitoring" :isActive="activeTabName === 'monitoring'" />
+      <nav-button
+        tab-name="graph"
+        :is-active="activeTabName === 'graph'"
+      />
+      <nav-button
+        tab-name="monitoring"
+        :is-active="activeTabName === 'monitoring'"
+      />
     </div>
     <div class="editor-navbar-center" />
   </div>
@@ -10,8 +16,8 @@
 
 <script lang="ts">
 import NavButton from '@/components/header/NavButton.vue'
-import globalState from '@/store/modules/globalInfo'
 import Vue from 'vue'
+import globalState from '@/store/modules/globalInfo'
 
 export default Vue.extend({
   components: {

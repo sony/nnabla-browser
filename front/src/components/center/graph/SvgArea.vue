@@ -173,7 +173,10 @@ export default Vue.extend({
           return { graph, translateX, translateY, scale }
         }
 
-        const setAssistAreaTransform = (el: HTMLElement, vNode: VNode): void => {
+        const setAssistAreaTransform = (
+          el: HTMLElement,
+          vNode: VNode
+        ): void => {
           const { graph, translateX, translateY, scale } = getTransformInfo(el)
           if (!graph) return
           const newGrid = scale * grid
@@ -276,11 +279,26 @@ export default Vue.extend({
     }
   },
   props: {
-    activeGraph: { type: Object as PropType<Graph> },
-    prevGraph: { type: Object as PropType<Graph> },
-    isDragging: { type: Boolean },
-    assistAreaSize: { type: Object as PropType<Vector2D> },
-    nntxtPath: { type: String }
+    activeGraph: {
+      type: Object as PropType<Graph>,
+      required: true
+    },
+    prevGraph: {
+      type: Object as PropType<Graph>,
+      required: true
+    },
+    isDragging: {
+      type: Boolean,
+      required: true
+    },
+    assistAreaSize: {
+      type: Object as PropType<Vector2D>,
+      required: true
+    },
+    nntxtPath: {
+      type: String,
+      required: true
+    }
   },
   computed: {
     assistAreaX: function (): number[] {
@@ -357,7 +375,9 @@ export default Vue.extend({
     getNodeStyle: (node: Node): AnyObject => styleHelper.createNodeStyle(node),
     getCapitalAttr: (): AnyObject => styleHelper.createCapitalAttr(),
     getCapitalStyle: (): AnyObject => styleHelper.createCapitalStyle(),
-    getTextComponentStyle: (): AnyObject => styleHelper.createTextComponentStyle(),
+    getTextComponentStyle: (): AnyObject => {
+      return styleHelper.createTextComponentStyle()
+    },
     getTextAttr: (): AnyObject => styleHelper.createTextAttr(),
     getTextStyle: (): AnyObject => styleHelper.createTextStyle(),
     createLinkLineContext: (link: Link): string => {

@@ -33,9 +33,9 @@
           :key="dirName + ':' + key"
         >
           <directory-component
-            :activeFile="activeFile"
-            :activeTabName="activeTabName"
-            :directoryNode="childInfo"
+            :active-file="activeFile"
+            :active-tab-name="activeTabName"
+            :directory-node="childInfo"
             :dir-name="(level > 0 ? dirName + '/' : '') + childInfo.name"
             :level="level + 1"
           />
@@ -48,7 +48,7 @@
           :key="dirName + ':nntxt:' + key"
         >
           <nntxts-component
-            :activeFile="activeFile"
+            :active-file="activeFile"
             :style="{ 'padding-left': 12 * (level + 1) + 'px' }"
             :nntxt="nntxt"
             :dir-name="dirName"

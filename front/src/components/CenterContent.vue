@@ -6,15 +6,18 @@
     <keep-alive>
       <graph
         v-if="selectedEditTab"
-        :activeGraph="activeGraph"
-        :prevGraph="prevGraph"
-        :isDragging="isDragging"
-        :assistAreaSize="assistAreaSize"
-        :activeGraphIndex="activeGraphIndex"
+        :active-graph="activeGraph"
+        :prev-graph="prevGraph"
+        :is-dragging="isDragging"
+        :assist-area-size="assistAreaSize"
+        :active-graphindex="activeGraphIndex"
         :graphs="graphs"
-        :nntxtPath="nntxtPath"
+        :nntxt-path="nntxtPath"
       />
-      <monitoring v-else-if="selectedMonitoringTab" :charts="charts"/>
+      <monitoring
+        v-else-if="selectedMonitoringTab"
+        :charts="charts"
+      />
     </keep-alive>
   </div>
 </template>
@@ -22,13 +25,13 @@
 <script lang="ts">
 import { ChartData } from '@/types/store'
 import { Graph } from '@/types/graph'
-import MonitoringComponent from '@/components/center/Monitoring.vue'
 import GraphViewer from '@/components/center/GraphViewer.vue'
-import Vue from 'vue'
+import MonitoringComponent from '@/components/center/Monitoring.vue'
 import { Vector2D } from '@/types/geometry'
+import Vue from 'vue'
 import chartInfoState from '@/store/modules/chartInfo'
-import graphInfoState from '@/store/modules/graphInfo'
 import globalState from '@/store/modules/globalInfo'
+import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   components: {

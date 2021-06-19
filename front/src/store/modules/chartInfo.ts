@@ -1,7 +1,7 @@
+import { Action, Module, VuexModule, getModule } from 'vuex-module-decorators'
 import { ChartData, ChartDatum, ChartInfoState } from '@/types/store'
-import { Action, VuexModule, Module, getModule } from 'vuex-module-decorators'
-import { httpClient } from '@/utils/httpClient'
 import { MonitorBuilder } from '@/utils/monitorBuilder'
+import { httpClient } from '@/utils/httpClient'
 import { serverEventHandler } from '@/utils/serverEventHandler'
 import store from '@/store'
 
@@ -10,7 +10,10 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
   charts: ChartData[] = []
 
   @Action({})
-  insertChartData ({ chartTitle, data }: { chartTitle: string; data: ChartDatum }) {
+  insertChartData ({
+    chartTitle,
+    data
+  }: { chartTitle: string; data: ChartDatum }): void {
     const targetChart = this.charts.find(x => x.name === chartTitle)
     if (typeof targetChart !== 'undefined') {
       // update chart data
@@ -28,7 +31,10 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
   }
 
   @Action({})
-  deleteChartData ({ chartTitle, data }: { chartTitle: string; data: ChartDatum }) {
+  deleteChartData ({
+    chartTitle,
+    data
+  }: { chartTitle: string; data: ChartDatum }): void {
     const targetChartIndex = this.charts.findIndex(x => x.name === chartTitle)
 
     if (targetChartIndex > -1) {
@@ -47,12 +53,22 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
   }
 
   @Action({})
-  fetchChart ({ path, chartData }: { path: string; chartData: { chartTitle: string; data: ChartDatum } }) {
+  fetchChart ({
+    path,
+    chartData
+  }: {
+    path: string;
+    chartData: { chartTitle: string; data: ChartDatum };
+  }): void {
     httpClient.getFileContent(path).then(res => {
       // Get data from server and update.
       const builder = new MonitorBuilder(res.data)
       const data = builder.build()
-      this.context.dispatch('directoryInfo/updateFileContent', { path: path, data }, { root: true })
+      this.context.dispatch(
+        'directoryInfo/updateFileContent',
+        { path: path, data },
+        { root: true }
+      )
 
       // Activate subscribe to update in real-time.
       httpClient.activateSSESubscribe(path, serverEventHandler.SSEConnectionId)
@@ -66,19 +82,37 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
         }
       }
 
-      this.context.dispatch('directoryInfo/activateSubscribe', path, { root: true })
+      this.context.dispatch(
+        'directoryInfo/activateSubscribe',
+        path,
+        { root: true }
+      )
       this.insertChartData(newChartData)
     })
   }
 
   @Action({})
-  dropChart ({ path, chartData }: { path: string; chartData: { chartTitle: string; data: ChartDatum } }) {
-    this.context.dispatch('directoryInfo/deleteFileContent', path, { root: true })
+  dropChart ({
+    path,
+    chartData
+  }: {
+    path: string;
+    chartData: { chartTitle: string; data: ChartDatum };
+  }): void {
+    this.context.dispatch(
+      'directoryInfo/deleteFileContent',
+      path,
+      { root: true }
+    )
 
     // Deactivate subscribe
     httpClient.deactivateSSESubscribe(path, serverEventHandler.SSEConnectionId)
 
-    this.context.dispatch('directoryInfo/deactivateSubscribe', path, { root: true })
+    this.context.dispatch(
+      'directoryInfo/deactivateSubscribe',
+      path,
+      { root: true }
+    )
     this.deleteChartData(chartData)
   }
 }

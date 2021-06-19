@@ -13,10 +13,10 @@
 </template>
 
 <script lang="ts">
-import Chart from 'chart.js'
 import { ChartData, ChartDatum } from '@/types/store'
-import SeriesChart from '@/components/center/SeriesChart.vue'
 import Vue, { PropType } from 'vue'
+import Chart from 'chart.js'
+import SeriesChart from '@/components/center/SeriesChart.vue'
 
 const COLORS = [
   '#3498db',

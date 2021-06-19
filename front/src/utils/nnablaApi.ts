@@ -20,7 +20,9 @@ class NnablaCore {
       ret.push(obj as RawFunction)
     } else if (typeof obj === 'object') {
       for (const key in obj) {
-        ret = ret.concat(this.getAllFuncionsRecursive((obj as AnyObject)[key] as AnyObject))
+        ret = ret.concat(
+          this.getAllFuncionsRecursive((obj as AnyObject)[key] as AnyObject)
+        )
       }
     }
     return ret
@@ -38,7 +40,7 @@ class NnablaCore {
     // workaround for some incorrect cases
     const target = layerType.toLowerCase()
     return this.getAllFunctions().find(
-      (functionInfo: RawFunction) => functionInfo.layer_name.toLowerCase() === target
+      (functionInfo) => functionInfo.layer_name.toLowerCase() === target
     ) as RawFunction
   }
 }

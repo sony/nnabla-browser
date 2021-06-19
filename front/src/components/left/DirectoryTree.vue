@@ -3,26 +3,35 @@
     <directory-root
       class="app-row"
       :class="{ graph: isGraph, monitoring: isMonitoring }"
-      :activeFile='activeFile'
-      :activeTabName='activeTabName'
-      :directoryNode='directoryNode'
+      :active-file="activeFile"
+      :active-tab-name="activeTabName"
+      :directory-node="directoryNode"
     />
   </div>
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
 import { DirectoryNode } from '@/types/store'
 import DirectoryRoot from './directory/DirectoryRoot.vue'
-import Vue, { PropType } from 'vue'
 
 export default Vue.extend({
-  props: {
-    activeFile: { type: String },
-    activeTabName: { type: String },
-    directoryNode: { type: Object as PropType<DirectoryNode> }
-  },
   components: {
     'directory-root': DirectoryRoot
+  },
+  props: {
+    activeFile: {
+      type: String,
+      required: true
+    },
+    activeTabName: {
+      type: String,
+      required: true
+    },
+    directoryNode: {
+      type: Object as PropType<DirectoryNode>,
+      required: true
+    }
   },
   computed: {
     isGraph: function (): boolean {

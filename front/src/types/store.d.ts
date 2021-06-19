@@ -1,4 +1,3 @@
-import { AnyObject } from '@/types/basic'
 import { Graph } from '@/types/graph'
 import { MonitorSeriesData } from './monitor'
 

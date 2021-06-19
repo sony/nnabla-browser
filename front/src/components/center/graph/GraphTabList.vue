@@ -11,17 +11,23 @@
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
 import { Graph } from '@/types/graph'
 import GraphTab from '@/components/center/graph/GraphTab.vue'
-import Vue, { PropType } from 'vue'
 
 export default Vue.extend({
-  props: {
-    activeGraphIndex: { type: Number },
-    graphs: { type: Object as PropType<Graph[]> }
-  },
   components: {
     'graph-tab': GraphTab
+  },
+  props: {
+    activeGraphIndex: {
+      type: Number,
+      required: true
+    },
+    graphs: {
+      type: Object as PropType<Graph[]>,
+      required: true
+    }
   }
 })
 </script>

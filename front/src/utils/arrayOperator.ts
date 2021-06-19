@@ -22,7 +22,11 @@ export const calcPercentage = (
   return roundDownNDigits(ratio, nDigits)
 }
 
-export const range = (start: number, end: number, isReverse = false): number[] => {
+export const range = (
+  start: number,
+  end: number,
+  isReverse = false
+): number[] => {
   const ret = [...Array(end).keys()].slice(start, end + 1)
 
   if (isReverse) return ret.reverse()

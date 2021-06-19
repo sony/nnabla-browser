@@ -1,10 +1,16 @@
 import * as d3 from 'd3'
-import store from '@/store'
+import {
+  Action,
+  Module,
+  Mutation,
+  VuexModule,
+  getModule
+} from 'vuex-module-decorators'
 import { Graph, Node } from '@/types/graph'
-import { GraphInfoState } from '@/types/store'
 import { GraphBuilder } from '@/utils/graphBuilder'
+import { GraphInfoState } from '@/types/store'
 import { httpClient } from '@/utils/httpClient'
-import { Mutation, Action, VuexModule, Module, getModule } from 'vuex-module-decorators'
+import store from '@/store'
 
 function getActiveGraph (state: GraphInfoState): Graph {
   return state.graphs[state.activeIndex.graph] || {}
@@ -20,44 +26,48 @@ class GraphInfoStateModule extends VuexModule implements GraphInfoState {
   assistAreaSize: { x: number; y: number } = { x: 0, y: 0 }
 
   @Mutation
-  SET_GRAPHS (graphs: Graph[]) {
+  SET_GRAPHS (graphs: Graph[]): void {
     this.graphs = graphs
   }
 
   @Mutation
-  SET_PREV_GRAPH (graph: Graph) {
+  SET_PREV_GRAPH (graph: Graph): void {
     this.prevGraph = graph
   }
 
   @Mutation
-  SET_NNTXT_PATH (path: string) {
+  SET_NNTXT_PATH (path: string): void {
     this.nntxtPath = path
   }
 
   @Mutation
-  SET_ACTIVE_LAYER_INDEX (index: number) {
+  SET_ACTIVE_LAYER_INDEX (index: number): void {
     this.activeIndex.layer = index
   }
 
   @Mutation
-  SET_ACTIVE_GRAPH_INDEX (index: number) {
+  SET_ACTIVE_GRAPH_INDEX (index: number): void {
     this.activeIndex.graph = index
   }
 
   @Mutation
-  SET_NODE_POSITION ({ index, x, y }: {index: number; x: number; y: number}) {
+  SET_NODE_POSITION ({
+    index,
+    x,
+    y
+  }: {index: number; x: number; y: number}): void {
     const activeGraph = getActiveGraph(this)
     activeGraph.nodes[index].position.x = x
     activeGraph.nodes[index].position.y = y
   }
 
   @Mutation
-  SET_IS_DRAGGING (isDragging: boolean) {
+  SET_IS_DRAGGING (isDragging: boolean): void {
     this.isDragging = isDragging
   }
 
   @Mutation
-  SET_ASSIST_AREA_SIZE ({ x, y }: {x: number; y: number}) {
+  SET_ASSIST_AREA_SIZE ({ x, y }: {x: number; y: number}): void {
     this.assistAreaSize.x = x
     this.assistAreaSize.y = y
   }
@@ -75,12 +85,16 @@ class GraphInfoStateModule extends VuexModule implements GraphInfoState {
   }
 
   @Action({ rawError: true })
-  fetchGraph (path: string) {
+  fetchGraph (path: string): void {
     httpClient.getFileContent(path).then(res => {
       // Sent data by http is already json. Don't have convert it explicitly.
       const builder = new GraphBuilder(res.data)
       const data = builder.build()
-      this.context.dispatch('directoryInfo/updateFileContent', { path, data }, { root: true })
+      this.context.dispatch(
+        'directoryInfo/updateFileContent',
+        { path, data },
+        { root: true }
+      )
 
       d3.select('#svg-links').style('opacity', 0)
       d3.select('#network-editor')
@@ -95,25 +109,29 @@ class GraphInfoStateModule extends VuexModule implements GraphInfoState {
       this.SET_NNTXT_PATH(path)
       this.SET_ACTIVE_LAYER_INDEX(-1)
       this.SET_ACTIVE_GRAPH_INDEX(0)
-      this.context.commit('directoryInfo/SET_ACTIVE_FILE', path, { root: true })
+      this.context.commit(
+        'directoryInfo/SET_ACTIVE_FILE',
+        path,
+        { root: true }
+      )
     })
   }
 
   @Action({ rawError: true })
-  updateActiveGraph (index: number) {
+  updateActiveGraph (index: number): void {
     this.SET_PREV_GRAPH(this.graphs[this.activeIndex.graph] || {})
     this.SET_ACTIVE_GRAPH_INDEX(index)
     this.SET_ACTIVE_LAYER_INDEX(-1)
   }
 
   @Action({ rawError: true })
-  resetGraphs () {
+  resetGraphs (): void {
     this.SET_GRAPHS([])
     this.SET_PREV_GRAPH({ nodes: [], links: [] })
   }
 
   @Action({})
-  resetNNtxtPath () {
+  resetNNtxtPath (): void {
     this.SET_NNTXT_PATH('')
   }
 }

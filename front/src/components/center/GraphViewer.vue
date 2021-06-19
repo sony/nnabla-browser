@@ -1,27 +1,27 @@
 <template>
   <div>
     <graph-tab-list
-      :activeGraphIndex="activeGraphIndex"
+      :active-graph-index="activeGraphIndex"
       :graphs="graphs"
     />
     <div class="tab-content network-editor-scroller">
       <svg-area
-        :activeGraph="activeGraph"
-        :prevGraph="prevGraph"
-        :isDragging="isDragging"
-        :assistAreaSize="assistAreaSize"
-        :nntxtPath="nntxtPath"
+        :active-graph="activeGraph"
+        :prev-graph="prevGraph"
+        :is-dragging="isDragging"
+        :assist-area-size="assistAreaSize"
+        :nntxt-path="nntxtPath"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
 import { Graph } from '@/types/graph'
-import { Vector2D } from '@/types/geometry'
 import GraphTabList from '@/components/center/graph/GraphTabList.vue'
 import SvgArea from '@/components/center/graph/SvgArea.vue'
-import Vue, { PropType } from 'vue'
+import { Vector2D } from '@/types/geometry'
 
 export default Vue.extend({
   components: {
@@ -29,13 +29,34 @@ export default Vue.extend({
     'svg-area': SvgArea
   },
   props: {
-    activeGraph: { type: Object as PropType<Graph> },
-    prevGraph: { type: Object as PropType<Graph> },
-    isDragging: { type: Boolean },
-    assistAreaSize: { type: Object as PropType<Vector2D> },
-    activeGraphIndex: { type: Number },
-    graphs: { type: Object as PropType<Graph[]> },
-    nntxtPath: { type: String }
+    activeGraph: {
+      type: Object as PropType<Graph>,
+      required: true
+    },
+    prevGraph: {
+      type: Object as PropType<Graph>,
+      required: true
+    },
+    isDragging: {
+      type: Boolean,
+      required: true
+    },
+    assistAreaSize: {
+      type: Object as PropType<Vector2D>,
+      required: true
+    },
+    activeGraphIndex: {
+      type: Number,
+      required: true
+    },
+    graphs: {
+      type: Object as PropType<Graph[]>,
+      required: true
+    },
+    nntxtPath: {
+      type: String,
+      required: true
+    }
   }
 })
 </script>

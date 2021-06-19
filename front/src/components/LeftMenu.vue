@@ -9,25 +9,28 @@
         style="top: 0; bottom: 0;"
       >
         <directory-tree
-          :activeFile="activeFile"
-          :activeTabName='activeTabName'
-          :directoryNode='directoryNode'
+          :active-file="activeFile"
+          :active-tab-name="activeTabName"
+          :directory-node="directoryNode"
         />
-        <property-area v-show="isPropertyAreaShow" :activeLayer="activeLayer" />
+        <property-area
+          v-show="isPropertyAreaShow"
+          :active-layer="activeLayer"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { DirectoryNode } from '@/types/store'
 import DirectoryTree from '@/components/left/DirectoryTree.vue'
+import { Node } from '@/types/graph'
 import PropertyArea from '@/components/left/PropertyArea.vue'
 import Vue from 'vue'
-import graphInfoState from '@/store/modules/graphInfo'
-import { DirectoryNode } from '@/types/store'
-import { Node } from '@/types/graph'
 import directoryInfoState from '@/store/modules/directoryInfo'
 import globalState from '@/store/modules/globalInfo'
+import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   components: {

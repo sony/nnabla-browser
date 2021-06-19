@@ -10,8 +10,8 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import graphInfoState from '@/store/modules/graphInfo'
 import { NNtxtFile } from '@/types/store'
+import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   props: {

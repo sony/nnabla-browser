@@ -9,9 +9,9 @@
     >
       <directory-component
         v-if="typeof directoryNode.name !== 'undefined'"
-        :activeFile="activeFile"
-        :activeTabName="activeTabName"
-        :directoryNode="directoryNode"
+        :active-file="activeFile"
+        :active-tab-name="activeTabName"
+        :directory-node="directoryNode"
         :dir-name="directoryNode.name"
         :level="0"
       />
@@ -20,18 +20,27 @@
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
 import Directory from './Directory.vue'
 import { DirectoryNode } from '@/types/store'
-import Vue, { PropType } from 'vue'
 
 export default Vue.extend({
-  props: {
-    activeFile: { type: String },
-    activeTabName: { type: String },
-    directoryNode: { type: Object as PropType<DirectoryNode> }
-  },
   components: {
     'directory-component': Directory
+  },
+  props: {
+    activeFile: {
+      type: String,
+      required: true
+    },
+    activeTabName: {
+      type: String,
+      required: true
+    },
+    directoryNode: {
+      type: Object as PropType<DirectoryNode>,
+      required: true
+    }
   }
 })
 </script>

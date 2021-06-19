@@ -1,8 +1,8 @@
 import $ from 'jquery'
 import { AnyObject } from '@/types/basic'
+import globalState from '@/store/modules/globalInfo'
 import graphInfoState from '@/store/modules/graphInfo'
 import { svgAreaOperator } from './svgAreaHelper'
-import globalState from '@/store/modules/globalInfo'
 
 const EditorWindowSize = {
   init: function (): void {

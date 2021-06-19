@@ -11,6 +11,7 @@ module.exports = {
   ],
   rules: {
     "sort-imports": "error",
+    "max-len": "error",
     "vue/attributes-order": "error",
     "vue/max-attributes-per-line": "error",
     "@typescript-eslint/no-unused-vars": "error",

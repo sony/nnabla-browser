@@ -10,8 +10,8 @@
 
 <script lang="ts">
 import { ChartDatum, ChartValue, MonitorFile } from '@/types/store'
-import chartInfoState from '@/store/modules/chartInfo'
 import Vue, { PropType } from 'vue'
+import chartInfoState from '@/store/modules/chartInfo'
 
 export default Vue.extend({
   props: {
@@ -32,6 +32,11 @@ export default Vue.extend({
       required: true
     }
   },
+  data: function () {
+    return {
+      checked: this.monitor.isView || false
+    }
+  },
   computed: {
     chartData: function (): { chartTitle: string; data: ChartDatum } {
       return {
@@ -47,11 +52,6 @@ export default Vue.extend({
       return (this.level > 0 ? this.dirName + '/' : '') + this.monitor.name
     }
   },
-  data: function () {
-    return {
-      checked: this.monitor.isView || false
-    }
-  },
   methods: {
     clickArea: function (): void {
       this.checked = !this.checked
@@ -59,9 +59,15 @@ export default Vue.extend({
     },
     changeEvent: function (): void {
       if (this.checked) {
-        chartInfoState.fetchChart({ path: this.filePath, chartData: this.chartData })
+        chartInfoState.fetchChart({
+          path: this.filePath,
+          chartData: this.chartData
+        })
       } else {
-        chartInfoState.dropChart({ path: this.filePath, chartData: this.chartData })
+        chartInfoState.dropChart({
+          path: this.filePath,
+          chartData: this.chartData
+        })
       }
     }
   }
