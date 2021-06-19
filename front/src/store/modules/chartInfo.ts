@@ -1,4 +1,10 @@
-import { Action, Module, VuexModule, getModule } from 'vuex-module-decorators'
+import {
+  Action,
+  Module,
+  Mutation,
+  VuexModule,
+  getModule
+} from 'vuex-module-decorators'
 import { ChartData, ChartDatum, ChartInfoState } from '@/types/store'
 import { MonitorBuilder } from '@/utils/monitorBuilder'
 import { httpClient } from '@/utils/httpClient'
@@ -8,6 +14,20 @@ import store from '@/store'
 @Module({ dynamic: true, store, namespaced: true, name: 'chartInfo' })
 class ChartInfoStateModule extends VuexModule implements ChartInfoState {
   charts: ChartData[] = []
+  activeChartPaths: string[] = []
+
+  @Mutation
+  ADD_ACTIVE_CHART_PATH (path: string): void {
+    this.activeChartPaths.push(path)
+  }
+
+  @Mutation
+  DELETE_ACTIVE_CHART_PATH (path: string): void {
+    const index = this.activeChartPaths.findIndex(p => p === path)
+    if (index > -1) {
+      this.activeChartPaths.splice(index, 1)
+    }
+  }
 
   @Action({})
   insertChartData ({
@@ -44,7 +64,6 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
 
       if (targetDataIndex > -1) {
         this.charts[targetChartIndex].data.splice(targetDataIndex, 1)
-
         if (this.charts[targetChartIndex].data.length < 1) {
           this.charts.splice(targetChartIndex, 1)
         }
@@ -87,6 +106,7 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
         path,
         { root: true }
       )
+      this.ADD_ACTIVE_CHART_PATH(path)
       this.insertChartData(newChartData)
     })
   }
@@ -113,6 +133,7 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
       path,
       { root: true }
     )
+    this.DELETE_ACTIVE_CHART_PATH(path)
     this.deleteChartData(chartData)
   }
 }

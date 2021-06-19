@@ -80,4 +80,5 @@ export interface ChartData {
 
 export interface ChartInfoState {
   charts: ChartData[];
+  activeChartPaths: string[];
 }

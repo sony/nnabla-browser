@@ -19,6 +19,10 @@ export default Vue.extend({
       type: Object as PropType<MonitorFile>,
       required: true
     },
+    activeChartPaths: {
+      type: Array as PropType<string[]>,
+      required: true
+    },
     dirName: {
       type: String,
       required: true
@@ -32,11 +36,6 @@ export default Vue.extend({
       required: true
     }
   },
-  data: function () {
-    return {
-      checked: this.monitor.isView || false
-    }
-  },
   computed: {
     chartData: function (): { chartTitle: string; data: ChartDatum } {
       return {
@@ -48,17 +47,17 @@ export default Vue.extend({
         }
       }
     },
+    checked: function (): boolean {
+      const path = `${this.dirName}/${this.monitor.name}`
+      return this.activeChartPaths.includes(path)
+    },
     filePath: function (): string {
       return (this.level > 0 ? this.dirName + '/' : '') + this.monitor.name
     }
   },
   methods: {
     clickArea: function (): void {
-      this.checked = !this.checked
-      this.changeEvent()
-    },
-    changeEvent: function (): void {
-      if (this.checked) {
+      if (!this.checked) {
         chartInfoState.fetchChart({
           path: this.filePath,
           chartData: this.chartData

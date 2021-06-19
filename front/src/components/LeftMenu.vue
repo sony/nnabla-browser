@@ -10,6 +10,7 @@
       >
         <directory-tree
           :active-file="activeFile"
+          :active-chart-paths="activeChartPaths"
           :active-tab-name="activeTabName"
           :directory-node="directoryNode"
         />
@@ -28,6 +29,7 @@ import DirectoryTree from '@/components/left/DirectoryTree.vue'
 import { Node } from '@/types/graph'
 import PropertyArea from '@/components/left/PropertyArea.vue'
 import Vue from 'vue'
+import chartInfoState from '@/store/modules/chartInfo'
 import directoryInfoState from '@/store/modules/directoryInfo'
 import globalState from '@/store/modules/globalInfo'
 import graphInfoState from '@/store/modules/graphInfo'
@@ -52,6 +54,9 @@ export default Vue.extend({
     },
     activeFile: function (): string {
       return directoryInfoState.activeFile
+    },
+    activeChartPaths: function (): string[] {
+      return chartInfoState.activeChartPaths
     }
   }
 })

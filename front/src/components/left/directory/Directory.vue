@@ -34,6 +34,7 @@
         >
           <directory-component
             :active-file="activeFile"
+            :active-chart-paths="activeChartPaths"
             :active-tab-name="activeTabName"
             :directory-node="childInfo"
             :dir-name="(level > 0 ? dirName + '/' : '') + childInfo.name"
@@ -65,6 +66,7 @@
           <csv-entry
             :style="{ 'padding-left': 12 * (level + 1) + 'px' }"
             :monitor="monitor"
+            :active-chart-paths="activeChartPaths"
             :dir-name="dirName"
             :dir-id="directoryNode.id"
             :level="level"
@@ -94,6 +96,10 @@ export default Vue.extend({
   props: {
     activeFile: {
       type: String,
+      required: true
+    },
+    activeChartPaths: {
+      type: Array as PropType<string[]>,
       required: true
     },
     activeTabName: {

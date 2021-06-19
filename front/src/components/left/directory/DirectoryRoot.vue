@@ -10,6 +10,7 @@
       <directory-component
         v-if="typeof directoryNode.name !== 'undefined'"
         :active-file="activeFile"
+        :active-chart-paths="activeChartPaths"
         :active-tab-name="activeTabName"
         :directory-node="directoryNode"
         :dir-name="directoryNode.name"
@@ -31,6 +32,10 @@ export default Vue.extend({
   props: {
     activeFile: {
       type: String,
+      required: true
+    },
+    activeChartPaths: {
+      type: Array as PropType<string[]>,
       required: true
     },
     activeTabName: {
