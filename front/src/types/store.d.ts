@@ -36,13 +36,13 @@ export interface EditorState {
 
 export interface MonitorFile {
    name: string;
-   data: MonitorSeriesData | AnyObject;
+   data: MonitorSeriesData|null;
    isView?: boolean;
 }
 
 export interface NNtxtFile {
   name: string;
-  data: AnyObject;
+  data: Graph[]|null;
 }
 
 export interface DirectoryNode {

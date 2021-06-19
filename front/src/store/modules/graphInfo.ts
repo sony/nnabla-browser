@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 import store from '@/store'
-import { Graph, Link, Node } from '@/types/graph'
+import { Graph, Node } from '@/types/graph'
 import { GraphInfoState } from '@/types/store'
 import { GraphBuilder } from '@/utils/graphBuilder'
 import { httpClient } from '@/utils/httpClient'
@@ -80,7 +80,7 @@ class GraphInfoStateModule extends VuexModule implements GraphInfoState {
       // Sent data by http is already json. Don't have convert it explicitly.
       const builder = new GraphBuilder(res.data)
       const data = builder.build()
-      this.context.commit('directoryInfo/updateFileContent', { path, data }, { root: true })
+      this.context.dispatch('directoryInfo/updateFileContent', { path, data }, { root: true })
 
       d3.select('#svg-links').style('opacity', 0)
       d3.select('#network-editor')
@@ -95,7 +95,7 @@ class GraphInfoStateModule extends VuexModule implements GraphInfoState {
       this.SET_NNTXT_PATH(path)
       this.SET_ACTIVE_LAYER_INDEX(-1)
       this.SET_ACTIVE_GRAPH_INDEX(0)
-      this.context.commit('directoryInfo/updateActiveFile', path, { root: true })
+      this.context.commit('directoryInfo/SET_ACTIVE_FILE', path, { root: true })
     })
   }
 

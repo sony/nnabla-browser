@@ -52,7 +52,7 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
       // Get data from server and update.
       const builder = new MonitorBuilder(res.data)
       const data = builder.build()
-      this.context.commit('directoryInfo/updateFileContent', { path: path, data }, { root: true })
+      this.context.dispatch('directoryInfo/updateFileContent', { path: path, data }, { root: true })
 
       // Activate subscribe to update in real-time.
       httpClient.activateSSESubscribe(path, serverEventHandler.SSEConnectionId)
@@ -66,19 +66,19 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
         }
       }
 
-      this.context.commit('directoryInfo/activateSubscribe', path, { root: true })
+      this.context.dispatch('directoryInfo/activateSubscribe', path, { root: true })
       this.insertChartData(newChartData)
     })
   }
 
   @Action({})
   dropChart ({ path, chartData }: { path: string; chartData: { chartTitle: string; data: ChartDatum } }) {
-    this.context.commit('directoryInfo/deleteFileContent', path, { root: true })
+    this.context.dispatch('directoryInfo/deleteFileContent', path, { root: true })
 
     // Deactivate subscribe
     httpClient.deactivateSSESubscribe(path, serverEventHandler.SSEConnectionId)
 
-    this.context.commit('directoryInfo/deactivateSubscribe', path, { root: true })
+    this.context.dispatch('directoryInfo/deactivateSubscribe', path, { root: true })
     this.deleteChartData(chartData)
   }
 }

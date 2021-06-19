@@ -1,29 +1,73 @@
 import * as Path from 'path'
 import * as d3 from 'd3'
 import * as pathOperator from '@/utils/pathOperator'
+import { Graph } from '@/types/graph'
+import { MonitorSeriesData } from '@/types/monitor'
 import { DirectoryInfoState, DirectoryNode, MonitorFile, NNtxtFile } from '@/types/store'
-import { AnyObject } from '@/types/basic'
-import { Mutation, Action, VuexModule, Module } from 'vuex-module-decorators'
+import { Mutation, Action, VuexModule, Module, getModule } from 'vuex-module-decorators'
+import store from '@/store'
 
 // monotonic incremental counter to assign unique id
 let nodeCounter = 0
 
-const deleteDirectoryInfo = (
+function findIndexByName (directoryNode: DirectoryNode, fileType: string, name: string): number {
+  switch (fileType) {
+    case 'nntxtFiles':
+      return directoryNode.nntxtFiles.findIndex(x => x.name === name)
+    case 'monitorFiles':
+      return directoryNode.monitorFiles.findIndex(x => x.name === name)
+    default:
+      throw new Error(`invalid fileType: ${fileType}`)
+  }
+}
+
+function deleteByIndex (directoryNode: DirectoryNode, fileType: string, index: number) {
+  switch (fileType) {
+    case 'nntxtFiles':
+      directoryNode.nntxtFiles.splice(index, 1)
+      break
+    case 'monitorFiles':
+      directoryNode.monitorFiles.splice(index, 1)
+      break
+    default:
+      throw new Error(`invalid fileType: ${fileType}`)
+  }
+}
+
+function findInsertIndexByName (directoryNode: DirectoryNode, fileType: string, name: string): number {
+  const findInsertIndex = (list: Array<{ name: string }>, name: string) => {
+    const insertIndex = list.findIndex(
+      (x): boolean => x.name.toLowerCase() > name.toLowerCase()
+    )
+    return insertIndex > -1 ? insertIndex : list.length
+  }
+  switch (fileType) {
+    case 'nntxtFiles':
+      return findInsertIndex(directoryNode.nntxtFiles, name)
+    case 'monitorFiles':
+      return findInsertIndex(directoryNode.monitorFiles, name)
+    default:
+      throw new Error(`invalid fileType: ${fileType}`)
+  }
+}
+
+function findInsertIndexByDirectoryName (directoryNode: DirectoryNode, name: string): number {
+  const insertIndex = directoryNode.children.findIndex(
+    (x): boolean => x.name.toLowerCase() > name.toLowerCase()
+  )
+  return insertIndex > -1 ? insertIndex : directoryNode.children.length
+}
+
+function deleteDirectoryInfo (
   parent: DirectoryNode,
   fileName: string,
   fileType: string
-): boolean => {
-  if (fileType !== 'nntxtFiles' && fileType !== 'monitorFiles') {
-    return false
-  }
-
-  const index = parent[fileType].findIndex((x: NNtxtFile | MonitorFile) => x.name === fileName)
+): boolean {
+  const index = findIndexByName(parent, fileType, fileName)
   if (index > -1) {
-    parent[fileType].splice(index, 1)
-
+    deleteByIndex(parent, fileType, index)
     return true
   }
-
   return false
 }
 
@@ -37,23 +81,29 @@ function createNewNode (name: string): DirectoryNode {
   }
 }
 
-function createNewSubTree (relPath: string, insertData: AnyObject): DirectoryNode {
+function createNewSubTree (relPath: string, insertData: Graph[]|MonitorSeriesData|null): DirectoryNode {
   const split = relPath.split('/')
 
   const subTree = createNewNode(split[0])
   let currentNode = subTree
-  let i
-  for (i = 1; i < split.length - 1; i++) {
+  for (let i = 1; i < split.length - 1; i++) {
     const dir = split[i]
-
     const tmp = createNewNode(dir)
     currentNode.children.push(tmp)
     currentNode = tmp
   }
 
-  const fileType = pathOperator.getFileType(split[i])
-  if (fileType) {
-    currentNode[fileType].push({ name: split[i], data: insertData })
+  const name = split[split.length - 1]
+  const fileType = pathOperator.getFileType(name)
+  switch (fileType) {
+    case 'nntxtFiles':
+      currentNode.nntxtFiles.push({ name: name, data: insertData as Graph[] })
+      break
+    case 'monitorFiles':
+      currentNode.monitorFiles.push({ name: name, data: insertData as MonitorSeriesData })
+      break
+    default:
+      throw new Error(`invalid fileType: ${fileType}`)
   }
 
   return subTree
@@ -69,55 +119,47 @@ function searchParent (
   let i
   for (i = 0; i < split.length - 1; i++) {
     const dir = split[i]
-
     const nextNode = currentNode.children.find(x => x.name === dir)
-
     if (typeof nextNode === 'undefined') {
       break
     }
-
     currentNode = nextNode
   }
-
   return [currentNode, split.slice(i, split.length).join('/')]
-}
-function findInsertIndex (list: Array<{ name: string }>, name: string): number {
-  let insertIndex = list.findIndex(
-    (x): boolean => x.name.toLowerCase() > name.toLowerCase()
-  )
-  insertIndex = insertIndex > -1 ? insertIndex : list.length
-
-  return insertIndex
 }
 
 function insertFile (
   parent: DirectoryNode,
   fileName: string,
-  insertData: AnyObject,
+  insertData: Graph[]|MonitorSeriesData|null,
   replace = false
 ): void {
   const fileType = pathOperator.getFileType(fileName)
-
-  if (fileType) {
-    const index = parent[fileType].findIndex((x: NNtxtFile | MonitorFile) => x.name === fileName)
-    if (index > -1) {
-      // Found. Update file contents.
-      if (replace) {
-        parent[fileType][index].data = insertData
-      } else {
-        parent[fileType][index].data = Object.assign(
-          {},
-          parent[fileType][index].data,
-          insertData
-        )
-      }
+  const index = findIndexByName(parent, fileType, fileName)
+  if (index > -1) {
+    // Found. Update file contents.
+    if (replace) {
+      parent[fileType][index].data = insertData
     } else {
-      // Not found. Insert new file.
-      const insertIndex = findInsertIndex(parent[fileType], fileName)
-      parent[fileType].splice(insertIndex, 0, {
-        name: fileName,
-        data: insertData
-      })
+      parent[fileType][index].data = Object.assign(
+        {},
+        parent[fileType][index].data,
+        insertData
+      )
+    }
+  } else {
+    // Not found. Insert new file.
+    const insertIndex = findInsertIndexByName(parent, fileType, fileName)
+    const newData = { name: fileName, data: insertData }
+    switch (fileType) {
+      case 'nntxtFiles':
+        parent.nntxtFiles.splice(insertIndex, 0, newData as NNtxtFile)
+        break
+      case 'monitorFiles':
+        parent.monitorFiles.splice(insertIndex, 0, newData as MonitorFile)
+        break
+      default:
+        throw new Error(`invalid fileType: ${fileType}`)
     }
   }
 }
@@ -125,41 +167,30 @@ function insertFile (
 function addDirectoryInfo (
   state: DirectoryInfoState,
   path: string,
-  data: AnyObject,
+  data: Graph[]|MonitorSeriesData|null,
   replace = false
 ): void {
   const [parent, relPath] = searchParent(path, state.data)
-
   if (relPath.split('/').length === 1) {
     insertFile(parent, relPath, data, replace)
   } else {
     const subTree = createNewSubTree(relPath, data)
-    const insertIndex = findInsertIndex(parent.children, relPath.split('/')[0])
+    const insertIndex = findInsertIndexByDirectoryName(parent, relPath.split('/')[0])
     parent.children.splice(insertIndex, 0, subTree)
   }
 }
 
 function deleteFileOrDirectoryPath (state: DirectoryInfoState, path: string): void {
   const [parent, relPath] = searchParent(path, state.data)
-
   const fileType = pathOperator.getFileType(relPath)
-  if (fileType) {
-    // delete file
-    const index = parent[fileType].findIndex((x: NNtxtFile | MonitorFile) => x.name === relPath)
-    if (index === -1) return
-
-    parent[fileType].splice(index, index + 1)
-  } else {
-    // delete directory
-    const index = parent.children.findIndex(x => x.name === relPath)
-    if (index === -1) return
-
-    parent.children.splice(index, index + 1)
-  }
+  // delete file
+  const index = findIndexByName(parent, fileType, relPath)
+  if (index === -1) return
+  deleteByIndex(parent, fileType, index)
 }
 
-@Module({ namespaced: true })
-export default class DirectoryInfoStateModule extends VuexModule implements DirectoryInfoState {
+@Module({ dynamic: true, store, namespaced: true, name: 'directoryInfo' })
+class DirectoryInfoStateModule extends VuexModule implements DirectoryInfoState {
   data: DirectoryNode = {
     id: 0,
     children: [],
@@ -173,52 +204,52 @@ export default class DirectoryInfoStateModule extends VuexModule implements Dire
   subscribedList: string[] = []
 
   @Mutation
+  SET_ACTIVE_FILE (path: string) {
+    this.activeFile = path
+  }
+
+  @Action({})
   initDirectoryStructure (paths: string[]) {
     for (const path of paths) {
-      addDirectoryInfo(this, path, {})
+      addDirectoryInfo(this, path, null)
     }
   }
 
-  @Mutation
+  @Action({})
   updateDirectoryStructure (path: string) {
     // Register file path without file content
-    addDirectoryInfo(this, path, {})
+    addDirectoryInfo(this, path, null)
   }
 
-  @Mutation
+  @Action({})
   deleteFileOrDirectory (path: string) {
     deleteFileOrDirectoryPath(this, path)
   }
 
-  @Mutation
-  updateFileContent ({ path, data }: { path: string; data: AnyObject }) {
+  @Action({})
+  updateFileContent ({ path, data }: { path: string; data: Graph[]|MonitorSeriesData }) {
     // Register file path with file content
     addDirectoryInfo(this, path, data)
   }
 
-  @Mutation
+  @Action({})
   deleteFileContent (path: string) {
-    addDirectoryInfo(this, path, {}, true)
+    deleteFileOrDirectoryPath(this, path)
   }
 
-  @Mutation
-  updateActiveFile (path: string) {
-    this.activeFile = path
-  }
-
-  @Mutation
+  @Action({})
   resetActiveFile () {
-    this.activeFile = ''
+    this.SET_ACTIVE_FILE('')
   }
 
-  @Mutation
+  @Action({})
   activateSubscribe (path: string) {
     if (!this.subscribedList.includes(path)) {
       this.subscribedList.push(path)
     }
   }
 
-  @Mutation
+  @Action({})
   deactivateSubscribe (path: string) {
     const index = this.subscribedList.indexOf(path)
     if (index > -1) {
@@ -254,3 +285,5 @@ export default class DirectoryInfoStateModule extends VuexModule implements Dire
     }
   }
 }
+
+export default getModule(DirectoryInfoStateModule)

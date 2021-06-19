@@ -4,6 +4,7 @@ import { MonitorBuilder } from '@/utils/monitorBuilder'
 import { NNtxt } from '@/types/nnablaApi'
 import { ServerEvent } from '@/types/serverEvent'
 import store from '@/store'
+import directoryInfoState from '@/store/modules/directoryInfo'
 
 class ServerEventHandler {
   SSEConnectionId = -1
@@ -15,14 +16,12 @@ class ServerEventHandler {
 
   initDirectoryStructureEventListener (event: Event): void {
     const paths = (event as ServerEvent).data.split('\n')
-
-    store.commit('directoryInfo/initDirectoryStructure', paths)
+    directoryInfoState.initDirectoryStructure(paths)
   }
 
   directoryStructureEventListener (event: Event): void {
     const filePath = (event as ServerEvent).lastEventId
-
-    store.commit('directoryInfo/updateDirectoryStructure', filePath)
+    directoryInfoState.updateDirectoryStructure(filePath)
   }
 
   fileContentEventListener (event: Event): void {
@@ -44,15 +43,16 @@ class ServerEventHandler {
       const rawData = (event as ServerEvent).data
       const builder = new MonitorBuilder((rawData as string))
       data = builder.build()
+    } else {
+      throw new Error(`invalid fileType: ${fileType}`)
     }
 
-    store.commit('directoryInfo/updateFileContent', { path: filePath, data })
+    directoryInfoState.updateFileContent({ path: filePath, data })
   }
 
   deleteEventListener (event: Event): void {
     const path = (event as ServerEvent).lastEventId
-
-    store.commit('directoryInfo/deleteFileOrDirectory', path)
+    directoryInfoState.deleteFileOrDirectory(path)
   }
 }
 
