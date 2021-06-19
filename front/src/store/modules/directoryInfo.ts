@@ -27,12 +27,12 @@ function findIndexByName (
   name: string
 ): number {
   switch (fileType) {
-    case 'nntxtFiles':
-      return directoryNode.nntxtFiles.findIndex(x => x.name === name)
-    case 'monitorFiles':
-      return directoryNode.monitorFiles.findIndex(x => x.name === name)
-    default:
-      throw new Error(`invalid fileType: ${fileType}`)
+  case 'nntxtFiles':
+    return directoryNode.nntxtFiles.findIndex(x => x.name === name)
+  case 'monitorFiles':
+    return directoryNode.monitorFiles.findIndex(x => x.name === name)
+  default:
+    throw new Error(`invalid fileType: ${fileType}`)
   }
 }
 
@@ -42,14 +42,14 @@ function deleteByIndex (
   index: number
 ): void {
   switch (fileType) {
-    case 'nntxtFiles':
-      directoryNode.nntxtFiles.splice(index, 1)
-      break
-    case 'monitorFiles':
-      directoryNode.monitorFiles.splice(index, 1)
-      break
-    default:
-      throw new Error(`invalid fileType: ${fileType}`)
+  case 'nntxtFiles':
+    directoryNode.nntxtFiles.splice(index, 1)
+    break
+  case 'monitorFiles':
+    directoryNode.monitorFiles.splice(index, 1)
+    break
+  default:
+    throw new Error(`invalid fileType: ${fileType}`)
   }
 }
 
@@ -68,12 +68,12 @@ function findInsertIndexByName (
     return insertIndex > -1 ? insertIndex : list.length
   }
   switch (fileType) {
-    case 'nntxtFiles':
-      return findInsertIndex(directoryNode.nntxtFiles, name)
-    case 'monitorFiles':
-      return findInsertIndex(directoryNode.monitorFiles, name)
-    default:
-      throw new Error(`invalid fileType: ${fileType}`)
+  case 'nntxtFiles':
+    return findInsertIndex(directoryNode.nntxtFiles, name)
+  case 'monitorFiles':
+    return findInsertIndex(directoryNode.monitorFiles, name)
+  default:
+    throw new Error(`invalid fileType: ${fileType}`)
   }
 }
 
@@ -128,17 +128,17 @@ function createNewSubTree (
   const name = split[split.length - 1]
   const fileType = pathOperator.getFileType(name)
   switch (fileType) {
-    case 'nntxtFiles':
-      currentNode.nntxtFiles.push({ name: name, data: insertData as Graph[] })
-      break
-    case 'monitorFiles':
-      currentNode.monitorFiles.push({
-        name: name,
-        data: insertData as MonitorSeriesData
-      })
-      break
-    default:
-      throw new Error(`invalid fileType: ${fileType}`)
+  case 'nntxtFiles':
+    currentNode.nntxtFiles.push({ name: name, data: insertData as Graph[] })
+    break
+  case 'monitorFiles':
+    currentNode.monitorFiles.push({
+      name: name,
+      data: insertData as MonitorSeriesData
+    })
+    break
+  default:
+    throw new Error(`invalid fileType: ${fileType}`)
   }
 
   return subTree
@@ -187,14 +187,14 @@ function insertFile (
     const insertIndex = findInsertIndexByName(parent, fileType, fileName)
     const newData = { name: fileName, data: insertData }
     switch (fileType) {
-      case 'nntxtFiles':
-        parent.nntxtFiles.splice(insertIndex, 0, newData as NNtxtFile)
-        break
-      case 'monitorFiles':
-        parent.monitorFiles.splice(insertIndex, 0, newData as MonitorFile)
-        break
-      default:
-        throw new Error(`invalid fileType: ${fileType}`)
+    case 'nntxtFiles':
+      parent.nntxtFiles.splice(insertIndex, 0, newData as NNtxtFile)
+      break
+    case 'monitorFiles':
+      parent.monitorFiles.splice(insertIndex, 0, newData as MonitorFile)
+      break
+    default:
+      throw new Error(`invalid fileType: ${fileType}`)
     }
   }
 }
