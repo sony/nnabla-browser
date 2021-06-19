@@ -35,18 +35,7 @@ export default Vue.extend({
     graph: GraphViewer,
     monitoring: MonitoringComponent
   },
-  props: {
-    historyInfo: {
-      type: Object,
-      default: Object
-    },
-    zoomInfo: {
-      type: Object,
-      default: Object
-    }
-  },
   computed: {
-    // todo: change to ":is" binding from this rule base switching after re-implementing history and zoom
     selectedEditTab: function (): boolean {
       return globalState.activeTabName === 'graph'
     },
