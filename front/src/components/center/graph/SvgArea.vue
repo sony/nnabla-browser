@@ -9,7 +9,7 @@
     >
       <transition name="fade">
         <g
-          v-show="isDragging && isLargeScale"
+          v-show="isDragging"
           id="svg-assist-dots"
           class="assist-dots"
         >
@@ -42,7 +42,7 @@
           <g
             v-for="(node, index) in activeGraph.nodes"
             :id="'layer-' + index"
-            :key="$store.state.graphInfo.nntxtPath + '-layer-' + index"
+            :key="nntxtPath + '-layer-' + index"
             class="layer"
             :transform="createTransform(node, index)"
             @mousedown="clickLayer(index)"
@@ -117,7 +117,7 @@
           <path
             v-for="(link, index) in activeGraph.links"
             :id="'link-' + index"
-            :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
+            :key="nntxtPath + '-link-' + index"
             :stroke="linkLineStyleAttrs.stroke"
             :stroke-width="linkLineStyleAttrs['stroke-width']"
             :fill="linkLineStyleAttrs['fill']"
@@ -132,11 +132,10 @@
 <script lang="ts">
 import * as d3 from 'd3'
 import { Graph, Link, NextTransition, Node } from '@/types/graph'
-import Vue, { VNode } from 'vue'
+import Vue, { PropType, VNode } from 'vue'
 import { styleHelper, svgAreaOperator } from '@/utils/svgAreaHelper'
 import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
-import { GraphInfoState } from '@/types/store'
 import { Vector2D } from '@/types/geometry'
 import graphInfoState from '@/store/modules/graphInfo'
 
@@ -147,26 +146,6 @@ const originPosY = grid * 2
 // define this variable outside Vue data to prevent infinite updates
 const nextTransition: NextTransition[] = []
 
-/***************************************
- interface
- ***************************************/
-
-interface DataType {
-  isLargeScale: boolean;
-}
-
-interface ComputedType {
-  graphState: GraphInfoState;
-  activeGraph: Graph;
-  prevGraph: Graph;
-  isDragging: boolean;
-  assistAreaSize: Vector2D;
-  assistAreaX: number[];
-  assistAreaY: number[];
-  linkLineStyleAttrs: object;
-  originTransform: string;
-}
-
 interface TransformInfo {
   graph: Element | null;
   translateX: number;
@@ -174,9 +153,7 @@ interface TransformInfo {
   scale: number;
 }
 
-/***************************************/
-
-export default Vue.extend<DataType, {}, ComputedType, {}>({
+export default Vue.extend({
   directives: {
     zoom: {
       inserted: function (el, binding, vNode: VNode): void {
@@ -298,27 +275,14 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
       }
     }
   },
-  data: function () {
-    return {
-      isLargeScale: true
-    }
+  props: {
+    activeGraph: { type: Object as PropType<Graph> },
+    prevGraph: { type: Object as PropType<Graph> },
+    isDragging: { type: Boolean },
+    assistAreaSize: { type: Object as PropType<Vector2D> },
+    nntxtPath: { type: String }
   },
   computed: {
-    graphState: function (): GraphInfoState {
-      return graphInfoState
-    },
-    activeGraph: function (): Graph {
-      return graphInfoState.activeGraph
-    },
-    prevGraph: function (): Graph {
-      return graphInfoState.prevGraph
-    },
-    isDragging: function (): boolean {
-      return graphInfoState.isDragging
-    },
-    assistAreaSize: function (): Vector2D {
-      return graphInfoState.assistAreaSize
-    },
     assistAreaX: function (): number[] {
       return d3.range(0, this.assistAreaSize.x, grid)
     },

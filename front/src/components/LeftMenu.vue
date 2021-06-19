@@ -8,8 +8,12 @@
         class="app-row"
         style="top: 0; bottom: 0;"
       >
-        <directory-tree />
-        <property-area v-show="isPropertyAreaShow" />
+        <directory-tree
+          :activeFile="activeFile"
+          :activeTabName='activeTabName'
+          :directoryNode='directoryNode'
+        />
+        <property-area v-show="isPropertyAreaShow" :activeLayer="activeLayer" />
       </div>
     </div>
   </div>
@@ -19,6 +23,10 @@
 import DirectoryTree from '@/components/left/DirectoryTree.vue'
 import PropertyArea from '@/components/left/PropertyArea.vue'
 import Vue from 'vue'
+import graphInfoState from '@/store/modules/graphInfo'
+import { DirectoryNode } from '@/types/store'
+import { Node } from '@/types/graph'
+import directoryInfoState from '@/store/modules/directoryInfo'
 
 export default Vue.extend({
   components: {
@@ -31,6 +39,15 @@ export default Vue.extend({
     },
     isPropertyAreaShow: function (): boolean {
       return this.activeTabName === 'graph'
+    },
+    activeLayer: function (): Node {
+      return graphInfoState.activeLayer
+    },
+    directoryNode: function (): DirectoryNode {
+      return directoryInfoState.data
+    },
+    activeFile: function (): string {
+      return directoryInfoState.activeFile
     }
   }
 })

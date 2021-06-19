@@ -27,39 +27,31 @@ import LayerProperties from '@/components/left/property/LayerProperties.vue'
 import LayerType from '@/components/left/property/LayerType.vue'
 import { Node } from '@/types/graph'
 import { RawFunction } from '@/types/nnablaApi'
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import { nnablaCore } from '@/utils/nnablaApi'
 
-interface ComputedPropertyArea {
-  selectedLayer: Node;
-  isLayerSelected: boolean;
-  defaultProps: RawFunction;
-  layerParams: object | string | number;
-  ioInfos: { outputShape: string[] };
-}
-
-export default Vue.extend<{}, {}, ComputedPropertyArea, {}>({
+export default Vue.extend({
   components: {
     'layer-type': LayerType,
     'layer-properties': LayerProperties
   },
+  props: {
+    activeLayer: { type: Object as PropType<Node> }
+  },
   computed: {
-    selectedLayer: function (): Node {
-      return this.$store.getters['graphInfo/activeLayer']
-    },
     isLayerSelected: function (): boolean {
-      return Object.keys(this.selectedLayer).length > 0
+      return Object.keys(this.activeLayer).length > 0
     },
     defaultProps: function (): RawFunction {
-      return nnablaCore.findFunction(this.selectedLayer.type)
+      return nnablaCore.findFunction(this.activeLayer.type)
     },
     layerParams: function (): AnyObject {
-      return this.selectedLayer.param || {}
+      return this.activeLayer.param || {}
     },
     ioInfos: function (): {outputShape: string[] } {
       // return input/output related info,ie. shapes etc.
       return {
-        outputShape: this.selectedLayer.outputShape
+        outputShape: this.activeLayer.outputShape
       }
     }
   }

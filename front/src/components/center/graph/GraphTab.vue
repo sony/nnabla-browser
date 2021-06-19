@@ -13,13 +13,7 @@ import Vue, { PropType } from 'vue'
 import { Graph } from '@/types/graph'
 import graphInfoState from '@/store/modules/graphInfo'
 
-interface GraphTabProps {
-  graph: Graph;
-  index: number;
-  selected: boolean;
-}
-
-export default Vue.extend<{}, {}, {}, GraphTabProps>({
+export default Vue.extend({
   props: {
     graph: {
       type: Object as PropType<Graph>,

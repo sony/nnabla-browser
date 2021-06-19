@@ -4,7 +4,7 @@
     class="branch"
   >
     <div
-      v-if="info.name.length > 0"
+      v-if="directoryNode.name.length > 0"
       class="branch-name"
       @click="expand = !expand"
     >
@@ -19,7 +19,7 @@
           icon="angle-right"
           style="width: 10px"
         />
-        {{ info.name }}
+        {{ directoryNode.name }}
       </div>
     </div>
 
@@ -29,11 +29,13 @@
     >
       <ul>
         <li
-          v-for="(childInfo, key) in info.children"
+          v-for="(childInfo, key) in directoryNode.children"
           :key="dirName + ':' + key"
         >
           <directory-component
-            :info="childInfo"
+            :activeFile="activeFile"
+            :activeTabName="activeTabName"
+            :directoryNode="childInfo"
             :dir-name="(level > 0 ? dirName + '/' : '') + childInfo.name"
             :level="level + 1"
           />
@@ -42,10 +44,11 @@
 
       <ul v-if="activeTabName === 'graph'">
         <li
-          v-for="(nntxt, key) in info.nntxtFiles"
+          v-for="(nntxt, key) in directoryNode.nntxtFiles"
           :key="dirName + ':nntxt:' + key"
         >
           <nntxts-component
+            :activeFile="activeFile"
             :style="{ 'padding-left': 12 * (level + 1) + 'px' }"
             :nntxt="nntxt"
             :dir-name="dirName"
@@ -56,14 +59,14 @@
 
       <ul v-if="activeTabName === 'monitoring'">
         <li
-          v-for="(monitor, key) in info.monitorFiles"
+          v-for="(monitor, key) in directoryNode.monitorFiles"
           :key="dirName + ':monitor:' + key"
         >
           <csv-entry
             :style="{ 'padding-left': 12 * (level + 1) + 'px' }"
             :monitor="monitor"
             :dir-name="dirName"
-            :dir-id="info.id"
+            :dir-id="directoryNode.id"
             :level="level"
           />
         </li>
@@ -89,7 +92,15 @@ export default Vue.extend({
     'csv-entry': CSVEntry
   },
   props: {
-    info: {
+    activeFile: {
+      type: String,
+      required: true
+    },
+    activeTabName: {
+      type: String,
+      required: true
+    },
+    directoryNode: {
       type: Object as PropType<DirectoryNode>,
       required: true
     },
@@ -111,14 +122,11 @@ export default Vue.extend({
     },
     checkDisplay: function (): boolean {
       return (
-        this.info.children.length +
-          this.info.nntxtFiles.length +
-          this.info.monitorFiles.length >
+        this.directoryNode.children.length +
+          this.directoryNode.nntxtFiles.length +
+          this.directoryNode.monitorFiles.length >
         0
       )
-    },
-    activeTabName: function (): string {
-      return this.$store.state.editor.activeTabName.toLowerCase()
     }
   }
 })

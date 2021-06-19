@@ -3,7 +3,6 @@ import { GraphBuilder } from '@/utils/graphBuilder'
 import { MonitorBuilder } from '@/utils/monitorBuilder'
 import { NNtxt } from '@/types/nnablaApi'
 import { ServerEvent } from '@/types/serverEvent'
-import store from '@/store'
 import directoryInfoState from '@/store/modules/directoryInfo'
 
 class ServerEventHandler {
@@ -31,7 +30,7 @@ class ServerEventHandler {
 
     if (fileType === null) return
 
-    if (!store.state.directoryInfo.subscribedList.includes(filePath)) return
+    if (!directoryInfoState.subscribedList.includes(filePath)) return
 
     // Have to convert sent data by sse to json explicitly.
     let data

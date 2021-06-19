@@ -6,8 +6,13 @@
     <keep-alive>
       <graph
         v-if="selectedEditTab"
-        :history-info="historyInfo"
-        @history="command => $emit('history', command)"
+        :activeGraph="activeGraph"
+        :prevGraph="prevGraph"
+        :isDragging="isDragging"
+        :assistAreaSize="assistAreaSize"
+        :activeGraphIndex="activeGraphIndex"
+        :graphs="graphs"
+        :nntxtPath="nntxtPath"
       />
       <monitoring v-else-if="selectedMonitoringTab" :charts="charts"/>
     </keep-alive>
@@ -16,14 +21,17 @@
 
 <script lang="ts">
 import { ChartData } from '@/types/store'
+import { Graph } from '@/types/graph'
 import MonitoringComponent from '@/components/center/Monitoring.vue'
-import NetworkComponent from '@/components/center/GraphViewer.vue'
+import GraphViewer from '@/components/center/GraphViewer.vue'
 import Vue from 'vue'
+import { Vector2D } from '@/types/geometry'
 import chartInfoState from '@/store/modules/chartInfo'
+import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   components: {
-    graph: NetworkComponent,
+    graph: GraphViewer,
     monitoring: MonitoringComponent
   },
   props: {
@@ -46,6 +54,27 @@ export default Vue.extend({
     },
     charts: function (): ChartData[] {
       return chartInfoState.charts
+    },
+    graphs: function (): Graph[] {
+      return graphInfoState.graphs
+    },
+    activeGraphIndex: function (): number {
+      return graphInfoState.activeIndex.graph
+    },
+    nntxtPath: function (): string {
+      return graphInfoState.nntxtPath
+    },
+    activeGraph: function (): Graph {
+      return graphInfoState.activeGraph
+    },
+    prevGraph: function (): Graph {
+      return graphInfoState.prevGraph
+    },
+    isDragging: function (): boolean {
+      return graphInfoState.isDragging
+    },
+    assistAreaSize: function (): Vector2D {
+      return graphInfoState.assistAreaSize
     }
   }
 })

@@ -9,8 +9,9 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
 import { ChartDatum, ChartValue, MonitorFile } from '@/types/store'
+import chartInfoState from '@/store/modules/chartInfo'
+import Vue, { PropType } from 'vue'
 
 export default Vue.extend({
   props: {
@@ -58,9 +59,9 @@ export default Vue.extend({
     },
     changeEvent: function (): void {
       if (this.checked) {
-        this.$store.dispatch('chartInfo/fetchChart', { path: this.filePath, chartData: this.chartData })
+        chartInfoState.fetchChart({ path: this.filePath, chartData: this.chartData })
       } else {
-        this.$store.dispatch('chartInfo/dropChart', { path: this.filePath, chartData: this.chartData })
+        chartInfoState.dropChart({ path: this.filePath, chartData: this.chartData })
       }
     }
   }

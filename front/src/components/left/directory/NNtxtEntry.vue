@@ -13,20 +13,12 @@ import Vue, { PropType } from 'vue'
 import graphInfoState from '@/store/modules/graphInfo'
 import { NNtxtFile } from '@/types/store'
 
-/** local interface **/
-interface NNtxtComputedType {
-  isSelected: boolean;
-  nntxtPath: string;
-}
-
-interface NNtxtPropsType {
-  nntxt: NNtxtFile;
-  dirName: string;
-  level: number;
-}
-
-export default Vue.extend<{}, {}, NNtxtComputedType, NNtxtPropsType>({
+export default Vue.extend({
   props: {
+    activeFile: {
+      type: String,
+      required: true
+    },
     nntxt: {
       type: Object as PropType<NNtxtFile>,
       required: true
@@ -45,7 +37,7 @@ export default Vue.extend<{}, {}, NNtxtComputedType, NNtxtPropsType>({
       return (this.level > 0 ? this.dirName + '/' : '') + this.nntxt.name
     },
     isSelected: function (): boolean {
-      return this.$store.state.directoryInfo.activeFile === this.nntxtPath
+      return this.activeFile === this.nntxtPath
     }
   },
   methods: {

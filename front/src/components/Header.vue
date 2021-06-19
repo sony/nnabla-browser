@@ -1,8 +1,8 @@
 <template>
   <div class="editor-navbar">
     <div style="margin-left: 30px;">
-      <nav-button tab-name="graph" />
-      <nav-button tab-name="monitoring" />
+      <nav-button tab-name="graph" :isActive="activeTabName === 'graph'" />
+      <nav-button tab-name="monitoring" :isActive="activeTabName === 'monitoring'" />
     </div>
     <div class="editor-navbar-center" />
   </div>
@@ -15,6 +15,11 @@ import Vue from 'vue'
 export default Vue.extend({
   components: {
     'nav-button': NavButton
+  },
+  computed: {
+    activeTabName: function (): string {
+      return this.$store.state.editor.activeTabName
+    }
   }
 })
 </script>

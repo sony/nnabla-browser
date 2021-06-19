@@ -1,7 +1,7 @@
 <template>
   <div
     class="nnc-invoker"
-    :class="['navbar-el', activeTabName === tabName ? 'active' : '']"
+    :class="['navbar-el', isActive ? 'active' : '']"
     @click="changeActiveTab(tabName)"
   >
     <span class="navbar-tab">
@@ -19,11 +19,10 @@ export default Vue.extend({
     tabName: {
       type: String,
       default: 'graph'
-    }
-  },
-  computed: {
-    activeTabName: function (): string {
-      return this.$store.state.editor.activeTabName
+    },
+    isActive: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
