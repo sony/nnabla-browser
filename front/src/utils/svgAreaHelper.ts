@@ -5,7 +5,6 @@ import { Definitions } from '@/utils/definitions'
 import { RawFunction } from '@/types/nnablaApi'
 import { Vector2D } from '@/types/geometry'
 import { nnablaCore } from './nnablaApi'
-import store from '@/store'
 import graphInfoState from '@/store/modules/graphInfo'
 
 const layerDef = Definitions.EDIT.LAYER
@@ -141,7 +140,7 @@ class SvgAreaOperator {
   }
 
   getLayerPosition (layerIndex: number): Vector2D {
-    const targetLayer: Node = store.getters['graphInfo/activeGraph'].nodes[layerIndex]
+    const targetLayer: Node = graphInfoState.activeGraph.nodes[layerIndex]
     return { x: targetLayer.position.x, y: targetLayer.position.y }
   }
 
@@ -169,7 +168,7 @@ class SvgAreaOperator {
   getOverlapLayerPosition (v: Vector2D, layerIndex: number): Vector2D | null {
     // todo: nearest neighbor search
 
-    const numLayers = store.getters['graphInfo/activeGraph'].nodes.length
+    const numLayers = graphInfoState.activeGraph.nodes.length
 
     for (let i = 0; i < numLayers; i++) {
       if (i === layerIndex) continue
@@ -294,12 +293,12 @@ class SvgAreaOperator {
       graphInfoState.SET_IS_DRAGGING(true)
 
       // get all links connecting this layer
-      const activeGraph = store.getters['graphInfo/activeGraph']
+      const activeGraph = graphInfoState.activeGraph
       const links: Link[] = []
       for (const i in activeGraph.links) {
         const link: Link = activeGraph.links[i]
         if (link.srcNodeId === index || link.destNodeId === index) {
-          links.push({ ...link, index: Number(index) })
+          links.push({ ...link, index: Number(i) })
         }
       }
 
