@@ -13,6 +13,7 @@
 <script lang="ts">
 import EditorWindowSize from '@/utils/editorWindowSize'
 import Vue from 'vue'
+import globalState from '@/store/modules/globalInfo'
 
 export default Vue.extend({
   props: {
@@ -27,7 +28,7 @@ export default Vue.extend({
   },
   methods: {
     changeActiveTab: function (tabName: string): void {
-      this.$store.commit('changeActiveTab', tabName)
+      globalState.SET_ACTIVE_TAB_NAME(tabName)
       Vue.nextTick(function () {
         EditorWindowSize.init()
       })

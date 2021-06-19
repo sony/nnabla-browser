@@ -27,6 +27,7 @@ import graphInfoState from '@/store/modules/graphInfo'
 import { DirectoryNode } from '@/types/store'
 import { Node } from '@/types/graph'
 import directoryInfoState from '@/store/modules/directoryInfo'
+import globalState from '@/store/modules/globalInfo'
 
 export default Vue.extend({
   components: {
@@ -35,7 +36,7 @@ export default Vue.extend({
   },
   computed: {
     activeTabName: function (): string {
-      return this.$store.state.editor.activeTabName.toLowerCase()
+      return globalState.activeTabName.toLowerCase()
     },
     isPropertyAreaShow: function (): boolean {
       return this.activeTabName === 'graph'

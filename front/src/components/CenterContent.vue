@@ -28,6 +28,7 @@ import Vue from 'vue'
 import { Vector2D } from '@/types/geometry'
 import chartInfoState from '@/store/modules/chartInfo'
 import graphInfoState from '@/store/modules/graphInfo'
+import globalState from '@/store/modules/globalInfo'
 
 export default Vue.extend({
   components: {
@@ -47,10 +48,10 @@ export default Vue.extend({
   computed: {
     // todo: change to ":is" binding from this rule base switching after re-implementing history and zoom
     selectedEditTab: function (): boolean {
-      return String(this.$store.state.editor.activeTabName) === 'graph'
+      return globalState.activeTabName === 'graph'
     },
     selectedMonitoringTab: function (): boolean {
-      return String(this.$store.state.editor.activeTabName) === 'monitoring'
+      return globalState.activeTabName === 'monitoring'
     },
     charts: function (): ChartData[] {
       return chartInfoState.charts

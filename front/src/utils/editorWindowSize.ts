@@ -1,8 +1,8 @@
 import $ from 'jquery'
 import { AnyObject } from '@/types/basic'
 import graphInfoState from '@/store/modules/graphInfo'
-import store from '@/store'
 import { svgAreaOperator } from './svgAreaHelper'
+import globalState from '@/store/modules/globalInfo'
 
 const EditorWindowSize = {
   init: function (): void {
@@ -42,7 +42,7 @@ const EditorWindowSize = {
     const contentHeight = windowHeight - navbarHeight
     $('.main-content').outerHeight(contentHeight)
 
-    if (store.state.editor.activeTabName === 'graph') {
+    if (globalState.activeTabName === 'graph') {
       const graphsTabHeight = boundingHeightOf('.network-tabs')
       const networkActionHeight = boundingHeightOf('.network-action')
       const graphHeight =

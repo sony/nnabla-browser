@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import NavButton from '@/components/header/NavButton.vue'
+import globalState from '@/store/modules/globalInfo'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -18,7 +19,7 @@ export default Vue.extend({
   },
   computed: {
     activeTabName: function (): string {
-      return this.$store.state.editor.activeTabName
+      return globalState.activeTabName
     }
   }
 })
