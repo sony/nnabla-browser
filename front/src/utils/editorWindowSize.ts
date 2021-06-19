@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import { AnyObject } from '@/types/basic'
+import graphInfoState from '@/store/modules/graphInfo'
 import store from '@/store'
 import { svgAreaOperator } from './svgAreaHelper'
 
@@ -47,8 +48,8 @@ const EditorWindowSize = {
       const graphHeight =
         contentHeight - graphsTabHeight - networkActionHeight
       $('.network-editor-scroller').height(graphHeight)
-      store.commit('graphInfo/setAssistAreaSize', {
-        x: $('.network-editor-scroller').width(),
+      graphInfoState.SET_ASSIST_AREA_SIZE({
+        x: $('.network-editor-scroller').width() as number,
         y: graphHeight
       })
       svgAreaOperator.adjustSvgSize()

@@ -52,11 +52,6 @@ class GraphInfoStateModule extends VuexModule implements GraphInfoState {
   }
 
   @Mutation
-  ADD_NEW_LINK (link: Link) {
-    this.activeGraph.links.push(link)
-  }
-
-  @Mutation
   SET_IS_DRAGGING (isDragging: boolean) {
     this.isDragging = isDragging
   }

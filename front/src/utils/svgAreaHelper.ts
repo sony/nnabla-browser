@@ -6,6 +6,7 @@ import { RawFunction } from '@/types/nnablaApi'
 import { Vector2D } from '@/types/geometry'
 import { nnablaCore } from './nnablaApi'
 import store from '@/store'
+import graphInfoState from '@/store/modules/graphInfo'
 
 const layerDef = Definitions.EDIT.LAYER
 
@@ -290,7 +291,7 @@ class SvgAreaOperator {
 
       this.layerFocusing(elem)
 
-      store.commit('graphInfo/SET_IS_DRAGGING', true)
+      graphInfoState.SET_IS_DRAGGING(true)
 
       // get all links connecting this layer
       const activeGraph = store.getters['graphInfo/activeGraph']
@@ -423,9 +424,9 @@ class SvgAreaOperator {
         .duration(500)
         .attr('transform', `translate(${x}, ${y})`)
         .on('end', () => {
-          store.commit('graphInfo/SET_NODE_POSITION', { index, x, y }) // layerIndex
+          graphInfoState.SET_NODE_POSITION({ index, x, y })
           this.adjustSvgSize()
-          store.commit('graphInfo/SET_IS_DRAGGING', false)
+          graphInfoState.SET_IS_DRAGGING(false)
         })
 
       // remove auxiliary layer

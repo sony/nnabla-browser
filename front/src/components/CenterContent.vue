@@ -19,6 +19,7 @@ import { ChartData } from '@/types/store'
 import MonitoringComponent from '@/components/center/Monitoring.vue'
 import NetworkComponent from '@/components/center/GraphViewer.vue'
 import Vue from 'vue'
+import chartInfoState from '@/store/modules/chartInfo'
 
 export default Vue.extend({
   components: {
@@ -44,7 +45,7 @@ export default Vue.extend({
       return String(this.$store.state.editor.activeTabName) === 'monitoring'
     },
     charts: function (): ChartData[] {
-      return this.$store.state.chartInfo.charts
+      return chartInfoState.charts
     }
   }
 })

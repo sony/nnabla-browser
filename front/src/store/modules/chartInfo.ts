@@ -1,14 +1,15 @@
 import { ChartData, ChartDatum, ChartInfoState } from '@/types/store'
-import { Action, Mutation, VuexModule, Module } from 'vuex-module-decorators'
+import { Action, VuexModule, Module, getModule } from 'vuex-module-decorators'
 import { httpClient } from '@/utils/httpClient'
 import { MonitorBuilder } from '@/utils/monitorBuilder'
 import { serverEventHandler } from '@/utils/serverEventHandler'
+import store from '@/store'
 
-@Module({ namespaced: true })
-export default class ChartInfoStateModule extends VuexModule implements ChartInfoState {
+@Module({ dynamic: true, store, namespaced: true, name: 'chartInfo' })
+class ChartInfoStateModule extends VuexModule implements ChartInfoState {
   charts: ChartData[] = []
 
-  @Mutation
+  @Action({})
   insertChartData ({ chartTitle, data }: { chartTitle: string; data: ChartDatum }) {
     const targetChart = this.charts.find(x => x.name === chartTitle)
     if (typeof targetChart !== 'undefined') {
@@ -26,7 +27,7 @@ export default class ChartInfoStateModule extends VuexModule implements ChartInf
     }
   }
 
-  @Mutation
+  @Action({})
   deleteChartData ({ chartTitle, data }: { chartTitle: string; data: ChartDatum }) {
     const targetChartIndex = this.charts.findIndex(x => x.name === chartTitle)
 
@@ -66,7 +67,7 @@ export default class ChartInfoStateModule extends VuexModule implements ChartInf
       }
 
       this.context.commit('directoryInfo/activateSubscribe', path, { root: true })
-      this.context.commit('insertChartData', newChartData)
+      this.insertChartData(newChartData)
     })
   }
 
@@ -78,6 +79,8 @@ export default class ChartInfoStateModule extends VuexModule implements ChartInf
     httpClient.deactivateSSESubscribe(path, serverEventHandler.SSEConnectionId)
 
     this.context.commit('directoryInfo/deactivateSubscribe', path, { root: true })
-    this.context.commit('deleteChartData', chartData)
+    this.deleteChartData(chartData)
   }
 }
+
+export default getModule(ChartInfoStateModule)

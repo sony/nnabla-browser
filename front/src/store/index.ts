@@ -1,7 +1,6 @@
 import Vuex, { StoreOptions } from 'vuex'
 import { RootState } from '../types/store'
 import Vue from 'vue'
-import chartInfo from './modules/chartInfo'
 import directoryInfo from './modules/directoryInfo'
 import { editor } from './modules/editor'
 
@@ -13,8 +12,7 @@ Vue.use(Vuex)
 const store: StoreOptions<RootState> = {
   modules: {
     editor,
-    directoryInfo,
-    chartInfo
+    directoryInfo
   }
 }
 

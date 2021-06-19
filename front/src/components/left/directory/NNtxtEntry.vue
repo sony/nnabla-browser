@@ -9,14 +9,14 @@
 </template>
 
 <script lang="ts">
-import { GraphInfoState, NNtxtFile, RootState } from '@/types/store'
 import Vue, { PropType } from 'vue'
+import graphInfoState from '@/store/modules/graphInfo'
+import { NNtxtFile } from '@/types/store'
 
 /** local interface **/
-interface NNtxtCouputedType {
+interface NNtxtComputedType {
   isSelected: boolean;
   nntxtPath: string;
-  graphInfo: GraphInfoState;
 }
 
 interface NNtxtPropsType {
@@ -25,7 +25,7 @@ interface NNtxtPropsType {
   level: number;
 }
 
-export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
+export default Vue.extend<{}, {}, NNtxtComputedType, NNtxtPropsType>({
   props: {
     nntxt: {
       type: Object as PropType<NNtxtFile>,
@@ -46,15 +46,12 @@ export default Vue.extend<{}, {}, NNtxtCouputedType, NNtxtPropsType>({
     },
     isSelected: function (): boolean {
       return this.$store.state.directoryInfo.activeFile === this.nntxtPath
-    },
-    graphInfo: function (): GraphInfoState {
-      return (this.$store.state as RootState).graphInfo
     }
   },
   methods: {
     clickEvent: function (): void {
-      if (this.nntxtPath !== this.graphInfo.nntxtPath) {
-        this.$store.dispatch('graphInfo/fetchGraph', this.nntxtPath)
+      if (!this.isSelected) {
+        graphInfoState.fetchGraph(this.nntxtPath)
       }
     }
   }
