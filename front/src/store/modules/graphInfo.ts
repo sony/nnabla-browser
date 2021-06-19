@@ -86,6 +86,7 @@ class GraphInfoStateModule extends VuexModule implements GraphInfoState {
 
   @Action({ rawError: true })
   fetchGraph (path: string): void {
+    this.SET_PREV_GRAPH(this.graphs[this.activeIndex.graph] || {})
     httpClient.getFileContent(path).then(res => {
       // Sent data by http is already json. Don't have convert it explicitly.
       const builder = new GraphBuilder(res.data)
