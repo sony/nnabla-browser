@@ -5,6 +5,7 @@
       :key="metrics.options.plugins.title.text"
     >
       <series-chart
+        class="series-chart"
         :chart-data="metrics.data"
         :options="metrics.options"
       />
@@ -120,5 +121,9 @@ export default Vue.extend({
 .monitoring {
   height: 100%;
   overflow: auto;
+}
+
+.series-chart {
+  padding: 8px;
 }
 </style>
