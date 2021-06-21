@@ -34,12 +34,12 @@ export default Vue.extend({
     },
     keydown: (e: KeyboardEvent): void => {
       switch (e.keyCode) {
-      case 27:
-      case 13:
-        ;(e.target as HTMLElement).blur()
-        break
-      default:
-        break
+        case 27:
+        case 13:
+          ;(e.target as HTMLElement).blur()
+          break
+        default:
+          break
       }
     }
   }
