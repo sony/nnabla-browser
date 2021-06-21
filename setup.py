@@ -22,6 +22,7 @@ setup(
         "protobuf",
         "numpy",
         "pyyaml",
+        "requests",
     ],
     python_requires=">=3.5",
     packages=["nnabla_browser"],
