@@ -127,7 +127,9 @@ export function generateChart (chartId: string, chartType: string): any {
         if (this.$data._chart) this.$data._chart.destroy()
         if (!this.$refs.canvas) {
           throw new Error(
-            'Please remove the <template></template> tags from your chart component. See https://vue-chartjs.org/guide/#vue-single-file-components'
+            'Please remove the <template></template> tags from your chart' +
+            ' component. See' +
+            ' https://vue-chartjs.org/guide/#vue-single-file-components'
           )
         }
         this.$data._chart = new Chart(this.$refs.canvas.getContext('2d'), {

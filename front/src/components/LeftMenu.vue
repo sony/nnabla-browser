@@ -8,17 +8,31 @@
         class="app-row"
         style="top: 0; bottom: 0;"
       >
-        <directory-tree />
-        <property-area v-show="isPropertyAreaShow" />
+        <directory-tree
+          :active-file="activeFile"
+          :active-chart-paths="activeChartPaths"
+          :active-tab-name="activeTabName"
+          :directory-node="directoryNode"
+        />
+        <property-area
+          v-show="isPropertyAreaShow"
+          :active-layer="activeLayer"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { DirectoryNode } from '@/types/store'
 import DirectoryTree from '@/components/left/DirectoryTree.vue'
+import { Node } from '@/types/graph'
 import PropertyArea from '@/components/left/PropertyArea.vue'
 import Vue from 'vue'
+import chartInfoState from '@/store/modules/chartInfo'
+import directoryInfoState from '@/store/modules/directoryInfo'
+import globalState from '@/store/modules/globalInfo'
+import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   components: {
@@ -27,10 +41,22 @@ export default Vue.extend({
   },
   computed: {
     activeTabName: function (): string {
-      return this.$store.state.editor.activeTabName.toLowerCase()
+      return globalState.activeTabName.toLowerCase()
     },
     isPropertyAreaShow: function (): boolean {
       return this.activeTabName === 'graph'
+    },
+    activeLayer: function (): Node {
+      return graphInfoState.activeLayer
+    },
+    directoryNode: function (): DirectoryNode {
+      return directoryInfoState.data
+    },
+    activeFile: function (): string {
+      return directoryInfoState.activeFile
+    },
+    activeChartPaths: function (): string[] {
+      return chartInfoState.activeChartPaths
     }
   }
 })

@@ -5,6 +5,7 @@
       :key="metrics.options.plugins.title.text"
     >
       <series-chart
+        class="series-chart"
         :chart-data="metrics.data"
         :options="metrics.options"
       />
@@ -13,10 +14,10 @@
 </template>
 
 <script lang="ts">
+import { ChartData, ChartDatum } from '@/types/store'
+import Vue, { PropType } from 'vue'
 import Chart from 'chart.js'
-import { ChartDatum } from '@/types/store'
 import SeriesChart from '@/components/center/SeriesChart.vue'
-import Vue from 'vue'
 
 const COLORS = [
   '#3498db',
@@ -36,7 +37,7 @@ const COLORS = [
  ***************************************/
 
 interface DataCollectionType {
-  data: { datasets: Chart.ChartData };
+  data: Chart.ChartData;
   options: Chart.ChartOptions;
 }
 
@@ -44,11 +45,17 @@ interface DataCollectionType {
 
 export default Vue.extend({
   components: { SeriesChart },
+  props: {
+    charts: {
+      type: Object as PropType<ChartData[]>,
+      default: []
+    }
+  },
   computed: {
     dataCollection: function (): DataCollectionType[] {
-      const charts = this.$store.state.chartInfo.charts
+      const charts = this.charts
 
-      const ret = []
+      const ret: DataCollectionType[] = []
       for (const i in charts) {
         const title = charts[i].name
         const datasets = charts[i].data.map((d: ChartDatum) => {
@@ -114,5 +121,9 @@ export default Vue.extend({
 .monitoring {
   height: 100%;
   overflow: auto;
+}
+
+.series-chart {
+  padding: 8px;
 }
 </style>

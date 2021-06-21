@@ -9,7 +9,7 @@
     >
       <transition name="fade">
         <g
-          v-show="isDragging && isLargeScale"
+          v-show="isDragging"
           id="svg-assist-dots"
           class="assist-dots"
         >
@@ -42,7 +42,7 @@
           <g
             v-for="(node, index) in activeGraph.nodes"
             :id="'layer-' + index"
-            :key="$store.state.graphInfo.nntxtPath + '-layer-' + index"
+            :key="nntxtPath + '-layer-' + index"
             class="layer"
             :transform="createTransform(node, index)"
             @mousedown="clickLayer(index)"
@@ -117,7 +117,7 @@
           <path
             v-for="(link, index) in activeGraph.links"
             :id="'link-' + index"
-            :key="$store.state.graphInfo.nntxtPath + '-link-' + index"
+            :key="nntxtPath + '-link-' + index"
             :stroke="linkLineStyleAttrs.stroke"
             :stroke-width="linkLineStyleAttrs['stroke-width']"
             :fill="linkLineStyleAttrs['fill']"
@@ -132,12 +132,12 @@
 <script lang="ts">
 import * as d3 from 'd3'
 import { Graph, Link, NextTransition, Node } from '@/types/graph'
-import Vue, { VNode } from 'vue'
+import Vue, { PropType, VNode } from 'vue'
 import { styleHelper, svgAreaOperator } from '@/utils/svgAreaHelper'
 import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
-import { GraphInfoState } from '@/types/store'
 import { Vector2D } from '@/types/geometry'
+import graphInfoState from '@/store/modules/graphInfo'
 
 const grid: number = Definitions.EDIT.GRID.SIZE
 const originPosX = grid * 2
@@ -146,26 +146,6 @@ const originPosY = grid * 2
 // define this variable outside Vue data to prevent infinite updates
 const nextTransition: NextTransition[] = []
 
-/***************************************
- interface
- ***************************************/
-
-interface DataType {
-  isLargeScale: boolean;
-}
-
-interface ComputedType {
-  graphState: GraphInfoState;
-  activeGraph: Graph;
-  prevGraph: Graph;
-  isDragging: boolean;
-  assistAreaSize: Vector2D;
-  assistAreaX: number[];
-  assistAreaY: number[];
-  linkLineStyleAttrs: object;
-  originTransform: string;
-}
-
 interface TransformInfo {
   graph: Element | null;
   translateX: number;
@@ -173,9 +153,7 @@ interface TransformInfo {
   scale: number;
 }
 
-/***************************************/
-
-export default Vue.extend<DataType, {}, ComputedType, {}>({
+export default Vue.extend({
   directives: {
     zoom: {
       inserted: function (el, binding, vNode: VNode): void {
@@ -195,7 +173,10 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
           return { graph, translateX, translateY, scale }
         }
 
-        const setAssistAreaTransform = (el: HTMLElement, vNode: VNode): void => {
+        const setAssistAreaTransform = (
+          el: HTMLElement,
+          vNode: VNode
+        ): void => {
           const { graph, translateX, translateY, scale } = getTransformInfo(el)
           if (!graph) return
           const newGrid = scale * grid
@@ -297,27 +278,29 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
       }
     }
   },
-  data: function () {
-    return {
-      isLargeScale: true
+  props: {
+    activeGraph: {
+      type: Object as PropType<Graph>,
+      required: true
+    },
+    prevGraph: {
+      type: Object as PropType<Graph>,
+      required: true
+    },
+    isDragging: {
+      type: Boolean,
+      required: true
+    },
+    assistAreaSize: {
+      type: Object as PropType<Vector2D>,
+      required: true
+    },
+    nntxtPath: {
+      type: String,
+      required: true
     }
   },
   computed: {
-    graphState: function (): GraphInfoState {
-      return this.$store.state.graphInfo
-    },
-    activeGraph: function (): Graph {
-      return this.$store.getters.activeGraph
-    },
-    prevGraph: function (): Graph {
-      return this.graphState.prevGraph
-    },
-    isDragging: function (): boolean {
-      return this.graphState.isDragging
-    },
-    assistAreaSize: function (): Vector2D {
-      return this.graphState.assistAreaSize
-    },
     assistAreaX: function (): number[] {
       return d3.range(0, this.assistAreaSize.x, grid)
     },
@@ -358,7 +341,7 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
   },
   methods: {
     clickLayer: function (index: number): void {
-      this.$store.commit('setActiveLayerIndex', index)
+      graphInfoState.SET_ACTIVE_LAYER_INDEX(index)
     },
     createTransform: function (node: Node, index: number): string {
       let ret = `translate(${node.position.x}, ${node.position.y})`
@@ -392,7 +375,9 @@ export default Vue.extend<DataType, {}, ComputedType, {}>({
     getNodeStyle: (node: Node): AnyObject => styleHelper.createNodeStyle(node),
     getCapitalAttr: (): AnyObject => styleHelper.createCapitalAttr(),
     getCapitalStyle: (): AnyObject => styleHelper.createCapitalStyle(),
-    getTextComponentStyle: (): AnyObject => styleHelper.createTextComponentStyle(),
+    getTextComponentStyle: (): AnyObject => {
+      return styleHelper.createTextComponentStyle()
+    },
     getTextAttr: (): AnyObject => styleHelper.createTextAttr(),
     getTextStyle: (): AnyObject => styleHelper.createTextStyle(),
     createLinkLineContext: (link: Link): string => {

@@ -1,11 +1,17 @@
 import * as d3 from 'd3'
-import { DrawingLinkMemory, Link, NextTransition, Node, TempLink } from '@/types/graph'
+import {
+  DrawingLinkMemory,
+  Link,
+  NextTransition,
+  Node,
+  TempLink
+} from '@/types/graph'
 import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
 import { RawFunction } from '@/types/nnablaApi'
 import { Vector2D } from '@/types/geometry'
+import graphInfoState from '@/store/modules/graphInfo'
 import { nnablaCore } from './nnablaApi'
-import store from '@/store'
 
 const layerDef = Definitions.EDIT.LAYER
 
@@ -46,9 +52,11 @@ class StyleHelper {
   }
 
   createTextComponentStyle (): AnyObject {
+    const offsetX = layerDef.CLIP_PATH.OFFSET_X
+    const offsetY = Definitions.EDIT.LAYER.CLIP_PATH.OFFSET_Y
     return {
       'clip-path': `url(#${layerDef.CLIP_PATH.ID})`,
-      transform: `translate(${layerDef.CLIP_PATH.OFFSET_X},${Definitions.EDIT.LAYER.CLIP_PATH.OFFSET_Y})`
+      transform: `translate(${offsetX},${offsetY})`
     }
   }
 
@@ -140,7 +148,7 @@ class SvgAreaOperator {
   }
 
   getLayerPosition (layerIndex: number): Vector2D {
-    const targetLayer: Node = store.getters.activeGraph.nodes[layerIndex]
+    const targetLayer: Node = graphInfoState.activeGraph.nodes[layerIndex]
     return { x: targetLayer.position.x, y: targetLayer.position.y }
   }
 
@@ -168,7 +176,7 @@ class SvgAreaOperator {
   getOverlapLayerPosition (v: Vector2D, layerIndex: number): Vector2D | null {
     // todo: nearest neighbor search
 
-    const numLayers = store.getters.activeGraph.nodes.length
+    const numLayers = graphInfoState.activeGraph.nodes.length
 
     for (let i = 0; i < numLayers; i++) {
       if (i === layerIndex) continue
@@ -264,7 +272,8 @@ class SvgAreaOperator {
         [x1 + halfX - offset, y1 + offset],
         [x1 + halfX, y1 + offset, x1 + halfX, y1], // cx, cy, x, y
         [x1 + halfX, y2],
-        [x1 + halfX, y2 - offset, x1 + halfX + sign * offset, y2 - offset], // cx, cy, x, y
+        // cx, cy, x, y
+        [x1 + halfX, y2 - offset, x1 + halfX + sign * offset, y2 - offset],
         [x2 - sign * offset, y2 - offset],
         [x2, y2 - offset, x2, y2] // cx, cy, x, y
       ]
@@ -290,10 +299,17 @@ class SvgAreaOperator {
 
       this.layerFocusing(elem)
 
-      store.commit('startDragging')
+      graphInfoState.SET_IS_DRAGGING(true)
 
       // get all links connecting this layer
-      const links: Link[] = store.getters.activeLinks(index)
+      const activeGraph = graphInfoState.activeGraph
+      const links: Link[] = []
+      for (const i in activeGraph.links) {
+        const link: Link = activeGraph.links[i]
+        if (link.srcNodeId === index || link.destNodeId === index) {
+          links.push({ ...link, index: Number(i) })
+        }
+      }
 
       this.connectedLinks = []
 
@@ -328,13 +344,19 @@ class SvgAreaOperator {
     }
   }
 
-  getLayerDragging (): (arg1: d3.D3DragEvent<SVGRectElement, unknown, unknown>, arg2: SVGRectElement) => void {
+  getLayerDragging (): (
+    arg1: d3.D3DragEvent<SVGRectElement, unknown, unknown>,
+    arg2: SVGRectElement
+  ) => void {
     // bind functions of this
     const getTranslateCoordinate = this.getTranslateCoordinate
     const createLinkLineContext = this.createLinkLineContext
     const getCorrectPosition = this.getCorrectPosition
 
-    return (event: d3.D3DragEvent<SVGRectElement, unknown, unknown>, elem: SVGRectElement): void => {
+    return (
+      event: d3.D3DragEvent<SVGRectElement, unknown, unknown>,
+      elem: SVGRectElement
+    ): void => {
       // remove auxiliary layer
       d3.select('#svg-layers')
         .select('rect#auxiliary-layer')
@@ -349,9 +371,11 @@ class SvgAreaOperator {
       // redraw all links
       for (const link of this.connectedLinks) {
         link.update({ x, y } as Vector2D)
+        const srcPosition = link.srcPosition as Vector2D
+        const destPosition = link.destPosition as Vector2D
         d3.select('path#link-' + link.index).attr(
           'd',
-          createLinkLineContext(link.srcPosition as Vector2D, link.destPosition as Vector2D)
+          createLinkLineContext(srcPosition, destPosition)
         )
       }
 
@@ -401,11 +425,13 @@ class SvgAreaOperator {
       // redraw all links
       for (const link of this.connectedLinks) {
         link.update({ x, y })
+        const srcPosition = link.srcPosition as Vector2D
+        const destPosition = link.destPosition as Vector2D
         d3.select('path#link-' + link.index)
           .transition()
           .ease(d3.easeCubicOut)
           .duration(500)
-          .attr('d', this.createLinkLineContext(link.srcPosition as Vector2D, link.destPosition as Vector2D))
+          .attr('d', this.createLinkLineContext(srcPosition, destPosition))
       }
 
       this.connectedLinks = []
@@ -416,9 +442,9 @@ class SvgAreaOperator {
         .duration(500)
         .attr('transform', `translate(${x}, ${y})`)
         .on('end', () => {
-          store.commit('setNodePosition', { index: index, x, y }) // layerIndex
+          graphInfoState.SET_NODE_POSITION({ index, x, y })
           this.adjustSvgSize()
-          store.commit('endDragging')
+          graphInfoState.SET_IS_DRAGGING(false)
         })
 
       // remove auxiliary layer
@@ -433,7 +459,8 @@ class SvgAreaOperator {
 
   getLayerClicked (): (arg1: Event) => void {
     return (event: Event): void => {
-      this.layerFocusing((event.currentTarget as SVGRectElement).parentNode as SVGRectElement)
+      const elem = event.currentTarget as SVGRectElement
+      this.layerFocusing(elem.parentNode as SVGRectElement)
     }
   }
 
@@ -441,10 +468,11 @@ class SvgAreaOperator {
     return (event: Event): void => {
       const elem = event.currentTarget
       if (!elem) return
+      const index = this.getLayerIndex(elem as HTMLElement)
       d3.select(elem as HTMLElement)
         .select('rect')
         .attr('fill-opacity', '0.5')
-      this.drawingLinkMemory.destNodeId = this.getLayerIndex(elem as HTMLElement)
+      this.drawingLinkMemory.destNodeId = index
     }
   }
 
@@ -471,7 +499,12 @@ class SvgAreaOperator {
   }
 
   registerMouseEvent (): void {
-    const allLayers: d3.Selection<SVGRectElement, unknown, HTMLElement, unknown> = d3.selectAll('#svg-layers .layer')
+    const allLayers: d3.Selection<
+      SVGRectElement,
+      unknown,
+      HTMLElement,
+      unknown
+    > = d3.selectAll('#svg-layers .layer')
 
     if (allLayers.nodes().length > 0) {
       // drag event
@@ -484,7 +517,6 @@ class SvgAreaOperator {
       )
 
       // click event
-      // allLayers.select('rect.layer-rect').on('click', this.getLayerClicked())
       allLayers.on('click', this.getLayerClicked())
 
       // mouse over event

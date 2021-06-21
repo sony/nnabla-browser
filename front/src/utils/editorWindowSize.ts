@@ -1,6 +1,7 @@
 import $ from 'jquery'
 import { AnyObject } from '@/types/basic'
-import store from '@/store'
+import globalState from '@/store/modules/globalInfo'
+import graphInfoState from '@/store/modules/graphInfo'
 import { svgAreaOperator } from './svgAreaHelper'
 
 const EditorWindowSize = {
@@ -41,14 +42,14 @@ const EditorWindowSize = {
     const contentHeight = windowHeight - navbarHeight
     $('.main-content').outerHeight(contentHeight)
 
-    if (store.state.editor.activeTabName === 'graph') {
+    if (globalState.activeTabName === 'graph') {
       const graphsTabHeight = boundingHeightOf('.network-tabs')
       const networkActionHeight = boundingHeightOf('.network-action')
       const graphHeight =
         contentHeight - graphsTabHeight - networkActionHeight
       $('.network-editor-scroller').height(graphHeight)
-      store.commit('setAssistAreaSize', {
-        x: $('.network-editor-scroller').width(),
+      graphInfoState.SET_ASSIST_AREA_SIZE({
+        x: $('.network-editor-scroller').width() as number,
         y: graphHeight
       })
       svgAreaOperator.adjustSvgSize()

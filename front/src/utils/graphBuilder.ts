@@ -31,7 +31,10 @@ function setupGetNodeAndLinkRecursive (
   functions: NNtxtFunction[],
   outputVariables: Variable[]
 ): (arg1: Layer, arg2: number) => void {
-  const recursive = (sourceLayer: Layer, sourceDepthFromRoot: number): void => {
+  const recursive = (
+    sourceLayer: Layer,
+    sourceDepthFromRoot: number
+  ): void => {
     for (const sourceOutput of sourceLayer.output) {
       // find user define output
       const outputVariableIndex = outputVariables.findIndex(
@@ -78,7 +81,9 @@ function setupGetNodeAndLinkRecursive (
 
         layerRegister.addLink(link)
 
-        if (isVisitEnough) recursive(layer, Math.max(...layer.depth as number[]))
+        if (isVisitEnough) {
+          recursive(layer, Math.max(...layer.depth as number[]))
+        }
       }
     }
   }

@@ -3,7 +3,7 @@ import { GraphBuilder } from '@/utils/graphBuilder'
 import { MonitorBuilder } from '@/utils/monitorBuilder'
 import { NNtxt } from '@/types/nnablaApi'
 import { ServerEvent } from '@/types/serverEvent'
-import store from '@/store'
+import directoryInfoState from '@/store/modules/directoryInfo'
 
 class ServerEventHandler {
   SSEConnectionId = -1
@@ -15,14 +15,12 @@ class ServerEventHandler {
 
   initDirectoryStructureEventListener (event: Event): void {
     const paths = (event as ServerEvent).data.split('\n')
-
-    store.commit('initDirectoryStructure', { paths })
+    directoryInfoState.initDirectoryStructure(paths)
   }
 
   directoryStructureEventListener (event: Event): void {
     const filePath = (event as ServerEvent).lastEventId
-
-    store.commit('updateDirectoryStructure', { path: filePath })
+    directoryInfoState.updateDirectoryStructure(filePath)
   }
 
   fileContentEventListener (event: Event): void {
@@ -32,7 +30,7 @@ class ServerEventHandler {
 
     if (fileType === null) return
 
-    if (!store.getters.isSubscribe(filePath)) return
+    if (!directoryInfoState.subscribedList.includes(filePath)) return
 
     // Have to convert sent data by sse to json explicitly.
     let data
@@ -44,15 +42,16 @@ class ServerEventHandler {
       const rawData = (event as ServerEvent).data
       const builder = new MonitorBuilder((rawData as string))
       data = builder.build()
+    } else {
+      throw new Error(`invalid fileType: ${fileType}`)
     }
 
-    store.commit('updateFileContent', { path: filePath, data })
+    directoryInfoState.updateFileContent({ path: filePath, data })
   }
 
   deleteEventListener (event: Event): void {
     const path = (event as ServerEvent).lastEventId
-
-    store.commit('deleteFileOrDirectory', { path })
+    directoryInfoState.deleteFileOrDirectory(path)
   }
 }
 

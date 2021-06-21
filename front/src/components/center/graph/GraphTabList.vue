@@ -6,29 +6,27 @@
       :graph="graph"
       :index="index"
       :selected="index === activeGraphIndex"
-      @history="command => $emit('history', command)"
     />
   </div>
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
 import { Graph } from '@/types/graph'
 import GraphTab from '@/components/center/graph/GraphTab.vue'
-import Vue from 'vue'
 
 export default Vue.extend({
   components: {
     'graph-tab': GraphTab
   },
-  computed: {
-    graphs: function (): Graph[] {
-      return this.$store.state.graphInfo.graphs
+  props: {
+    activeGraphIndex: {
+      type: Number,
+      required: true
     },
-    path: function (): string {
-      return this.$store.state.graphInfo.nntxtPath
-    },
-    activeGraphIndex: function (): Graph {
-      return this.$store.state.graphInfo.activeIndex.graph
+    graphs: {
+      type: Object as PropType<Graph[]>,
+      required: true
     }
   }
 })

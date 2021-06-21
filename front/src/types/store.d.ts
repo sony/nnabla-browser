@@ -1,10 +1,11 @@
-import { AnyObject } from '@/types/basic'
 import { Graph } from '@/types/graph'
 import { MonitorSeriesData } from './monitor'
 
 export interface RootState {
   editor: EditorState;
   graphInfo: GraphInfoState;
+  chartInfo: ChartInfoState;
+  directoryInfo: DirectoryInfoState;
 }
 
 /***************************************
@@ -34,13 +35,13 @@ export interface EditorState {
 
 export interface MonitorFile {
    name: string;
-   data: MonitorSeriesData | AnyObject;
+   data: MonitorSeriesData|null;
    isView?: boolean;
 }
 
 export interface NNtxtFile {
   name: string;
-  data: AnyObject;
+  data: Graph[]|null;
 }
 
 export interface DirectoryNode {
@@ -79,4 +80,5 @@ export interface ChartData {
 
 export interface ChartInfoState {
   charts: ChartData[];
+  activeChartPaths: string[];
 }

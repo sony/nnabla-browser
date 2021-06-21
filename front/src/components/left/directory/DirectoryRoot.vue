@@ -8,9 +8,12 @@
       style="top: 40px; bottom: 0;"
     >
       <directory-component
-        v-if="typeof directoryInfo.name !== 'undefined'"
-        :info="directoryInfo"
-        :dir-name="directoryInfo.name"
+        v-if="typeof directoryNode.name !== 'undefined'"
+        :active-file="activeFile"
+        :active-chart-paths="activeChartPaths"
+        :active-tab-name="activeTabName"
+        :directory-node="directoryNode"
+        :dir-name="directoryNode.name"
         :level="0"
       />
     </div>
@@ -18,17 +21,30 @@
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
 import Directory from './Directory.vue'
 import { DirectoryNode } from '@/types/store'
-import Vue from 'vue'
 
 export default Vue.extend({
   components: {
     'directory-component': Directory
   },
-  computed: {
-    directoryInfo: function (): DirectoryNode {
-      return this.$store.state.directoryInfo.data
+  props: {
+    activeFile: {
+      type: String,
+      required: true
+    },
+    activeChartPaths: {
+      type: Array as PropType<string[]>,
+      required: true
+    },
+    activeTabName: {
+      type: String,
+      required: true
+    },
+    directoryNode: {
+      type: Object as PropType<DirectoryNode>,
+      required: true
     }
   }
 })

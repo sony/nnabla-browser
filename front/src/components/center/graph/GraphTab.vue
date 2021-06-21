@@ -11,14 +11,9 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 import { Graph } from '@/types/graph'
+import graphInfoState from '@/store/modules/graphInfo'
 
-interface GraphTabProps {
-  graph: Graph;
-  index: number;
-  selected: boolean;
-}
-
-export default Vue.extend<{}, {}, {}, GraphTabProps>({
+export default Vue.extend({
   props: {
     graph: {
       type: Object as PropType<Graph>,
@@ -35,7 +30,7 @@ export default Vue.extend<{}, {}, {}, GraphTabProps>({
   },
   methods: {
     click: function (): void {
-      this.$store.commit('setActiveGraphIndex', this.index)
+      graphInfoState.updateActiveGraph(this.index)
     },
     keydown: (e: KeyboardEvent): void => {
       switch (e.keyCode) {

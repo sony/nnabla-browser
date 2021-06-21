@@ -9,16 +9,18 @@
 </template>
 
 <script lang="ts">
+import { ChartDatum, ChartValue, MonitorFile } from '@/types/store'
 import Vue, { PropType } from 'vue'
-import { MonitorBuilder } from '@/utils/monitorBuilder'
-import { MonitorFile } from '@/types/store'
-import { httpClient } from '@/utils/httpClient'
-import { serverEventHandler } from '@/utils/serverEventHandler'
+import chartInfoState from '@/store/modules/chartInfo'
 
 export default Vue.extend({
   props: {
     monitor: {
       type: Object as PropType<MonitorFile>,
+      required: true
+    },
+    activeChartPaths: {
+      type: Array as PropType<string[]>,
       required: true
     },
     dirName: {
@@ -34,76 +36,37 @@ export default Vue.extend({
       required: true
     }
   },
-  data: function () {
-    return {
-      checked: this.monitor.isView || false,
-      loaded: false,
-      filePath: (this.level > 0 ? this.dirName + '/' : '') + this.monitor.name
-    }
-  },
-  watch: {
-    monitor: {
-      handler: function (): void {
-        if (this.checked) {
-          this.updateChart()
+  computed: {
+    chartData: function (): { chartTitle: string; data: ChartDatum } {
+      return {
+        chartTitle: this.monitor.name.split('.')[0],
+        data: {
+          id: this.dirId,
+          name: this.dirName,
+          values: this.monitor.data as ChartValue
         }
-      },
-      deep: true
+      }
+    },
+    checked: function (): boolean {
+      const path = `${this.dirName}/${this.monitor.name}`
+      return this.activeChartPaths.includes(path)
+    },
+    filePath: function (): string {
+      return (this.level > 0 ? this.dirName + '/' : '') + this.monitor.name
     }
   },
   methods: {
-    updateChart: function (): void {
-      if (this.monitor.data) {
-        this.monitor.isView = this.checked
-
-        const chartData = {
-          chartTitle: this.monitor.name.split('.')[0],
-          data: {
-            id: this.dirId,
-            name: this.dirName,
-            values: this.monitor.data
-          }
-        }
-
-        const mutation = this.checked ? 'insertChartData' : 'deleteChartData'
-
-        this.$store.commit(mutation, chartData)
-      }
-    },
     clickArea: function (): void {
-      this.checked = !this.checked
-      this.changeEvent()
-    },
-    changeEvent: function (): void {
-      if (this.checked) {
-        if (this.loaded) return
-
-        this.loaded = true
-        httpClient.getFileContent(this.filePath).then(res => {
-          // Get data from server and update.
-          const builder = new MonitorBuilder(res.data)
-          const data = builder.build()
-          this.$store.commit('updateFileContent', { path: this.filePath, data })
-          this.updateChart()
-
-          // Activate subscribe to update in real-time.
-          httpClient.activateSSESubscribe(
-            this.filePath,
-            serverEventHandler.SSEConnectionId
-          )
-          this.$store.commit('activateSubscribe', { path: this.filePath })
+      if (!this.checked) {
+        chartInfoState.fetchChart({
+          path: this.filePath,
+          chartData: this.chartData
         })
       } else {
-        this.loaded = false
-        this.updateChart()
-        this.$store.commit('deleteFileContent', { path: this.filePath })
-
-        // Deactivate subscribe
-        httpClient.deactivateSSESubscribe(
-          this.filePath,
-          serverEventHandler.SSEConnectionId
-        )
-        this.$store.commit('deactivateSubscribe', { path: this.filePath })
+        chartInfoState.dropChart({
+          path: this.filePath,
+          chartData: this.chartData
+        })
       }
     }
   }

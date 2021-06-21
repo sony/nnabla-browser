@@ -1,16 +1,27 @@
 <template>
   <div>
-    <graph-tab-list @history="command => $emit('history', command)" />
+    <graph-tab-list
+      :active-graph-index="activeGraphIndex"
+      :graphs="graphs"
+    />
     <div class="tab-content network-editor-scroller">
-      <svg-area />
+      <svg-area
+        :active-graph="activeGraph"
+        :prev-graph="prevGraph"
+        :is-dragging="isDragging"
+        :assist-area-size="assistAreaSize"
+        :nntxt-path="nntxtPath"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import Vue, { PropType } from 'vue'
+import { Graph } from '@/types/graph'
 import GraphTabList from '@/components/center/graph/GraphTabList.vue'
 import SvgArea from '@/components/center/graph/SvgArea.vue'
-import Vue from 'vue'
+import { Vector2D } from '@/types/geometry'
 
 export default Vue.extend({
   components: {
@@ -18,9 +29,33 @@ export default Vue.extend({
     'svg-area': SvgArea
   },
   props: {
-    historyInfo: {
-      type: Object,
-      default: Object
+    activeGraph: {
+      type: Object as PropType<Graph>,
+      required: true
+    },
+    prevGraph: {
+      type: Object as PropType<Graph>,
+      required: true
+    },
+    isDragging: {
+      type: Boolean,
+      required: true
+    },
+    assistAreaSize: {
+      type: Object as PropType<Vector2D>,
+      required: true
+    },
+    activeGraphIndex: {
+      type: Number,
+      required: true
+    },
+    graphs: {
+      type: Object as PropType<Graph[]>,
+      required: true
+    },
+    nntxtPath: {
+      type: String,
+      required: true
     }
   }
 })
