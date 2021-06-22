@@ -1,22 +1,18 @@
 <template>
   <div>
-    <Header />
-    <Main />
+    <router-view></router-view>
   </div>
 </template>
 
 <script lang="ts">
 import $ from 'jquery'
 import EditorWindowSize from '@/utils/editorWindowSize'
-import Header from '@/components/Header.vue'
-import Main from '@/components/Main.vue'
 import Vue from 'vue'
 import { serverEventHandler } from '@/utils/serverEventHandler'
 
 let eventSrc: EventSource
 
 export default Vue.extend({
-  components: { Header, Main },
   mounted: function () {
     EditorWindowSize.init()
     EditorWindowSize.bind()

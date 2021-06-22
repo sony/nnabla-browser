@@ -2,7 +2,7 @@
   <div
     class="nnc-invoker"
     :class="['navbar-el', isActive ? 'active' : '']"
-    @click="changeActiveTab(tabName)"
+    @click="changeActiveTab()"
   >
     <span class="navbar-tab">
       {{ tabName.toUpperCase() }}
@@ -13,7 +13,6 @@
 <script lang="ts">
 import EditorWindowSize from '@/utils/editorWindowSize'
 import Vue from 'vue'
-import globalState from '@/store/modules/globalInfo'
 
 export default Vue.extend({
   props: {
@@ -27,8 +26,8 @@ export default Vue.extend({
     }
   },
   methods: {
-    changeActiveTab: function (tabName: string): void {
-      globalState.SET_ACTIVE_TAB_NAME(tabName)
+    changeActiveTab: function (): void {
+      this.$router.push(`/${this.tabName}`)
       Vue.nextTick(function () {
         EditorWindowSize.init()
       })
