@@ -1,33 +1,25 @@
 <template>
-  <div
-    id="leftContent"
-    class="left-content"
-  >
-    <div class="left-component">
-      <div
-        class="app-row"
-        style="top: 0; bottom: 0;"
-      >
-        <directory-tree
-          :active-file="activeFile"
-          :active-chart-paths="activeChartPaths"
-          :active-tab-name="activeTabName"
-          :directory-node="directoryNode"
-        />
-      </div>
-    </div>
-  </div>
+  <left-menu-base>
+    <directory-tree
+      :active-file="activeFile"
+      :active-chart-paths="activeChartPaths"
+      :active-tab-name="activeTabName"
+      :directory-node="directoryNode"
+    />
+  </left-menu-base>
 </template>
 
 <script lang="ts">
 import { DirectoryNode } from '@/types/store'
 import DirectoryTree from '@/components/left/DirectoryTree.vue'
+import LeftMenuBase from '@/components/LeftMenuBase.vue'
 import Vue from 'vue'
 import chartInfoState from '@/store/modules/chartInfo'
 import directoryInfoState from '@/store/modules/directoryInfo'
 
 export default Vue.extend({
   components: {
+    'left-menu-base': LeftMenuBase,
     'directory-tree': DirectoryTree
   },
   computed: {
@@ -46,19 +38,3 @@ export default Vue.extend({
   }
 })
 </script>
-
-<style>
-.left-content {
-  position: relative;
-  width: 15%;
-  height: 100%;
-  min-width: 280px;
-  background-color: var(--color-gray1);
-  border-right: solid 1px var(--color-gray2);
-}
-
-.left-component .icon-small {
-  width: 16px;
-  height: 16px;
-}
-</style>

@@ -1,29 +1,22 @@
 <template>
-  <div
-    id="leftContent"
-    class="left-content"
-  >
-    <div class="left-component">
-      <div
-        class="app-row"
-        style="top: 0; bottom: 0;"
-      >
-        <directory-tree
-          :active-file="activeFile"
-          :active-tab-name="activeTabName"
-          :directory-node="directoryNode"
-        />
-        <property-area
-          :active-layer="activeLayer"
-        />
-      </div>
+  <left-menu-base>
+    <div>
+      <directory-tree
+        :active-file="activeFile"
+        :active-tab-name="activeTabName"
+        :directory-node="directoryNode"
+      />
+      <property-area
+        :active-layer="activeLayer"
+      />
     </div>
-  </div>
+  </left-menu-base>
 </template>
 
 <script lang="ts">
 import { DirectoryNode } from '@/types/store'
 import DirectoryTree from '@/components/left/DirectoryTree.vue'
+import LeftMenuBase from '@/components/LeftMenuBase.vue'
 import { Node } from '@/types/graph'
 import PropertyArea from '@/components/left/PropertyArea.vue'
 import Vue from 'vue'
@@ -32,6 +25,7 @@ import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   components: {
+    'left-menu-base': LeftMenuBase,
     'property-area': PropertyArea,
     'directory-tree': DirectoryTree
   },
@@ -54,19 +48,3 @@ export default Vue.extend({
   }
 })
 </script>
-
-<style>
-.left-content {
-  position: relative;
-  width: 15%;
-  height: 100%;
-  min-width: 280px;
-  background-color: var(--color-gray1);
-  border-right: solid 1px var(--color-gray2);
-}
-
-.left-component .icon-small {
-  width: 16px;
-  height: 16px;
-}
-</style>

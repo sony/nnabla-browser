@@ -1,20 +1,15 @@
 <template>
-  <div
-    id="centerContent"
-    class="center-content"
-  >
-    <keep-alive>
-      <graph
-        :active-graph="activeGraph"
-        :prev-graph="prevGraph"
-        :is-dragging="isDragging"
-        :assist-area-size="assistAreaSize"
-        :active-graphindex="activeGraphIndex"
-        :graphs="graphs"
-        :nntxt-path="nntxtPath"
-      />
-    </keep-alive>
-  </div>
+  <center-content-base>
+    <graph
+      :active-graph="activeGraph"
+      :prev-graph="prevGraph"
+      :is-dragging="isDragging"
+      :assist-area-size="assistAreaSize"
+      :active-graphindex="activeGraphIndex"
+      :graphs="graphs"
+      :nntxt-path="nntxtPath"
+    />
+  </center-content-base>
 </template>
 
 <script lang="ts">
@@ -23,9 +18,11 @@ import GraphViewer from '@/components/center/GraphViewer.vue'
 import { Vector2D } from '@/types/geometry'
 import Vue from 'vue'
 import graphInfoState from '@/store/modules/graphInfo'
+import CenterContentBase from '@/components/CenterContentBase.vue'
 
 export default Vue.extend({
   components: {
+    'center-content-base': CenterContentBase,
     graph: GraphViewer
   },
   computed: {
@@ -53,12 +50,3 @@ export default Vue.extend({
   }
 })
 </script>
-
-<style>
-.center-content {
-  width: 84%;
-  height: 100%;
-  border-right: solid 1px var(--color-gray2);
-  background-color: var(--color-gray0);
-}
-</style>
