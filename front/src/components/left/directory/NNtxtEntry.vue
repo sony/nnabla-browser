@@ -44,6 +44,7 @@ export default Vue.extend({
     clickEvent: function (): void {
       if (!this.isSelected) {
         graphInfoState.fetchGraph(this.nntxtPath)
+        this.$router.push({ path: '/graph', query: { path: this.nntxtPath } })
       }
     }
   }

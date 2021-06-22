@@ -3,9 +3,7 @@
     id="centerContent"
     class="center-content"
   >
-    <keep-alive>
-      <slot></slot>
-    </keep-alive>
+    <slot></slot>
   </div>
 </template>
 

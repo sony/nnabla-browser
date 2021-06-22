@@ -28,7 +28,7 @@ import LayerProperties from '@/components/left/property/LayerProperties.vue'
 import LayerType from '@/components/left/property/LayerType.vue'
 import { Node } from '@/types/graph'
 import { RawFunction } from '@/types/nnablaApi'
-import { nnablaCore } from '@/utils/nnablaApi'
+import { findFunction } from '@/utils/nnablaApi'
 
 export default Vue.extend({
   components: {
@@ -39,6 +39,10 @@ export default Vue.extend({
     activeLayer: {
       type: Object as PropType<Node>,
       required: true
+    },
+    nnablaFunctions: {
+      type: Array as PropType<RawFunction[]>,
+      default: []
     }
   },
   computed: {
@@ -46,7 +50,7 @@ export default Vue.extend({
       return Object.keys(this.activeLayer).length > 0
     },
     defaultProps: function (): RawFunction {
-      return nnablaCore.findFunction(this.activeLayer.type)
+      return findFunction(this.nnablaFunctions, this.activeLayer.type)
     },
     defaultParams: function (): AnyObject {
       return { ...this.defaultProps.inputs, ...this.defaultProps.arguments }

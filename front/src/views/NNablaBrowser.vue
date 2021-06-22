@@ -8,6 +8,7 @@
 import $ from 'jquery'
 import EditorWindowSize from '@/utils/editorWindowSize'
 import Vue from 'vue'
+import globalState from '@/store/modules/globalInfo'
 import { serverEventHandler } from '@/utils/serverEventHandler'
 
 let eventSrc: EventSource
@@ -27,6 +28,9 @@ export default Vue.extend({
     if (this.$route.query.mode === 'sai') {
       document.documentElement.style.setProperty('--color-brand', '#D2017A')
     }
+
+    // Load all NNabla APIs
+    globalState.fetchNnablaApi()
   },
   methods: {
     // Set up server sent event.

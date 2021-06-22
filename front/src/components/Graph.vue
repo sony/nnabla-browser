@@ -25,12 +25,22 @@ import CenterContent from '@/components/graph/CenterContent.vue'
 import LeftMenu from '@/components/graph/LeftMenu.vue'
 import NavButton from '@/components/header/NavButton.vue'
 import Vue from 'vue'
+import directoryInfoState from '@/store/modules/directoryInfo'
+import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   components: {
     'left-menu': LeftMenu,
     'center-content': CenterContent,
     'nav-button': NavButton
+  },
+  mounted: function () {
+    if (this.$route.query.path) {
+      graphInfoState.fetchGraph(this.$route.query.path as string)
+    } else {
+      graphInfoState.resetGraphs()
+      directoryInfoState.SET_ACTIVE_FILE('')
+    }
   }
 })
 </script>

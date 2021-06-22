@@ -7,7 +7,9 @@
         :directory-node="directoryNode"
       />
       <property-area
+        v-show="nnablaFunctions.length > 0"
         :active-layer="activeLayer"
+        :nnabla-functions="nnablaFunctions"
       />
     </div>
   </left-menu-base>
@@ -22,6 +24,8 @@ import PropertyArea from '@/components/left/PropertyArea.vue'
 import Vue from 'vue'
 import directoryInfoState from '@/store/modules/directoryInfo'
 import graphInfoState from '@/store/modules/graphInfo'
+import { RawFunction } from '@/types/nnablaApi'
+import globalState from '@/store/modules/globalInfo'
 
 export default Vue.extend({
   components: {
@@ -44,6 +48,9 @@ export default Vue.extend({
     },
     activeFile: function (): string {
       return directoryInfoState.activeFile
+    },
+    nnablaFunctions: function (): RawFunction[] {
+      return globalState.nnablaFunctions
     }
   }
 })

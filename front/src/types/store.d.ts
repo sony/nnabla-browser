@@ -1,5 +1,6 @@
 import { Graph } from '@/types/graph'
-import { MonitorSeriesData } from './monitor'
+import { MonitorSeriesData } from '@/types/monitor'
+import { RawFunction } from '@/types/nnablaApi'
 
 export interface RootState {
   editor: EditorState;
@@ -26,7 +27,7 @@ export interface GraphInfoState {
  ***************************************/
 
 export interface EditorState {
-  activeTabName: string;
+  nnablaFunctions: RawFunction[];
 }
 
 /***************************************

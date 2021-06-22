@@ -1,13 +1,15 @@
 <template>
   <center-content-base>
     <graph
+      v-show="nnablaFunctions.length > 0"
       :active-graph="activeGraph"
       :prev-graph="prevGraph"
       :is-dragging="isDragging"
       :assist-area-size="assistAreaSize"
-      :active-graphindex="activeGraphIndex"
+      :active-graph-index="activeGraphIndex"
       :graphs="graphs"
       :nntxt-path="nntxtPath"
+      :nnabla-functions="nnablaFunctions"
     />
   </center-content-base>
 </template>
@@ -19,6 +21,8 @@ import { Vector2D } from '@/types/geometry'
 import Vue from 'vue'
 import graphInfoState from '@/store/modules/graphInfo'
 import CenterContentBase from '@/components/CenterContentBase.vue'
+import { RawFunction } from '@/types/nnablaApi'
+import globalState from '@/store/modules/globalInfo'
 
 export default Vue.extend({
   components: {
@@ -46,6 +50,9 @@ export default Vue.extend({
     },
     assistAreaSize: function (): Vector2D {
       return graphInfoState.assistAreaSize
+    },
+    nnablaFunctions: function (): RawFunction[] {
+      return globalState.nnablaFunctions
     }
   }
 })
