@@ -94,13 +94,12 @@ def file_content():
 # return content of the all files as json
 @app.route("/subscribe/file-contents", methods=["POST"])
 def file_contents():
-    ret = {'contents': []}
+    ret = {"contents": []}
     for path in request.json["paths"]:
         full_path = os.path.join(app.config["USER"]["LOGDIR"], path)
-        ret['contents'].append({
-            'path': path,
-            'content': get_file_content(full_path)
-        })
+        ret["contents"].append(
+            {"path": path, "content": get_file_content(full_path)}
+        )
     return jsonify(ret)
 
 

@@ -126,7 +126,9 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
         )
 
         // Activate subscribe to update in real-time.
-        httpClient.activateSSESubscribe(path, serverEventHandler.SSEConnectionId)
+        httpClient.activateSSESubscribe(
+          path, serverEventHandler.SSEConnectionId
+        )
 
         const [chartTitle, name] = getChartTitleAndName(path)
         const chartData = {

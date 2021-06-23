@@ -23,15 +23,15 @@ export default Vue.extend({
     'header-bar': Header
   },
   watch: {
-    $route: function () {
+    $route: function (): void {
       this.initializeByUrl()
     }
   },
-  mounted: function () {
+  mounted: function (): void {
     this.initializeByUrl()
   },
   methods: {
-    initializeByUrl: function () {
+    initializeByUrl: function (): void {
       if (this.$route.query.path) {
         graphInfoState.fetchGraph(this.$route.query.path as string)
       } else {

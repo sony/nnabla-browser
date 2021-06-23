@@ -54,9 +54,11 @@ export default Vue.extend({
       if (!this.checked) {
         newActiveChartPaths = this.activeChartPaths.concat([this.filePath])
       } else {
-        newActiveChartPaths = this.activeChartPaths.filter((path) => path !== this.filePath)
+        newActiveChartPaths = this.activeChartPaths
+          .filter((path) => path !== this.filePath)
       }
-      this.$router.push({ path: 'monitoring', query: { activeChartPaths: newActiveChartPaths } })
+      const query = { activeChartPaths: newActiveChartPaths }
+      this.$router.push({ path: 'monitoring', query: query })
     }
   }
 })

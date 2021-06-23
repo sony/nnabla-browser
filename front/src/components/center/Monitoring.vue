@@ -46,7 +46,12 @@ function getNodeId (node: DirectoryNode, path: string): number {
       break
     }
     const [parentPath, currNode] = candidate
-    const dirName = parentPath === '' ? currNode.name : `${parentPath}/${currNode.name}`
+    let dirName
+    if (parentPath === '') {
+      dirName = currNode.name
+    } else {
+      dirName = `${parentPath}/${currNode.name}`
+    }
     for (let i = 0; i < currNode.monitorFiles.length; ++i) {
       const fileName = currNode.monitorFiles[i].name
       if (`${dirName}/${fileName}` === path) {

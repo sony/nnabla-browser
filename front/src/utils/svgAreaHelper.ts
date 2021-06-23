@@ -10,13 +10,16 @@ import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
 import { RawFunction } from '@/types/nnablaApi'
 import { Vector2D } from '@/types/geometry'
-import graphInfoState from '@/store/modules/graphInfo'
 import { findFunction } from './nnablaApi'
+import graphInfoState from '@/store/modules/graphInfo'
 
 const layerDef = Definitions.EDIT.LAYER
 
 class StyleHelper {
-  getDefaultComponent (nnablaFunctions: RawFunction[], layerType: string): RawFunction {
+  getDefaultComponent (
+    nnablaFunctions: RawFunction[],
+    layerType: string
+  ): RawFunction {
     return findFunction(nnablaFunctions, layerType)
   }
 

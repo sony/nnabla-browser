@@ -19,14 +19,14 @@ import NavButton from '@/components/header/NavButton.vue'
 import Vue from 'vue'
 
 export default Vue.extend({
+  components: {
+    'nav-button': NavButton
+  },
   props: {
     activeTabName: {
       type: String,
       default: 'graph'
     }
-  },
-  components: {
-    'nav-button': NavButton
   }
 })
 </script>

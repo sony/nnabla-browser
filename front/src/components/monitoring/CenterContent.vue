@@ -1,12 +1,15 @@
 <template>
   <center-content-base>
-    <monitoring :charts="charts" :directory-node="directoryNode" />
+    <monitoring
+      :charts="charts"
+      :directory-node="directoryNode"
+    />
   </center-content-base>
 </template>
 
 <script lang="ts">
-import CenterContentBase from '@/components/CenterContentBase.vue'
 import { ChartData, DirectoryNode } from '@/types/store'
+import CenterContentBase from '@/components/CenterContentBase.vue'
 import MonitoringComponent from '@/components/center/Monitoring.vue'
 import Vue from 'vue'
 import chartInfoState from '@/store/modules/chartInfo'

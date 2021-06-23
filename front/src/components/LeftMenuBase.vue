@@ -8,7 +8,7 @@
         class="app-row"
         style="top: 0; bottom: 0;"
       >
-        <slot></slot>
+        <slot />
       </div>
     </div>
   </div>

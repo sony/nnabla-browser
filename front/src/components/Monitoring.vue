@@ -22,15 +22,15 @@ export default Vue.extend({
     'header-bar': Header
   },
   watch: {
-    $route: function () {
+    $route: function (): void {
       this.initializeByUrl()
     }
   },
-  mounted: function () {
+  mounted: function (): void {
     this.initializeByUrl()
   },
   methods: {
-    initializeByUrl: function () {
+    initializeByUrl: function (): void {
       const addedChartPaths = []
       const droppedChartPaths = []
       const rawUrlChartPaths = this.$route.query.activeChartPaths

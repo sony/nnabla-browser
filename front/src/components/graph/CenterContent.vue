@@ -15,14 +15,14 @@
 </template>
 
 <script lang="ts">
+import CenterContentBase from '@/components/CenterContentBase.vue'
 import { Graph } from '@/types/graph'
 import GraphViewer from '@/components/center/GraphViewer.vue'
+import { RawFunction } from '@/types/nnablaApi'
 import { Vector2D } from '@/types/geometry'
 import Vue from 'vue'
-import graphInfoState from '@/store/modules/graphInfo'
-import CenterContentBase from '@/components/CenterContentBase.vue'
-import { RawFunction } from '@/types/nnablaApi'
 import globalState from '@/store/modules/globalInfo'
+import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   components: {

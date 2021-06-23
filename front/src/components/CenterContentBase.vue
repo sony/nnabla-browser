@@ -3,7 +3,7 @@
     id="centerContent"
     class="center-content"
   >
-    <slot></slot>
+    <slot />
   </div>
 </template>
 

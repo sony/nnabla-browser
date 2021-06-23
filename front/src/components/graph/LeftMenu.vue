@@ -21,11 +21,11 @@ import DirectoryTree from '@/components/left/DirectoryTree.vue'
 import LeftMenuBase from '@/components/LeftMenuBase.vue'
 import { Node } from '@/types/graph'
 import PropertyArea from '@/components/left/PropertyArea.vue'
+import { RawFunction } from '@/types/nnablaApi'
 import Vue from 'vue'
 import directoryInfoState from '@/store/modules/directoryInfo'
-import graphInfoState from '@/store/modules/graphInfo'
-import { RawFunction } from '@/types/nnablaApi'
 import globalState from '@/store/modules/globalInfo'
+import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   components: {

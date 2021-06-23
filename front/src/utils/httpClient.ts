@@ -29,7 +29,8 @@ class HttpClient {
   }
 
   getFileContents (paths: string[]): Promise<FileContents> {
-    return axios.post(this.BaseURL + 'file-contents', { paths }).then(res => res.data as FileContents)
+    return axios.post(this.BaseURL + 'file-contents', { paths })
+      .then(res => res.data as FileContents)
   }
 
   activateSSESubscribe (

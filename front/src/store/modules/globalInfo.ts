@@ -6,10 +6,10 @@ import {
   getModule
 } from 'vuex-module-decorators'
 import { EditorState } from '@/types/store'
-import { httpClient } from '@/utils/httpClient'
-import store from '@/store'
 import { RawFunction } from '@/types/nnablaApi'
 import { extractRawFunctions } from '@/utils/nnablaApi'
+import { httpClient } from '@/utils/httpClient'
+import store from '@/store'
 
 @Module({ dynamic: true, store, namespaced: true, name: 'editor' })
 class EditorStateModule extends VuexModule implements EditorState {
