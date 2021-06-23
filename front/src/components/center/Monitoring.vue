@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import { ChartData, ChartDatum } from '@/types/store'
+import { ChartData, ChartDatum, DirectoryNode } from '@/types/store'
 import Vue, { PropType } from 'vue'
 import Chart from 'chart.js'
 import SeriesChart from '@/components/center/SeriesChart.vue'
@@ -32,16 +32,33 @@ const COLORS = [
   '#f39c12'
 ]
 
-/***************************************
- interface
- ***************************************/
-
 interface DataCollectionType {
   data: Chart.ChartData;
   options: Chart.ChartOptions;
 }
 
-/***************************************/
+function getNodeId (node: DirectoryNode, path: string): number {
+  // WFS
+  const candidates: [string, DirectoryNode][] = [['', node]]
+  while (true) {
+    const candidate = candidates.shift()
+    if (candidate === undefined) {
+      break
+    }
+    const [parentPath, currNode] = candidate
+    const dirName = parentPath === '' ? currNode.name : `${parentPath}/${currNode.name}`
+    for (let i = 0; i < currNode.monitorFiles.length; ++i) {
+      const fileName = currNode.monitorFiles[i].name
+      if (`${dirName}/${fileName}` === path) {
+        return currNode.id
+      }
+    }
+    for (let i = 0; i < currNode.children.length; ++i) {
+      candidates.push([dirName, currNode.children[i]])
+    }
+  }
+  return 0
+}
 
 export default Vue.extend({
   components: { SeriesChart },
@@ -49,6 +66,10 @@ export default Vue.extend({
     charts: {
       type: Object as PropType<ChartData[]>,
       default: []
+    },
+    directoryNode: {
+      type: Object as PropType<DirectoryNode>,
+      required: true
     }
   },
   computed: {
@@ -59,13 +80,15 @@ export default Vue.extend({
       for (const i in charts) {
         const title = charts[i].name
         const datasets = charts[i].data.map((d: ChartDatum) => {
+          const path = `${d.name}/${title}.series.txt`
+          const nodeId = getNodeId(this.directoryNode, path)
           const data = []
           for (let j = 0; j < d.values.t.length; ++j) {
             data.push({ x: d.values.t[j], y: d.values.v[j] })
           }
           return {
             label: d.name[0] === '/' ? d.name.substr(1) : d.name,
-            borderColor: COLORS[d.id % COLORS.length],
+            borderColor: COLORS[nodeId % COLORS.length],
             borderWidth: 2,
             pointBorderWidth: 0,
             pointRadius: 0,

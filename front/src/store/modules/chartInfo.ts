@@ -5,34 +5,11 @@ import {
   VuexModule,
   getModule
 } from 'vuex-module-decorators'
-import { ChartData, ChartDatum, ChartInfoState, DirectoryNode } from '@/types/store'
+import { ChartData, ChartDatum, ChartInfoState } from '@/types/store'
 import { MonitorBuilder } from '@/utils/monitorBuilder'
 import { httpClient } from '@/utils/httpClient'
 import { serverEventHandler } from '@/utils/serverEventHandler'
 import store from '@/store'
-
-function getNodeId (node: DirectoryNode, path: string): number {
-  // WFS
-  const candidates: [string, DirectoryNode][] = [['', node]]
-  while (true) {
-    const candidate = candidates.shift()
-    if (candidate === undefined) {
-      break
-    }
-    const [parentPath, currNode] = candidate
-    const dirName = parentPath === '' ? currNode.name : `${parentPath}/${currNode.name}`
-    for (let i = 0; i < currNode.monitorFiles.length; ++i) {
-      const fileName = currNode.monitorFiles[i].name
-      if (`${dirName}/${fileName}` === path) {
-        return currNode.id
-      }
-    }
-    for (let i = 0; i < currNode.children.length; ++i) {
-      candidates.push([dirName, currNode.children[i]])
-    }
-  }
-  return 0
-}
 
 function getChartTitleAndName (path: string): [string, string] {
   const splits = path.split('/')
@@ -100,13 +77,7 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
   }
 
   @Action({})
-  fetchChart ({
-    path,
-    node
-  }: {
-    path: string;
-    node: DirectoryNode|undefined;
-  }): void {
+  fetchChart (path: string): void {
     httpClient.getFileContent(path).then(res => {
       // Get data from server and update.
       const builder = new MonitorBuilder(res.data)
@@ -121,11 +92,9 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
       httpClient.activateSSESubscribe(path, serverEventHandler.SSEConnectionId)
 
       const [chartTitle, name] = getChartTitleAndName(path)
-      const id = node === undefined ? 0 : getNodeId(node, path)
       const chartData = {
         chartTitle: chartTitle,
         data: {
-          id: id,
           name: name,
           values: data
         }
@@ -142,13 +111,7 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
   }
 
   @Action({})
-  fetchCharts ({
-    paths,
-    node
-  }: {
-    paths: string[];
-    node: DirectoryNode|undefined;
-  }): void {
+  fetchCharts (paths: string[]): void {
     httpClient.getFileContents(paths).then(res => {
       for (let i = 0; i < res.contents.length; ++i) {
         const path = res.contents[i].path
@@ -166,11 +129,9 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
         httpClient.activateSSESubscribe(path, serverEventHandler.SSEConnectionId)
 
         const [chartTitle, name] = getChartTitleAndName(path)
-        const id = node === undefined ? 0 : getNodeId(node, path)
         const chartData = {
           chartTitle: chartTitle,
           data: {
-            id: id,
             name: name,
             values: data
           }

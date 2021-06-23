@@ -14,7 +14,6 @@ import Header from '@/components/Header.vue'
 import LeftMenu from '@/components/monitoring/LeftMenu.vue'
 import Vue from 'vue'
 import chartInfoState from '@/store/modules/chartInfo'
-import directoryInfoState from '@/store/modules/directoryInfo'
 
 export default Vue.extend({
   components: {
@@ -34,7 +33,15 @@ export default Vue.extend({
     initializeByUrl: function () {
       const addedChartPaths = []
       const droppedChartPaths = []
-      const urlChartPaths = this.$route.query.activeChartPaths as string[]
+      const rawUrlChartPaths = this.$route.query.activeChartPaths
+      let urlChartPaths: string[]
+      if (typeof rawUrlChartPaths === 'string') {
+        urlChartPaths = [rawUrlChartPaths]
+      } else if (rawUrlChartPaths === undefined) {
+        urlChartPaths = []
+      } else {
+        urlChartPaths = rawUrlChartPaths as string[]
+      }
       // TODO: faster matching
       for (let i = 0; i < urlChartPaths.length; ++i) {
         if (!chartInfoState.activeChartPaths.includes(urlChartPaths[i])) {
@@ -46,7 +53,7 @@ export default Vue.extend({
           droppedChartPaths.push(chartInfoState.activeChartPaths[i])
         }
       }
-      chartInfoState.fetchCharts({ paths: addedChartPaths, node: directoryInfoState.data })
+      chartInfoState.fetchCharts(addedChartPaths)
       for (let i = 0; i < droppedChartPaths.length; ++i) {
         chartInfoState.dropChart(droppedChartPaths[i])
       }

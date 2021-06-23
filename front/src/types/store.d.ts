@@ -69,7 +69,6 @@ export interface ChartValue {
 }
 
 export interface ChartDatum {
-  id: number;
   name: string;
   values: ChartValue;
 }
