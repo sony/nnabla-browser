@@ -91,6 +91,19 @@ def file_content():
     return get_file_content(path)
 
 
+# return content of the all files as json
+@app.route("/subscribe/file-contents", methods=["POST"])
+def file_contents():
+    ret = {'contents': []}
+    for path in request.json["paths"]:
+        full_path = os.path.join(app.config["USER"]["LOGDIR"], path)
+        ret['contents'].append({
+            'path': path,
+            'content': get_file_content(full_path)
+        })
+    return jsonify(ret)
+
+
 # set filepath to update in real-time
 @app.route("/subscribe/activate-subscribe", methods=["POST"])
 def activate_subscribe():

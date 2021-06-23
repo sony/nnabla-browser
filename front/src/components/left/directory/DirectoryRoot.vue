@@ -15,6 +15,7 @@
         :directory-node="directoryNode"
         :dir-name="directoryNode.name"
         :level="0"
+        :root-node="directoryNode"
       />
     </div>
   </div>

@@ -1,5 +1,14 @@
 import axios, { AxiosResponse } from 'axios'
 
+interface FileContent {
+  path: string;
+  content: string;
+}
+
+interface FileContents {
+  contents: FileContent[];
+}
+
 class HttpClient {
   BaseURL: string
 
@@ -17,6 +26,10 @@ class HttpClient {
 
   getFileContent (path: string): Promise<AxiosResponse> {
     return axios.post(this.BaseURL + 'file-content', { path })
+  }
+
+  getFileContents (paths: string[]): Promise<FileContents> {
+    return axios.post(this.BaseURL + 'file-contents', { paths }).then(res => res.data as FileContents)
   }
 
   activateSSESubscribe (

@@ -9,9 +9,8 @@
 </template>
 
 <script lang="ts">
-import { ChartDatum, ChartValue, MonitorFile } from '@/types/store'
+import { DirectoryNode, MonitorFile } from '@/types/store'
 import Vue, { PropType } from 'vue'
-import chartInfoState from '@/store/modules/chartInfo'
 
 export default Vue.extend({
   props: {
@@ -34,19 +33,13 @@ export default Vue.extend({
     level: {
       type: Number,
       required: true
+    },
+    rootNode: {
+      type: Object as PropType<DirectoryNode>,
+      required: true
     }
   },
   computed: {
-    chartData: function (): { chartTitle: string; data: ChartDatum } {
-      return {
-        chartTitle: this.monitor.name.split('.')[0],
-        data: {
-          id: this.dirId,
-          name: this.dirName,
-          values: this.monitor.data as ChartValue
-        }
-      }
-    },
     checked: function (): boolean {
       const path = `${this.dirName}/${this.monitor.name}`
       return this.activeChartPaths.includes(path)
@@ -57,17 +50,13 @@ export default Vue.extend({
   },
   methods: {
     clickArea: function (): void {
+      let newActiveChartPaths = []
       if (!this.checked) {
-        chartInfoState.fetchChart({
-          path: this.filePath,
-          chartData: this.chartData
-        })
+        newActiveChartPaths = this.activeChartPaths.concat([this.filePath])
       } else {
-        chartInfoState.dropChart({
-          path: this.filePath,
-          chartData: this.chartData
-        })
+        newActiveChartPaths = this.activeChartPaths.filter((path) => path !== this.filePath)
       }
+      this.$router.push({ path: 'monitoring', query: { activeChartPaths: newActiveChartPaths } })
     }
   }
 })

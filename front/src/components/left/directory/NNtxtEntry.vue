@@ -11,7 +11,6 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 import { NNtxtFile } from '@/types/store'
-import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   props: {
@@ -43,7 +42,6 @@ export default Vue.extend({
   methods: {
     clickEvent: function (): void {
       if (!this.isSelected) {
-        graphInfoState.fetchGraph(this.nntxtPath)
         this.$router.push({ path: '/graph', query: { path: this.nntxtPath } })
       }
     }

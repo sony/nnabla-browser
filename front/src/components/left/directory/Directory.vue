@@ -39,6 +39,7 @@
             :directory-node="childInfo"
             :dir-name="(level > 0 ? dirName + '/' : '') + childInfo.name"
             :level="level + 1"
+            :root-node="rootNode"
           />
         </li>
       </ul>
@@ -70,6 +71,7 @@
             :dir-name="dirName"
             :dir-id="directoryNode.id"
             :level="level"
+            :root-node="rootNode"
           />
         </li>
       </ul>
@@ -116,6 +118,10 @@ export default Vue.extend({
     },
     level: {
       type: Number,
+      required: true
+    },
+    rootNode: {
+      type: Object as PropType<DirectoryNode>,
       required: true
     }
   },

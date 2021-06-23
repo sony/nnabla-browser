@@ -1,18 +1,6 @@
 <template>
   <div>
-    <div class="editor-navbar">
-      <div style="margin-left: 30px;">
-        <nav-button
-          tab-name="graph"
-          :is-active="false"
-        />
-        <nav-button
-          tab-name="monitoring"
-          :is-active="true"
-        />
-      </div>
-      <div class="editor-navbar-center" />
-    </div>
+    <header-bar active-tab-name="monitoring" />
     <div class="main-content">
       <left-menu />
       <center-content />
@@ -22,15 +10,47 @@
 
 <script lang="ts">
 import CenterContent from '@/components/monitoring/CenterContent.vue'
+import Header from '@/components/Header.vue'
 import LeftMenu from '@/components/monitoring/LeftMenu.vue'
-import NavButton from '@/components/header/NavButton.vue'
 import Vue from 'vue'
+import chartInfoState from '@/store/modules/chartInfo'
+import directoryInfoState from '@/store/modules/directoryInfo'
 
 export default Vue.extend({
   components: {
     'left-menu': LeftMenu,
     'center-content': CenterContent,
-    'nav-button': NavButton
+    'header-bar': Header
+  },
+  watch: {
+    $route: function () {
+      this.initializeByUrl()
+    }
+  },
+  mounted: function () {
+    this.initializeByUrl()
+  },
+  methods: {
+    initializeByUrl: function () {
+      const addedChartPaths = []
+      const droppedChartPaths = []
+      const urlChartPaths = this.$route.query.activeChartPaths as string[]
+      // TODO: faster matching
+      for (let i = 0; i < urlChartPaths.length; ++i) {
+        if (!chartInfoState.activeChartPaths.includes(urlChartPaths[i])) {
+          addedChartPaths.push(urlChartPaths[i])
+        }
+      }
+      for (let i = 0; i < chartInfoState.activeChartPaths.length; ++i) {
+        if (!urlChartPaths.includes(chartInfoState.activeChartPaths[i])) {
+          droppedChartPaths.push(chartInfoState.activeChartPaths[i])
+        }
+      }
+      chartInfoState.fetchCharts({ paths: addedChartPaths, node: directoryInfoState.data })
+      for (let i = 0; i < droppedChartPaths.length; ++i) {
+        chartInfoState.dropChart(droppedChartPaths[i])
+      }
+    }
   }
 })
 </script>
@@ -38,23 +58,5 @@ export default Vue.extend({
 <style>
 div.main-content {
   display: flex;
-}
-.editor-navbar {
-  width: 100%;
-  height: 40px;
-  background-color: var(--color-gray5);
-}
-
-.editor-navbar-center {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  margin: 0 auto;
-  width: 25%;
-  height: 40px;
-  text-align: center;
-  line-height: 40px;
 }
 </style>
