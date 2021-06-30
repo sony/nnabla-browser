@@ -17,15 +17,15 @@
 <script lang="ts">
 import NavButton from '@/components/header/NavButton.vue'
 import Vue from 'vue'
-import globalState from '@/store/modules/globalInfo'
 
 export default Vue.extend({
   components: {
     'nav-button': NavButton
   },
-  computed: {
-    activeTabName: function (): string {
-      return globalState.activeTabName
+  props: {
+    activeTabName: {
+      type: String,
+      default: 'graph'
     }
   }
 })

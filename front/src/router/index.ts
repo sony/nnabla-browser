@@ -1,5 +1,7 @@
 import VueRouter, { RouteConfig } from 'vue-router'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import Graph from '@/components/Graph.vue'
+import Monitoring from '@/components/Monitoring.vue'
 import NNablaBrowser from '@/views/NNablaBrowser.vue'
 import Vue from 'vue'
 
@@ -15,7 +17,21 @@ const routes: Array<RouteConfig> = [
     meta: {
       title: 'nnabla browser',
       desc: 'NNC-like visualizer for nnabla developers.'
-    }
+    },
+    children: [
+      {
+        path: 'graph',
+        component: Graph
+      },
+      {
+        path: 'monitoring',
+        component: Monitoring
+      },
+      {
+        path: '',
+        redirect: 'graph'
+      }
+    ]
   }
 ]
 

@@ -1,22 +1,19 @@
 <template>
   <div>
-    <Header />
-    <Main />
+    <router-view />
   </div>
 </template>
 
 <script lang="ts">
 import $ from 'jquery'
 import EditorWindowSize from '@/utils/editorWindowSize'
-import Header from '@/components/Header.vue'
-import Main from '@/components/Main.vue'
 import Vue from 'vue'
+import globalState from '@/store/modules/globalInfo'
 import { serverEventHandler } from '@/utils/serverEventHandler'
 
 let eventSrc: EventSource
 
 export default Vue.extend({
-  components: { Header, Main },
   mounted: function () {
     EditorWindowSize.init()
     EditorWindowSize.bind()
@@ -31,6 +28,9 @@ export default Vue.extend({
     if (this.$route.query.mode === 'sai') {
       document.documentElement.style.setProperty('--color-brand', '#D2017A')
     }
+
+    // Load all NNabla APIs
+    globalState.fetchNnablaApi()
   },
   methods: {
     // Set up server sent event.

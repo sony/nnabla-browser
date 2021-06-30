@@ -1,8 +1,5 @@
 import $ from 'jquery'
 import { AnyObject } from '@/types/basic'
-import globalState from '@/store/modules/globalInfo'
-import graphInfoState from '@/store/modules/graphInfo'
-import { svgAreaOperator } from './svgAreaHelper'
 
 const EditorWindowSize = {
   init: function (): void {
@@ -14,6 +11,8 @@ const EditorWindowSize = {
     })
   },
   changeSize: function (): void {
+    // TODO: remove jQuery-based codes
+
     const _NullQueriedDom = {
       getBoundingClientRect: (): AnyObject => {
         return { width: 0, height: 0 }
@@ -41,19 +40,6 @@ const EditorWindowSize = {
     const navbarHeight = boundingHeightOf('.editor-navbar')
     const contentHeight = windowHeight - navbarHeight
     $('.main-content').outerHeight(contentHeight)
-
-    if (globalState.activeTabName === 'graph') {
-      const graphsTabHeight = boundingHeightOf('.network-tabs')
-      const networkActionHeight = boundingHeightOf('.network-action')
-      const graphHeight =
-        contentHeight - graphsTabHeight - networkActionHeight
-      $('.network-editor-scroller').height(graphHeight)
-      graphInfoState.SET_ASSIST_AREA_SIZE({
-        x: $('.network-editor-scroller').width() as number,
-        y: graphHeight
-      })
-      svgAreaOperator.adjustSvgSize()
-    }
   }
 }
 

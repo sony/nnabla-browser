@@ -136,6 +136,7 @@ import Vue, { PropType, VNode } from 'vue'
 import { styleHelper, svgAreaOperator } from '@/utils/svgAreaHelper'
 import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
+import { RawFunction } from '@/types/nnablaApi'
 import { Vector2D } from '@/types/geometry'
 import graphInfoState from '@/store/modules/graphInfo'
 
@@ -298,6 +299,10 @@ export default Vue.extend({
     nntxtPath: {
       type: String,
       required: true
+    },
+    nnablaFunctions: {
+      type: Array as PropType<RawFunction[]>,
+      default: []
     }
   },
   computed: {
@@ -372,7 +377,9 @@ export default Vue.extend({
       }
     },
     getNodeAttr: (): AnyObject => styleHelper.createNodeAttr(),
-    getNodeStyle: (node: Node): AnyObject => styleHelper.createNodeStyle(node),
+    getNodeStyle: function (node: Node): AnyObject {
+      return styleHelper.createNodeStyle(this.nnablaFunctions, node)
+    },
     getCapitalAttr: (): AnyObject => styleHelper.createCapitalAttr(),
     getCapitalStyle: (): AnyObject => styleHelper.createCapitalStyle(),
     getTextComponentStyle: (): AnyObject => {

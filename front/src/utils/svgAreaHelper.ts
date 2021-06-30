@@ -10,28 +10,36 @@ import { AnyObject } from '@/types/basic'
 import { Definitions } from '@/utils/definitions'
 import { RawFunction } from '@/types/nnablaApi'
 import { Vector2D } from '@/types/geometry'
+import { findFunction } from './nnablaApi'
 import graphInfoState from '@/store/modules/graphInfo'
-import { nnablaCore } from './nnablaApi'
 
 const layerDef = Definitions.EDIT.LAYER
 
 class StyleHelper {
-  getDefaultComponent (layerType: string): RawFunction {
-    return nnablaCore.findFunction(layerType)
+  getDefaultComponent (
+    nnablaFunctions: RawFunction[],
+    layerType: string
+  ): RawFunction {
+    return findFunction(nnablaFunctions, layerType)
   }
 
-  getLayerColor (layerType: string): string {
-    return this.getDefaultComponent(layerType).color
+  getLayerColor (nnablaFunctions: RawFunction[], layerType: string): string {
+    const component = this.getDefaultComponent(nnablaFunctions, layerType)
+    if (component) {
+      return component.color
+    } else {
+      return '#fff'
+    }
   }
 
   createNodeAttr (): AnyObject {
     return { width: layerDef.RECT_WIDTH, height: layerDef.RECT_HEIGHT }
   }
 
-  createNodeStyle (node: Node): AnyObject {
+  createNodeStyle (nnablaFunctions: RawFunction[], node: Node): AnyObject {
     return {
-      fill: this.getLayerColor(node.type),
-      stroke: this.getLayerColor(node.type)
+      fill: this.getLayerColor(nnablaFunctions, node.type),
+      stroke: this.getLayerColor(nnablaFunctions, node.type)
     }
   }
 
@@ -112,21 +120,22 @@ class SvgAreaOperator {
 
       if (node2 != null) {
         const layersDOM = (node1 as Element).getClientRects()[0]
-
-        svg.attr(
-          'width',
-          Math.max(
-            (node2 as Element).clientWidth,
-            layersDOM.width + layerDef.GRID * 4
+        if (layersDOM) {
+          svg.attr(
+            'width',
+            Math.max(
+              (node2 as Element).clientWidth,
+              layersDOM.width + layerDef.GRID * 4
+            )
           )
-        )
-        svg.attr(
-          'height',
-          Math.max(
-            (node2 as Element).clientHeight,
-            layersDOM.height + layerDef.GRID * 4
+          svg.attr(
+            'height',
+            Math.max(
+              (node2 as Element).clientHeight,
+              layersDOM.height + layerDef.GRID * 4
+            )
           )
-        )
+        }
       }
     }
   }

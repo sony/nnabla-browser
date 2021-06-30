@@ -1,47 +1,41 @@
 <template>
-  <div
-    id="leftContent"
-    class="left-content"
-  >
-    <div class="left-component">
-      <div
-        class="app-row"
-        style="top: 0; bottom: 0;"
-      >
-        <directory-tree
-          :active-file="activeFile"
-          :active-chart-paths="activeChartPaths"
-          :active-tab-name="activeTabName"
-          :directory-node="directoryNode"
-        />
-        <property-area
-          v-show="isPropertyAreaShow"
-          :active-layer="activeLayer"
-        />
-      </div>
+  <left-menu-base>
+    <div>
+      <directory-tree
+        :active-file="activeFile"
+        :active-tab-name="activeTabName"
+        :directory-node="directoryNode"
+      />
+      <property-area
+        v-show="nnablaFunctions.length > 0"
+        :active-layer="activeLayer"
+        :nnabla-functions="nnablaFunctions"
+      />
     </div>
-  </div>
+  </left-menu-base>
 </template>
 
 <script lang="ts">
 import { DirectoryNode } from '@/types/store'
 import DirectoryTree from '@/components/left/DirectoryTree.vue'
+import LeftMenuBase from '@/components/LeftMenuBase.vue'
 import { Node } from '@/types/graph'
 import PropertyArea from '@/components/left/PropertyArea.vue'
+import { RawFunction } from '@/types/nnablaApi'
 import Vue from 'vue'
-import chartInfoState from '@/store/modules/chartInfo'
 import directoryInfoState from '@/store/modules/directoryInfo'
 import globalState from '@/store/modules/globalInfo'
 import graphInfoState from '@/store/modules/graphInfo'
 
 export default Vue.extend({
   components: {
+    'left-menu-base': LeftMenuBase,
     'property-area': PropertyArea,
     'directory-tree': DirectoryTree
   },
   computed: {
     activeTabName: function (): string {
-      return globalState.activeTabName.toLowerCase()
+      return 'graph'
     },
     isPropertyAreaShow: function (): boolean {
       return this.activeTabName === 'graph'
@@ -55,25 +49,9 @@ export default Vue.extend({
     activeFile: function (): string {
       return directoryInfoState.activeFile
     },
-    activeChartPaths: function (): string[] {
-      return chartInfoState.activeChartPaths
+    nnablaFunctions: function (): RawFunction[] {
+      return globalState.nnablaFunctions
     }
   }
 })
 </script>
-
-<style>
-.left-content {
-  position: relative;
-  width: 15%;
-  height: 100%;
-  min-width: 280px;
-  background-color: var(--color-gray1);
-  border-right: solid 1px var(--color-gray2);
-}
-
-.left-component .icon-small {
-  width: 16px;
-  height: 16px;
-}
-</style>
