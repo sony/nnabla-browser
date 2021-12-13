@@ -4,6 +4,8 @@
 
 NNabla browser is a browser based visualizer for Neural Network Libraries.
 
+![](imgs/overview.gif)
+
 ## For users
 
 ### Environment
