@@ -1,4 +1,4 @@
-# NNabla Browser
+# nnabla Browser
 
 [![test](https://github.com/nnabla/nnabla-browser/actions/workflows/test.yaml/badge.svg)](https://github.com/nnabla/nnabla-browser/actions/workflows/test.yaml)
 
@@ -15,7 +15,7 @@ python >=3.5
 - Pip install from git repository
 
     ```shell
-    $pip install git+http://github.com/nnabla/nnabla-browser.git
+    $pip install git+http://github.com/sony/nnabla-browser.git
     ```
 
 - Building from source by yourself & install
