@@ -2,7 +2,7 @@
 
 [![test](https://github.com/nnabla/nnabla-browser/actions/workflows/test.yaml/badge.svg)](https://github.com/nnabla/nnabla-browser/actions/workflows/test.yaml)
 
-NNabla browser is a browser based visualizer for Neural Network Libraries.
+NNabla browser is a browser based visualizer for [Neural Network Libraries](https://github.com/sony/nnabla).
 
 ![](imgs/overview.gif)
 
