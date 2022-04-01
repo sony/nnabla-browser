@@ -10,7 +10,7 @@ nnabla browser is a browser based visualizer for [Neural Network Libraries](http
 
 ### Environment
 
-python >=3.5
+python >= 3.6
 
 ### Install
 
