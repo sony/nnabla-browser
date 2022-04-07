@@ -20,9 +20,11 @@ DOCKER_BUILD_ARGS += --build-arg http_proxy=${http_proxy}
 DOCKER_BUILD_ARGS += --build-arg https_proxy=${https_proxy}
 
 DOCKER_RUN_OPTS = --rm
-DOCKER_RUN_OPTS += -v $$(pwd):$$(pwd)
-DOCKER_RUN_OPTS += -w $$(pwd)
+DOCKER_RUN_OPTS += -v $$(pwd):${HOME}
+DOCKER_RUN_OPTS += -w ${HOME}
 DOCKER_RUN_OPTS += -u $$(id -u):$$(id -g)
+DOCKER_RUN_OPTS += -v /tmp/docker.passwd:/etc/passwd:ro
+DOCKER_RUN_OPTS += -v /tmp/docker.group:/etc/group:ro
 DOCKER_RUN_OPTS += -e http_proxy=${http_proxy}
 DOCKER_RUN_OPTS += -e https_proxy=${https_proxy}
 
@@ -32,8 +34,12 @@ nnabla-browser-build-env:
 
 .PHONY:nnabla-browser-wheel
 nnabla-browser-wheel:
+	npm install
+	npm build
 	python3 setup.py bdist_wheel
 
 .PHONY:bwd-nnabla-browser-wheel
 bwd-nnabla-browser-wheel:nnabla-browser-build-env
+	getent passwd > /tmp/docker.passwd
+	getent group > /tmp/docker.group
 	docker run $(DOCKER_RUN_OPTS) $(NNABLA_BROWSER_BUILD_ENV_DOCKER_IMAGE_NAME) make nnabla-browser-wheel

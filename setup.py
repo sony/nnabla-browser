@@ -23,8 +23,9 @@ setup(
         "numpy",
         "pyyaml",
         "requests",
+        "nnabla"
     ],
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     packages=["nnabla_browser"],
     package_data={'nnabla_browser': ['dist/*', "dist/static/*"]},
     include_package_data=True,

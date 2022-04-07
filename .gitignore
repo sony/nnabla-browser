@@ -15,6 +15,9 @@ pipfile.lock
 
 front/lib/js/nnablaCore.js
 
+.config/
+.npm/
+
 .vscode/
 
 logdir/

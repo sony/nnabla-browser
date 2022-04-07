@@ -13,6 +13,8 @@ watchdog = "*"
 google = "*"
 protobuf = "*"
 numpy = "*"
+pyyaml = "*"
+requests = "*"
 nnabla = "*"
 
 [dev-packages]
