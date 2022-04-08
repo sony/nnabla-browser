@@ -20,14 +20,15 @@ python >= 3.6
     $pip install nnabla-browser
     ```
 
-- Build from source by yourself & install (required npm)
+- Build from source to create wheel & install
 
+    Using npm installed in your environment, you can create wheel as follows.
     ```shell
-    $ make nnabla-browser-wheel
+    $ make nnabla-browser-wheel  # npm is required
     $ pip install ./dist/nnablabrowser-<version>-<env>.whl
     ```
 
-    We also provide docker image so that you don't have to set up environment on your server except docker: 
+    We also provide docker image so that you don't have to set up environment on your server: 
     ```shell
     $ make bwd-nnabla-browser-wheel # `bwd` stands for build with docker
     $ pip install ./dist/nnablabrowser-<version>-<env>.whl

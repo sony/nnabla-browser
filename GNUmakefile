@@ -35,7 +35,7 @@ nnabla-browser-build-env:
 .PHONY:nnabla-browser-wheel
 nnabla-browser-wheel:
 	npm install
-	npm build
+	npm run build
 	python3 setup.py bdist_wheel
 
 .PHONY:bwd-nnabla-browser-wheel

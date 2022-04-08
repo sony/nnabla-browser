@@ -1,4 +1,9 @@
-from setuptools import setup, find_packages
+from setuptools import setup
+import glob
+
+# get webpack outputs
+pkg_dirs = glob.glob('nnabla_browser/dist/**/', recursive=True)
+pkg_data = [f'{x.lstrip("nnabla_browser/")}*' for x in pkg_dirs]
 
 setup(
     name="nnabla-browser",
@@ -27,7 +32,7 @@ setup(
     ],
     python_requires=">=3.6",
     packages=["nnabla_browser"],
-    package_data={'nnabla_browser': ['dist/*', "dist/static/*"]},
+    package_data={'nnabla_browser': pkg_data},
     include_package_data=True,
     entry_points={
         "console_scripts": [
