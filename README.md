@@ -14,17 +14,24 @@ python >= 3.6
 
 ### Install
 
-- Pip install from git repository
+- Pip install from pypi
 
     ```shell
-    $pip install git+http://github.com/sony/nnabla-browser.git
+    $pip install nnabla-browser
     ```
 
-- Building from source by yourself & install
+- Build from source to create wheel & install
 
+    Using npm installed in your environment, you can create wheel as follows.
     ```shell
-    $python setup.py bdist_wheel
-    $pip install ./dist/nnablabrowser-<version>-<env>.whl
+    $ make nnabla-browser-wheel  # npm is required
+    $ pip install ./dist/nnablabrowser-<version>-<env>.whl
+    ```
+
+    We also provide docker image so that you don't have to set up environment on your server: 
+    ```shell
+    $ make bwd-nnabla-browser-wheel # `bwd` stands for build with docker
+    $ pip install ./dist/nnablabrowser-<version>-<env>.whl
     ```
 
     Note that .whl file is created in ./dist for default setting.
@@ -47,14 +54,14 @@ export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 Launch any browser application and just access to \<server-address\>:PORT/  
 For example, when you launch server on the same computer which browser can be used, you can access localhost:8888/
 
-## For developers
+## contributions
 
 ### Requirements
 
 - pipenv
 - npm
 
-### Bundle all js package
+### Bundle js packages
 
 ```shell
 # install node dependency 
