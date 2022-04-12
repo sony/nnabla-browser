@@ -17,13 +17,23 @@ def nnabla_proto_to_json(file_path):
         with open(file_path, "r") as f:
             text_format.Merge(f.read(), proto)
     else:
-        with zipfile.ZipFile(file_path, "r") as zf:
-            nntxt_file_list = fnmatch.filter(zf.namelist(), "*.nntxt")
-            if len(nntxt_file_list) > 0:
-                with zf.open(nntxt_file_list[0]) as f:
-                    text_format.Merge(f.read(), proto)
-            else:
-                return ""
+        retry = 5
+        while retry > 0:
+            try:
+                with zipfile.ZipFile(file_path, "r") as zf:
+                    nntxt_file_list = fnmatch.filter(zf.namelist(), "*.nntxt")
+                    if len(nntxt_file_list) > 0:
+                        with zf.open(nntxt_file_list[0]) as f:
+                            text_format.Merge(f.read(), proto)
+                            break
+                    else:
+                        return ""
+            except zipfile.BadZipfile:
+                time.sleep(5)
+            retry -= 1
+
+        if retry == -1:
+            raise RuntimeError(f"cannot open {file_path}")
 
     raw_msg = json_format.MessageToJson(proto)
 
@@ -88,9 +98,7 @@ def initialize_send_queue(path_list, base_path):
     }
 
     # return as list
-    return [
-        send_info,
-    ]
+    return [send_info]
 
 
 class Monitor(FileSystemEventHandler):
@@ -100,7 +108,7 @@ class Monitor(FileSystemEventHandler):
         send_manager,
         directory_manager,
         sse_updates,
-        update_interval=10,
+        update_interval=1,
     ):
         super().__init__()
         self.logdir = logdir
@@ -139,15 +147,11 @@ class Monitor(FileSystemEventHandler):
                 ):
                     continue
 
-                self.send_manager[i] = self.send_manager[i] + [
-                    send_info,
-                ]
+                self.send_manager[i] = self.send_manager[i] + [send_info]
 
     def on_created(self, event):
         abs_path = os.path.abspath(event.src_path)
-        self.directory_manager += [
-            abs_path,
-        ]
+        self.directory_manager += [abs_path]
 
         self.file_modified_timestamp[abs_path] = 0  # init time by 0
 

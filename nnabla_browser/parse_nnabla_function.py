@@ -16,8 +16,7 @@ NNABLA_VERSION = f"v{version_digits[0]}.{version_digits[1]}.{version_digits[2]}"
 
 YAML_PATH = {
     "functions": os.path.join(
-        get_data_home(),
-        f"browser/{NNABLA_VERSION}/functions.yaml",
+        get_data_home(), f"browser/{NNABLA_VERSION}/functions.yaml"
     )
 }
 
