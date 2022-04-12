@@ -7,6 +7,7 @@ import {
 } from 'vuex-module-decorators'
 import { ChartData, ChartDatum, ChartInfoState } from '@/types/store'
 import { MonitorBuilder } from '@/utils/monitorBuilder'
+import { MonitorSeriesData } from '@/types/monitor'
 import { httpClient } from '@/utils/httpClient'
 import { serverEventHandler } from '@/utils/serverEventHandler'
 import store from '@/store'
@@ -34,6 +35,22 @@ class ChartInfoStateModule extends VuexModule implements ChartInfoState {
     if (index > -1) {
       this.activeChartPaths.splice(index, 1)
     }
+  }
+
+  @Action({})
+  insertChartDataByRawData ({
+    path,
+    data
+  }: { path: string; data: MonitorSeriesData }): void {
+    const [chartTitle, name] = getChartTitleAndName(path)
+    const chartData = {
+      chartTitle: chartTitle,
+      data: {
+        name: name,
+        values: data
+      }
+    }
+    this.insertChartData(chartData)
   }
 
   @Action({})

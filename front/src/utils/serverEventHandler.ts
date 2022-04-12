@@ -3,6 +3,7 @@ import { GraphBuilder } from '@/utils/graphBuilder'
 import { MonitorBuilder } from '@/utils/monitorBuilder'
 import { NNtxt } from '@/types/nnablaApi'
 import { ServerEvent } from '@/types/serverEvent'
+import chartInfoState from '@/store/modules/chartInfo'
 import directoryInfoState from '@/store/modules/directoryInfo'
 
 class ServerEventHandler {
@@ -42,10 +43,10 @@ class ServerEventHandler {
       const rawData = (event as ServerEvent).data
       const builder = new MonitorBuilder((rawData as string))
       data = builder.build()
+      chartInfoState.insertChartDataByRawData({ path: filePath, data })
     } else {
       throw new Error(`invalid fileType: ${fileType}`)
     }
-
     directoryInfoState.updateFileContent({ path: filePath, data })
   }
 
