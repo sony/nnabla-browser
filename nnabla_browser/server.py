@@ -186,7 +186,7 @@ def sse():
 
 
 def run_server(port):
-    print("open server : {}".format(port))
+    print(f"open server : {port}")
     app.wsgi_app = ProxyFix(app.wsgi_app)
     server = WSGIServer(("0.0.0.0", port), app)
     server.serve_forever()

@@ -14,9 +14,11 @@ def encode_msg(data=None, event=None, idx=None):
             continue
 
         for line in v.split("\n"):
-            ret.append("{}: {}".format(k, line))
+            ret.append(f"{k}: {line}")
 
-    return "{}\n\n".format("\n".join(ret))
+    msg = "\n".join(ret)
+
+    return f"{msg}\n\n"
 
 
 def allow_cors(app, response):
@@ -37,9 +39,7 @@ def check_and_create_logdir(logdir):
     if not os.path.exists(logdir):
         ans = str(
             input(
-                "{} dose not exist. Would you like to create new directory? [y/N]:".format(
-                    logdir
-                )
+                f"{logdir} dose not exist. Would you like to create new directory? [y/N]:"
             )
         )
         if ans.strip().lower() in ["y", "yes"]:
