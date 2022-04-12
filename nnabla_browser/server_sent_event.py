@@ -16,6 +16,6 @@ class ServerSentEvent:
                 continue
 
             for _v in v.split("\n"):
-                ret.append("{}: {}".format(k, _v))
+                ret.append(f"{k}: {_v}")
 
         return "{}\n\n".format("\n".join(ret))

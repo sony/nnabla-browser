@@ -11,7 +11,8 @@ import yaml
 from nnabla.logger import logger
 from nnabla.utils.download import get_data_home
 
-NNABLA_VERSION = "v{}.{}.{}".format(*nn.__version__.split(".")[:3])
+version_digits = nn.__version__.split(".")[:3]
+NNABLA_VERSION = f"v{version_digits[0]}.{version_digits[1]}.{version_digits[2]}"
 
 YAML_PATH = {
     "functions": os.path.join(
@@ -124,7 +125,7 @@ def get_all_function_api_definitions(
             "layer_name": layer_name,
             "snake_name": snake_name,
             "color": get_color(layer_name, default_color, activations),
-            "api_type": "{}_api".format(api_type),
+            "api_type": f"{api_type}_api",
             "inputs": inputs,
             "arguments": arguments,
         }
