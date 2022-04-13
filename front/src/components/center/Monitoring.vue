@@ -69,7 +69,7 @@ export default Vue.extend({
   components: { SeriesChart },
   props: {
     charts: {
-      type: Object as PropType<ChartData[]>,
+      type: Array as PropType<ChartData[]>,
       default: []
     },
     directoryNode: {

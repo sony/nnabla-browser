@@ -52,7 +52,7 @@ export default Vue.extend({
       required: true
     },
     graphs: {
-      type: Object as PropType<Graph[]>,
+      type: Array as PropType<Graph[]>,
       required: true
     },
     nntxtPath: {

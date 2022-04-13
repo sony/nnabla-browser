@@ -2,7 +2,7 @@
   <div class="graph-tab-list">
     <graph-tab
       v-for="(graph, index) in graphs"
-      :key="path + '-' + index"
+      :key="index"
       :graph="graph"
       :index="index"
       :selected="index === activeGraphIndex"
@@ -25,7 +25,7 @@ export default Vue.extend({
       required: true
     },
     graphs: {
-      type: Object as PropType<Graph[]>,
+      type: Array as PropType<Graph[]>,
       required: true
     }
   }
