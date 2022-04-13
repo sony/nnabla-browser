@@ -53,6 +53,11 @@ class ServerEventHandler {
   deleteEventListener (event: Event): void {
     const path = (event as ServerEvent).lastEventId
     directoryInfoState.deleteFileOrDirectory(path)
+
+    const fileType = PathOperator.getFileType(path)
+    if (fileType === 'monitorFiles') {
+      chartInfoState.deleteChartData(path)
+    }
   }
 }
 
