@@ -170,6 +170,9 @@ function insertFile (
   replace = false
 ): void {
   const fileType = pathOperator.getFileType(fileName)
+
+  if (fileType === null) return
+
   const index = findIndexByName(parent, fileType, fileName)
   if (index > -1) {
     // Found. Update file contents.
@@ -224,6 +227,7 @@ function deleteFileOrDirectoryPath (
 ): void {
   const [parent, relPath] = searchParent(path, state.data)
   const fileType = pathOperator.getFileType(relPath)
+  if (fileType === null) return
   // delete file
   const index = findIndexByName(parent, fileType, relPath)
   if (index === -1) return

@@ -1,6 +1,6 @@
 import * as Path from 'path'
 
-const getFileType = (path: string): 'nntxtFiles' | 'monitorFiles' => {
+const getFileType = (path: string): 'nntxtFiles' | 'monitorFiles' | null => {
   const ext = Path.extname(path)
   const subExt = Path.extname(Path.basename(path, ext))
 
@@ -12,7 +12,7 @@ const getFileType = (path: string): 'nntxtFiles' | 'monitorFiles' => {
     return 'monitorFiles'
   }
 
-  throw new Error(`invlaid file: ${path}`)
+  return null
 }
 
 export { getFileType }
