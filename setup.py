@@ -35,7 +35,7 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Scientific/Engineering :: Visualization'
+        'Topic :: Scientific/Engineering :: Visualization',
         'Programming Language :: Python :: 3.6',
     ],
     install_requires=[
