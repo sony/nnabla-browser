@@ -61,7 +61,7 @@ function dataHandler (newData: ChartData, oldData: ChartData): void {
         chart.data.yLabels = newData.yLabels
         this.$emit('ylabels:update')
       }
-      chart.update()
+      chart.update('none')
       this.$emit('chart:update')
     } else {
       if (chart) {
