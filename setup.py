@@ -11,11 +11,16 @@ setup(
     description="A browser base visualizer for Neural Network Libraries (nnabla).",
     url='https://github.com/sony/nnabla-browser',
     author="Akio Hayakawa",
-    # license=...,
+    license='Apache License 2.0',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'Topic :: Neural Network framework :: Visualization Tools',
+        'Intended Audience :: Education',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: Apache Software License',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Scientific/Engineering :: Visualization'
         'Programming Language :: Python :: 3.6',
     ],
     install_requires=[
