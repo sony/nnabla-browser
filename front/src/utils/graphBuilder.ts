@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { Graph, Layer, Link, Node } from '@/types/graph'
-import { NNtxt, NNtxtFunction, Variable } from '@/types/nnablaApi'
+import { NNtxt, NNtxtFunction, Parameter, Variable } from '@/types/nnablaApi'
 import { Definitions } from '@/utils/definitions'
 import { LayerRegister } from '@/utils/layerRegister'
 import { Vector2D } from '@/types/geometry'
@@ -36,6 +36,16 @@ function createDummyOutputLayer (variable: Variable): NNtxtFunction {
     name: variable.dataName,
     output: [],
     type: 'OutputVariable',
+    param: {}
+  }
+}
+
+function createDummyParameter (parameter: Parameter): NNtxtFunction {
+  return {
+    input: [],
+    name: parameter.name,
+    output: [parameter.name],
+    type: 'Parameter',
     param: {}
   }
 }
@@ -110,11 +120,9 @@ function computeLayerPosition (depth: number, needSlice: number): Vector2D {
 }
 
 export class GraphBuilder {
-  layerRegister: LayerRegister
   nntxt: NNtxt;
 
   constructor (nntxt: NNtxt) {
-    this.layerRegister = new LayerRegister()
     this.nntxt = nntxt
   }
 
@@ -124,6 +132,7 @@ export class GraphBuilder {
     const executors = this.nntxt.executor || []
 
     for (const executor of executors) {
+      const layerRegister = new LayerRegister()
       const network = networks.find(x => x.name === executor.networkName)
 
       if (typeof network === 'undefined') continue
@@ -136,7 +145,7 @@ export class GraphBuilder {
       const functions: NNtxtFunction[] = []
       const noInputFunctions: NNtxtFunction[] = []
       network.function.forEach((f: NNtxtFunction) => {
-        if (Object.prototype.hasOwnProperty.call(f, 'input')) functions.push(f)
+        if (f.input !== undefined) functions.push(f)
         else noInputFunctions.push({ ...f, input: [] })
       })
 
@@ -144,10 +153,10 @@ export class GraphBuilder {
         x => x.type === 'Parameter'
       )
 
-      this.layerRegister.initialize(allParameters)
+      layerRegister.initialize(allParameters)
 
       const recursive = setupGetNodeAndLinkRecursive(
-        this.layerRegister,
+        layerRegister,
         functions,
         outputVariables
       )
@@ -158,12 +167,26 @@ export class GraphBuilder {
         ...noInputFunctions
       ]
 
+      // recursively register layers
       for (const inputLayer of inputLayers) {
-        const [layer] = this.layerRegister.addLayer(inputLayer, 0)
+        const [layer] = layerRegister.addLayer(inputLayer, 0)
         recursive(layer, 0)
       }
 
-      const depthToLayers = this.layerRegister.getDepthToLayers()
+      // if there are rogue parameters, add them as parameter layers
+      const visitedSize = layerRegister.visistedParameters.size
+      const totalSize = layerRegister.allParameters.length
+      if (visitedSize < totalSize) {
+        for (const parameter of layerRegister.allParameters) {
+          if (!layerRegister.visistedParameters.has(parameter)) {
+            const inputLayer = createDummyParameter(parameter)
+            const [layer] = layerRegister.addLayer(inputLayer, 0)
+            recursive(layer, 0)
+          }
+        }
+      }
+
+      const depthToLayers = layerRegister.getDepthToLayers()
 
       const nodes: Node[] = []
       for (let { needSlice, layers } of Object.values(depthToLayers)) {
@@ -181,11 +204,16 @@ export class GraphBuilder {
       nodes.forEach(a => {
         const b = a.type === 'OutputVariable' ? a.input : a.output
         for (const x of b) {
-          a.outputShape = variableMap.get(x).shape.dim
+          const v = variableMap.get(x)
+          if (v.shape.dim === undefined) {
+            a.outputShape = []
+          } else {
+            a.outputShape = v.shape.dim
+          }
         }
       })
 
-      const links = this.layerRegister.links
+      const links = layerRegister.links
 
       graphInfoArray.push({ name: executor.name, nodes, links })
     }

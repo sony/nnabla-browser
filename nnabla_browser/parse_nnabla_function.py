@@ -201,6 +201,12 @@ def create_variable_info():
             "color": "#000000",
             "arguments": {},
         },
+        "parameter": {
+            "layer_name": "Parameter",
+            "snake_name": "parameter",
+            "color": "#000000",
+            "arguments": {},
+        },
     }
 
 

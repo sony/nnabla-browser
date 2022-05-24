@@ -24,20 +24,22 @@ export class LayerRegister {
   layers: { [key: string]: Layer } = {}
   links: Link[] = []
   allParameters: Parameter[] = []
+  visistedParameters: Set<Parameter>
 
   initialize (params?: Parameter[]): void {
     this.counter = 0
     this.layers = {}
     this.links = []
+    this.visistedParameters = new Set<Parameter>()
     if (params) {
       this.allParameters = params
     }
   }
 
   addLayer (func: NNtxtFunction, depth: number): [Layer, boolean] {
-    if (!Object.prototype.hasOwnProperty.call(this.layers, func.name)) {
+    if (this.layers[func.name] === undefined) {
       // first visit
-      let visitCount = 1
+      const visitCount = 1
       const parameters = []
       const buffers = []
 
@@ -48,10 +50,8 @@ export class LayerRegister {
         )
         if (varIndex > -1) {
           parameters.push(this.allParameters[varIndex])
+          this.visistedParameters.add(this.allParameters[varIndex])
         } else {
-          // check deprecated input
-          if (buffers.findIndex(x => x === _input) > -1) visitCount++
-
           buffers.push(_input)
         }
       }
@@ -71,7 +71,6 @@ export class LayerRegister {
     }
 
     const retLayer = this.layers[func.name]
-
     return [retLayer, retLayer.input.length <= retLayer.visitCount]
   }
 
