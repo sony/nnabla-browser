@@ -27,7 +27,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          pip install nnabla black isort pylint
+          pip install nnabla isort black==22.3.0 pylint==2.13.5
           npm install
       - name: Check build
         run: |

@@ -62,7 +62,7 @@
             @mousedown="clickLayer(index)"
           >
             <g
-              v-if="node.type !== 'InputVariable'"
+              v-if="node.type !== 'InputVariable' && node.type !== 'Parameter'"
               class="link-circles top"
             >
               <circle
