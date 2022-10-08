@@ -22,7 +22,7 @@ pkg_data = [f'{x.lstrip("nnabla_browser/")}*' for x in pkg_dirs]
 
 setup(
     name="nnabla-browser",
-    version="0.1.0",
+    version="0.2.0",
     description="A browser base visualizer for Neural Network Libraries (nnabla).",
     url='https://github.com/sony/nnabla-browser',
     author="Akio Hayakawa",
