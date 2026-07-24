@@ -1,3 +1,6 @@
+> This project has reached end of life on [April 3, 2025].
+> No further development or security support is provided.
+
 # nnabla-browser
 
 [![test](https://github.com/sony/nnabla-browser/actions/workflows/test.yaml/badge.svg)](https://github.com/sony/nnabla-browser/actions/workflows/test.yaml)
